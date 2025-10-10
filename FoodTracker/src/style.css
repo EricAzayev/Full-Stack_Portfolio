@@ -1,0 +1,422 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  background-color: #1a1a1a;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid #333;
+}
+
+.app-header h1 {
+  margin: 0 0 1rem 0;
+  font-size: 2rem;
+  color: #646cff;
+}
+
+.tab-navigation {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tab-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #333;
+  background-color: transparent;
+  color: #ccc;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.tab-button:hover {
+  background-color: #333;
+  color: white;
+}
+
+.tab-button.active {
+  background-color: #646cff;
+  color: white;
+  border-color: #646cff;
+}
+
+.app-main {
+  flex: 1;
+  padding: 2rem;
+}
+
+.today-tab {
+  display: flex;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.left-panel {
+  flex: 1;
+  max-width: 500px;
+}
+
+.right-panel {
+  flex: 1;
+  max-width: 400px;
+}
+
+.food-input-section {
+  background-color: #1a1a1a;
+  padding: 2rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.foods-eaten-section {
+  background-color: #1a1a1a;
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+.foods-eaten-section h3 {
+  margin: 0 0 1rem 0;
+  color: #646cff;
+}
+
+.food-input-section h2 {
+  margin: 0 0 1.5rem 0;
+  color: #646cff;
+}
+
+.success-message {
+  background-color: #2d5a2d;
+  color: #90ee90;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  border-left: 3px solid #4caf50;
+  font-weight: 500;
+}
+
+.input-group {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.search-container {
+  position: relative;
+  flex: 1;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background-color: #242424;
+  color: white;
+  font-size: 1rem;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.search-result-item {
+  padding: 0.75rem;
+  cursor: pointer;
+  border-bottom: 1px solid #333;
+  transition: background-color 0.2s;
+}
+
+.search-result-item:hover {
+  background-color: #333;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-item.no-results {
+  color: #888;
+  font-style: italic;
+  cursor: default;
+}
+
+.search-result-item.no-results:hover {
+  background-color: transparent;
+}
+
+.servings-input {
+  width: 100px;
+  padding: 0.75rem;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background-color: #242424;
+  color: white;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.servings-input:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+.add-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.add-button:hover:not(:disabled) {
+  background-color: #535bf2;
+}
+
+.add-button:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+}
+
+.today-summary {
+  background-color: #1a1a1a;
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+.today-summary h3 {
+  margin: 0 0 1rem 0;
+  color: #646cff;
+}
+
+.nutrient-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.nutrient-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background-color: #242424;
+  border-radius: 4px;
+}
+
+.nutrient-item span:first-child {
+  color: #ccc;
+}
+
+.nutrient-item span:last-child {
+  color: #646cff;
+  font-weight: 500;
+}
+
+.foods-eaten {
+  margin-bottom: 1.5rem;
+}
+
+.foods-eaten h4 {
+  margin: 0 0 1rem 0;
+  color: #ccc;
+  font-size: 1rem;
+}
+
+.food-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.food-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background-color: #242424;
+  border-radius: 4px;
+  border-left: 3px solid #646cff;
+}
+
+.food-item span:first-child {
+  color: white;
+  font-weight: 500;
+}
+
+.food-item span:last-child {
+  color: #646cff;
+  font-size: 0.9rem;
+}
+
+.food-name {
+  font-weight: 500;
+}
+
+.food-servings {
+  color: #646cff;
+  font-size: 0.9rem;
+}
+
+.no-foods {
+  color: #888;
+  font-style: italic;
+  text-align: center;
+  padding: 2rem;
+}
+
+.toggle-nutrients-button {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.5rem;
+  background-color: #333;
+  color: #ccc;
+  border: 1px solid #555;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-nutrients-button:hover {
+  background-color: #444;
+  color: white;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  
+  .app-header {
+    background-color: #f9f9f9;
+    border-bottom-color: #e0e0e0;
+  }
+  
+  .app-header h1 {
+    color: #646cff;
+  }
+  
+  .tab-button {
+    border-color: #e0e0e0;
+    color: #666;
+  }
+  
+  .tab-button:hover {
+    background-color: #e0e0e0;
+    color: #213547;
+  }
+  
+  .food-input-section,
+  .foods-eaten-section,
+  .today-summary {
+    background-color: #f9f9f9;
+  }
+  
+  .success-message {
+    background-color: #e8f5e8;
+    color: #2e7d32;
+    border-left-color: #4caf50;
+  }
+  
+  .search-input,
+  .servings-input {
+    background-color: white;
+    color: #213547;
+    border-color: #e0e0e0;
+  }
+  
+  .search-results {
+    background-color: white;
+    border-color: #e0e0e0;
+  }
+  
+  .search-result-item {
+    border-bottom-color: #e0e0e0;
+  }
+  
+  .search-result-item:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .search-result-item.no-results {
+    color: #999;
+  }
+  
+  .nutrient-item {
+    background-color: white;
+  }
+  
+  .nutrient-item span:first-child {
+    color: #666;
+  }
+  
+  .foods-eaten h4 {
+    color: #666;
+  }
+  
+  .food-item {
+    background-color: white;
+    border-left-color: #646cff;
+  }
+  
+  .food-item span:first-child {
+    color: #213547;
+  }
+  
+  .no-foods {
+    color: #999;
+  }
+  
+  .toggle-nutrients-button {
+    background-color: #e0e0e0;
+    color: #666;
+    border-color: #ccc;
+  }
+  
+  .toggle-nutrients-button:hover {
+    background-color: #d0d0d0;
+    color: #333;
+  }
+}
