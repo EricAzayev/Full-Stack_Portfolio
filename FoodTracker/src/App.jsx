@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import TodayTab from './components/TodayTab'
+import DevModeTab from './components/DevModeTab'
 
 function App() {
   const [activeTab, setActiveTab] = useState('today')
@@ -27,6 +28,12 @@ function App() {
           >
             Analytics
           </button>
+          <button 
+            className={`tab-button ${activeTab === 'dev' ? 'active' : ''}`}
+            onClick={() => setActiveTab('dev')}
+          >
+            Dev Mode
+          </button>
         </nav>
       </header>
       
@@ -34,6 +41,7 @@ function App() {
         {activeTab === 'today' && <TodayTab />}
         {activeTab === 'history' && <div>History tab coming soon...</div>}
         {activeTab === 'analytics' && <div>Analytics tab coming soon...</div>}
+        {activeTab === 'dev' && <DevModeTab />}
       </main>
     </div>
   )

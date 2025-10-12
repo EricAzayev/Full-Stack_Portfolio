@@ -420,3 +420,131 @@ body {
     color: #333;
   }
 }
+
+/* Dev Mode Tab Styles */
+.dev-mode-tab {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.dev-mode-content {
+  background-color: #1a1a1a;
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+.dev-mode-content h2 {
+  margin: 0 0 1rem 0;
+  color: #646cff;
+  font-size: 2rem;
+}
+
+.dev-description {
+  color: #ccc;
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.dev-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.action-section {
+  background-color: #242424;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #646cff;
+}
+
+.action-section h3 {
+  margin: 0 0 0.5rem 0;
+  color: #646cff;
+  font-size: 1.3rem;
+}
+
+.action-section p {
+  color: #ccc;
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}
+
+.reset-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.reset-button:hover:not(:disabled) {
+  background-color: #c82333;
+  transform: translateY(-1px);
+}
+
+.reset-button:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.message {
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.message.success {
+  background-color: #2d5a2d;
+  color: #90ee90;
+  border-left: 3px solid #4caf50;
+}
+
+.message.error {
+  background-color: #5a2d2d;
+  color: #ffb3b3;
+  border-left: 3px solid #f44336;
+}
+
+/* Light mode styles for dev mode */
+@media (prefers-color-scheme: light) {
+  .dev-mode-content {
+    background-color: #f9f9f9;
+  }
+  
+  .dev-description {
+    color: #666;
+  }
+  
+  .action-section {
+    background-color: white;
+    border-left-color: #646cff;
+  }
+  
+  .action-section h3 {
+    color: #646cff;
+  }
+  
+  .action-section p {
+    color: #666;
+  }
+  
+  .message.success {
+    background-color: #e8f5e8;
+    color: #2e7d32;
+    border-left-color: #4caf50;
+  }
+  
+  .message.error {
+    background-color: #ffebee;
+    color: #c62828;
+    border-left-color: #f44336;
+  }
+}
