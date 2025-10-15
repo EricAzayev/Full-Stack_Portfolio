@@ -244,6 +244,69 @@ export default foodLibrary;`;
   }
 });
 
+// Route to update food quantity in today's intake
+router.put("/today", (req, res) => {
+  try {
+    console.log("PUT /today route called with body:", req.body);
+    const { foodName, servings } = req.body;
+
+    if (!foodName || servings === undefined || !foodLibrary[foodName]) {
+      return res.status(400).json({ error: "Invalid food name or servings" });
+    }
+
+    // Get the food data
+    const foodData = foodLibrary[foodName];
+    const nutrients = foodData.Nutrients;
+
+    // Get current servings of this food
+    const currentServings = today.food[foodName] || 0;
+    const servingsDifference = servings - currentServings;
+
+    // Update today's data
+    const updatedToday = { ...today };
+
+    // Update calories
+    updatedToday.calories += foodData.Metadata.Calories_kcal * servingsDifference;
+
+    // Update nutrients
+    Object.keys(nutrients).forEach((nutrient) => {
+      if (typeof nutrients[nutrient] === "number") {
+        updatedToday.nutrients[nutrient] += nutrients[nutrient] * servingsDifference;
+        // Ensure no negative values
+        updatedToday.nutrients[nutrient] = Math.max(0, updatedToday.nutrients[nutrient]);
+      }
+    });
+
+    // Update food servings
+    if (servings <= 0) {
+      // Remove the food if servings is 0 or negative
+      delete updatedToday.food[foodName];
+    } else {
+      updatedToday.food[foodName] = servings;
+    }
+
+    // Ensure calories is not negative
+    updatedToday.calories = Math.max(0, updatedToday.calories);
+
+    // Write updated data to file
+    const todayFilePath = path.join(__dirname, "../data/today.js");
+    const todayFileContent = generateTodayFileContent(updatedToday);
+
+    fs.writeFileSync(todayFilePath, todayFileContent);
+
+    console.log(`Updated ${foodName} to ${servings} servings in today's intake`);
+
+    res.status(200).json({
+      message: `Updated ${foodName} to ${servings} servings`,
+      updatedToday: today,
+      needToday: needToday
+    });
+  } catch (error) {
+    console.error("Error updating food quantity:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Function to check if we need to reset for a new day
 const shouldResetForNewDay = () => {
   const today = new Date();

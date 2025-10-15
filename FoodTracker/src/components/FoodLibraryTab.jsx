@@ -30,6 +30,8 @@ const FoodLibraryTab = () => {
   const [errors, setErrors] = useState({});
   const [editingFood, setEditingFood] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+  const [aiResult, setAiResult] = useState('');
+  const [showAiTools, setShowAiTools] = useState(false);
 
   // Fetch food library data
   useEffect(() => {
@@ -294,6 +296,72 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
     }
   };
 
+  // Parse AI result and fill form
+  const parseAiResult = () => {
+    try {
+      // Clean the input - remove any extra whitespace and newlines
+      const cleanResult = aiResult.trim().replace(/\n/g, '');
+      
+      // Parse the pipe-separated values
+      const pairs = cleanResult.split('|');
+      const parsedData = {};
+      
+      pairs.forEach(pair => {
+        const [key, value] = pair.split(':');
+        if (key && value !== undefined) {
+          parsedData[key.trim()] = value.trim();
+        }
+      });
+
+      // Validate that we have the required fields
+      if (!parsedData.foodName || !parsedData.category || !parsedData.servingSize_g || !parsedData.calories) {
+        setMessage('Error: Missing required fields (foodName, category, servingSize_g, or calories)');
+        setTimeout(() => setMessage(''), 5000);
+        return;
+      }
+
+      // Update the form with parsed data
+      setNewFood({
+        name: parsedData.foodName,
+        category: parsedData.category,
+        servingSize: parsedData.servingSize_g,
+        calories: parsedData.calories,
+        isProbiotic: parsedData.containsProbiotics === 'true',
+        nutrients: {
+          Protein_g: parsedData.Protein_g || '',
+          Carbohydrates_g: parsedData.Carbohydrates_g || '',
+          Fats_g: parsedData.Fats_g || '',
+          Omega3_DHA_EPA_mg: parsedData.Omega3_DHA_EPA_mg || '',
+          Vitamin_B12_mcg: parsedData.Vitamin_B12_mcg || '',
+          Choline_mg: parsedData.Choline_mg || '',
+          Magnesium_mg: parsedData.Magnesium_mg || '',
+          Iron_mg: parsedData.Iron_mg || '',
+          Zinc_mg: parsedData.Zinc_mg || '',
+          Calcium_mg: parsedData.Calcium_mg || '',
+          Vitamin_D_mcg: parsedData.Vitamin_D_mcg || '',
+          Vitamin_C_mg: parsedData.Vitamin_C_mg || '',
+          Fiber_g: parsedData.Fiber_g || '',
+          Collagen_g: parsedData.Collagen_g || ''
+        }
+      });
+
+      // Clear any existing errors
+      setErrors({});
+      
+      // Show success message
+      setMessage(`✓ Form filled with data for "${parsedData.foodName}"!`);
+      setTimeout(() => setMessage(''), 3000);
+      
+      // Clear the AI result input
+      setAiResult('');
+      
+    } catch (error) {
+      console.error('Error parsing AI result:', error);
+      setMessage('Error parsing AI result. Please check the format and try again.');
+      setTimeout(() => setMessage(''), 5000);
+    }
+  };
+
   return (
     <div className="food-library-tab">
       <div className="food-library-container">
@@ -408,35 +476,86 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
                 </label>
               </div>
 
-              <div className="prompt-section">
-                <div className="prompt-header">
-                  <button 
-                    type="button"
-                    className="copy-prompt-button"
-                    onClick={() => copyPromptToClipboard()}
-                    title="Copy prompt to clipboard"
-                  >
-                    📋 Copy Prompt
-                  </button>
-                  <span className="prompt-label">AI Prompt for Nutritional Analysis:</span>
-                </div>
-                <div className="prompt-content">
-                  <p className="prompt-text">
-                    FoodName: {newFood.name || '[Food Name]'}, servingSize: {newFood.servingSize || '[Serving Size]'}, calories: {newFood.calories || '[Calories]'}.
-                  </p>
-                  <p className="prompt-text">
-                    These values may be null, at which point you should make a reasonable, evidence-based estimate for a typical serving. Output only the formatted line, with no explanations or additional text.
-                  </p>
-                  <p className="prompt-text">
-                    Write a dissectable line formatted as follows:
-                  </p>
-                  <p className="prompt-text prompt-format">
-                    foodName:{newFood.name || '[name]'}|category:{newFood.category || '[category]'}|servingSize_g:{newFood.servingSize || '[servingSize]'}|calories:{newFood.calories || '[calories]'}|containsProbiotics:{newFood.isProbiotic}|Protein_g:{newFood.nutrients.Protein_g || '[val]'}|Carbohydrates_g:{newFood.nutrients.Carbohydrates_g || '[val]'}|Fats_g:{newFood.nutrients.Fats_g || '[val]'}|Omega3_DHA_EPA_mg:{newFood.nutrients.Omega3_DHA_EPA_mg || '[val]'}|Vitamin_B12_mcg:{newFood.nutrients.Vitamin_B12_mcg || '[val]'}|Choline_mg:{newFood.nutrients.Choline_mg || '[val]'}|Magnesium_mg:{newFood.nutrients.Magnesium_mg || '[val]'}|Iron_mg:{newFood.nutrients.Iron_mg || '[val]'}|Zinc_mg:{newFood.nutrients.Zinc_mg || '[val]'}|Calcium_mg:{newFood.nutrients.Calcium_mg || '[val]'}|Vitamin_D_mcg:{newFood.nutrients.Vitamin_D_mcg || '[val]'}|Vitamin_C_mg:{newFood.nutrients.Vitamin_C_mg || '[val]'}|Fiber_g:{newFood.nutrients.Fiber_g || '[val]'}|Collagen_g:{newFood.nutrients.Collagen_g || '[val]'}
-                  </p>
-                  <p className="prompt-text">
-                    A food tracker will dissect the line to fill in the user's nutrition library, so be as thorough and realistic as possible with all nutrient values. Use your best nutritional knowledge to estimate missing information when data is incomplete.
-                  </p>
-                </div>
+              <div className="ai-tools-section">
+                <button 
+                  type="button"
+                  className="ai-tools-toggle"
+                  onClick={() => setShowAiTools(!showAiTools)}
+                >
+                  <div className="ai-tools-header">
+                    <div className="ai-tools-icon">🤖</div>
+                    <div className="ai-tools-title">
+                      <span className="ai-tools-main-title">AI Nutrition Assistant</span>
+                      <span className="ai-tools-subtitle">Let AI analyze your food's nutritional profile</span>
+                    </div>
+                    <div className={`ai-tools-arrow ${showAiTools ? 'expanded' : ''}`}>
+                      ▼
+                    </div>
+                  </div>
+                </button>
+
+                {showAiTools && (
+                  <div className="ai-tools-content">
+                    <div className="ai-tools-description">
+                      <p>✨ Generate comprehensive nutritional data using AI. Perfect for foods with incomplete nutrition labels or when you need detailed micronutrient analysis.</p>
+                    </div>
+
+                    <div className="prompt-section">
+                      <div className="prompt-header">
+                        <button 
+                          type="button"
+                          className="copy-prompt-button"
+                          onClick={() => copyPromptToClipboard()}
+                          title="Copy prompt to clipboard"
+                        >
+                          📋 Copy Prompt
+                        </button>
+                        <span className="prompt-label">Step 1: Generate AI Prompt</span>
+                      </div>
+                      <div className="prompt-content">
+                        <p className="prompt-text">
+                          FoodName: {newFood.name || '[Food Name]'}, servingSize: {newFood.servingSize || '[Serving Size]'}, calories: {newFood.calories || '[Calories]'}.
+                        </p>
+                        <p className="prompt-text">
+                          These values may be null, at which point you should make a reasonable, evidence-based estimate for a typical serving. Output only the formatted line, with no explanations or additional text.
+                        </p>
+                        <p className="prompt-text">
+                          Write a dissectable line formatted as follows:
+                        </p>
+                        <p className="prompt-text prompt-format">
+                          foodName:{newFood.name || '[name]'}|category:{newFood.category || '[category]'}|servingSize_g:{newFood.servingSize || '[servingSize]'}|calories:{newFood.calories || '[calories]'}|containsProbiotics:{newFood.isProbiotic}|Protein_g:{newFood.nutrients.Protein_g || '[val]'}|Carbohydrates_g:{newFood.nutrients.Carbohydrates_g || '[val]'}|Fats_g:{newFood.nutrients.Fats_g || '[val]'}|Omega3_DHA_EPA_mg:{newFood.nutrients.Omega3_DHA_EPA_mg || '[val]'}|Vitamin_B12_mcg:{newFood.nutrients.Vitamin_B12_mcg || '[val]'}|Choline_mg:{newFood.nutrients.Choline_mg || '[val]'}|Magnesium_mg:{newFood.nutrients.Magnesium_mg || '[val]'}|Iron_mg:{newFood.nutrients.Iron_mg || '[val]'}|Zinc_mg:{newFood.nutrients.Zinc_mg || '[val]'}|Calcium_mg:{newFood.nutrients.Calcium_mg || '[val]'}|Vitamin_D_mcg:{newFood.nutrients.Vitamin_D_mcg || '[val]'}|Vitamin_C_mg:{newFood.nutrients.Vitamin_C_mg || '[val]'}|Fiber_g:{newFood.nutrients.Fiber_g || '[val]'}|Collagen_g:{newFood.nutrients.Collagen_g || '[val]'}
+                        </p>
+                        <p className="prompt-text">
+                          A food tracker will dissect the line to fill in the user's nutrition library, so be as thorough and realistic as possible with all nutrient values. Use your best nutritional knowledge to estimate missing information when data is incomplete.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="result-section">
+                      <div className="result-header">
+                        <span className="result-label">Step 2: Parse AI Response</span>
+                      </div>
+                      <div className="result-input-container">
+                        <textarea
+                          className="result-input"
+                          placeholder="Paste the AI result here (e.g., foodName:Greek Yogurt|category:Dairy|servingSize_g:227|calories:120|containsProbiotics:true|Protein_g:23|...)"
+                          value={aiResult}
+                          onChange={(e) => setAiResult(e.target.value)}
+                          rows={3}
+                        />
+                        <button 
+                          type="button"
+                          className="parse-result-button"
+                          onClick={() => parseAiResult()}
+                          disabled={!aiResult.trim()}
+                          title="Parse AI result and fill form"
+                        >
+                          🔄 Parse & Fill Form
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="nutrients-section">

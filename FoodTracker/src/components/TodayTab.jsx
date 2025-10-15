@@ -103,6 +103,48 @@ const TodayTab = () => {
     }
   }
 
+  // Handle updating food quantity
+  const handleUpdateQuantity = async (foodName, newQuantity) => {
+    if (newQuantity < 0) return
+
+    try {
+      const response = await fetch('http://localhost:3001/api/today', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          foodName: foodName,
+          servings: newQuantity
+        })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        
+        // Update local state with the new data
+        setTodayData(result.updatedToday)
+        setNeedToday(result.needToday)
+        
+        // Show success message
+        if (newQuantity === 0) {
+          setSuccessMessage(`✓ Removed ${foodName} from today's intake!`)
+        } else {
+          setSuccessMessage(`✓ Updated ${foodName} to ${newQuantity} serving${newQuantity !== 1 ? 's' : ''}!`)
+        }
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccessMessage(''), 3000)
+      } else {
+        const error = await response.json()
+        alert(`Error: ${error.error}`)
+      }
+    } catch (error) {
+      console.error('Error updating food quantity:', error)
+      alert('Error updating food quantity. Please try again.')
+    }
+  }
+
   // Handle keyboard shortcuts
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -193,8 +235,36 @@ const TodayTab = () => {
             <div className="food-list">
               {Object.entries(todayData.food).map(([foodName, servings]) => (
                 <div key={foodName} className="food-item">
-                  <span className="food-name">{foodName}</span>
-                  <span className="food-servings">{servings} serving{servings !== 1 ? 's' : ''}</span>
+                  <div className="food-info">
+                    <span className="food-name">{foodName}</span>
+                    <span className="food-servings">{servings} serving{servings !== 1 ? 's' : ''}</span>
+                  </div>
+                  <div className="quantity-controls">
+                    <button 
+                      className="quantity-btn decrease-btn"
+                      onClick={() => handleUpdateQuantity(foodName, servings - 1)}
+                      title="Decrease quantity"
+                    >
+                      −
+                    </button>
+                    <span className="quantity-display">{servings}</span>
+                    <button 
+                      className="quantity-btn increase-btn"
+                      onClick={() => handleUpdateQuantity(foodName, servings + 1)}
+                      title="Increase quantity"
+                    >
+                      +
+                    </button>
+                    {servings > 0 && (
+                      <button 
+                        className="quantity-btn remove-btn"
+                        onClick={() => handleUpdateQuantity(foodName, 0)}
+                        title="Remove food"
+                      >
+                        🗑️
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
