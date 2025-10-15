@@ -153,7 +153,7 @@ export default lastResetData;`;
       todayData = freshToday;
     }
 
-    res.status(200).json(todayData);
+    res.status(200).json({ today: todayData, needToday });
   } catch (error) {
     console.error("Error in /today GET endpoint:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -201,6 +201,7 @@ router.post("/today", (req, res) => {
     res.status(200).json({
       message: `Added ${servings} serving(s) of ${foodName}`,
       updatedToday,
+      needToday,
     });
   } catch (error) {
     console.error("Error updating today's data:", error);

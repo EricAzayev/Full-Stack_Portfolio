@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react'
+import TodaySummary from './TodaySummary'
 
 const TodayTab = () => {
   const [foodLibrary, setFoodLibrary] = useState({})
   const [todayData, setTodayData] = useState({})
+  const [needToday, setNeedToday] = useState({})
   const [searchTerm, setSearchTerm] = useState('')
   const [servings, setServings] = useState(1)
   const [searchResults, setSearchResults] = useState([])
   const [showResults, setShowResults] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
-  const [showAllNutrients, setShowAllNutrients] = useState(false)
 
   // Fetch data from API
   useEffect(() => {
@@ -20,12 +21,12 @@ const TodayTab = () => {
         ])
         
         const foodLibraryData = await foodLibraryRes.json()
-        const todayData = await todayRes.json()
+        const todayResponse = await todayRes.json()
         
         // Data loaded successfully
-        
         setFoodLibrary(foodLibraryData)
-        setTodayData(todayData)
+        setTodayData(todayResponse.today)
+        setNeedToday(todayResponse.needToday)
       } catch (error) {
         console.error('Error fetching data:', error)
       }
@@ -81,6 +82,7 @@ const TodayTab = () => {
         
         // Update local state with the new data
         setTodayData(result.updatedToday)
+        setNeedToday(result.needToday)
         
         // Show success message
         setSuccessMessage(`✓ Added ${servings} serving(s) of ${searchTerm} to today's intake!`)
@@ -201,84 +203,10 @@ const TodayTab = () => {
           )}
         </div>
 
-        <div className="today-summary">
-          <h3>Today's Summary</h3>
-          
-          <div className="nutrient-summary">
-            <div className="nutrient-item">
-              <span>Calories:</span>
-              <span>{todayData.calories || 0}</span>
-            </div>
-            <div className="nutrient-item">
-              <span>Protein:</span>
-              <span>{todayData.nutrients?.Protein_g || 0}g</span>
-            </div>
-            <div className="nutrient-item">
-              <span>Carbs:</span>
-              <span>{todayData.nutrients?.Carbohydrates_g || 0}g</span>
-            </div>
-            <div className="nutrient-item">
-              <span>Fats:</span>
-              <span>{todayData.nutrients?.Fats_g || 0}g</span>
-            </div>
-            <div className="nutrient-item">
-              <span>Omega-3:</span>
-              <span>{todayData.nutrients?.Omega3_DHA_EPA_mg || 0}mg</span>
-            </div>
-            <div className="nutrient-item">
-              <span>Vitamin B12:</span>
-              <span>{todayData.nutrients?.Vitamin_B12_mcg || 0}μg</span>
-            </div>
-            <div className="nutrient-item">
-              <span>Calcium:</span>
-              <span>{todayData.nutrients?.Calcium_mg || 0}mg</span>
-            </div>
-            <div className="nutrient-item">
-              <span>Magnesium:</span>
-              <span>{todayData.nutrients?.Magnesium_mg || 0}mg</span>
-            </div>
-            
-            {showAllNutrients && (
-              <>
-                <div className="nutrient-item">
-                  <span>Choline:</span>
-                  <span>{todayData.nutrients?.Choline_mg || 0}mg</span>
-                </div>
-                <div className="nutrient-item">
-                  <span>Iron:</span>
-                  <span>{todayData.nutrients?.Iron_mg || 0}mg</span>
-                </div>
-                <div className="nutrient-item">
-                  <span>Zinc:</span>
-                  <span>{todayData.nutrients?.Zinc_mg || 0}mg</span>
-                </div>
-                <div className="nutrient-item">
-                  <span>Vitamin D:</span>
-                  <span>{todayData.nutrients?.Vitamin_D_mcg || 0}μg</span>
-                </div>
-                <div className="nutrient-item">
-                  <span>Vitamin C:</span>
-                  <span>{todayData.nutrients?.Vitamin_C_mg || 0}mg</span>
-                </div>
-                <div className="nutrient-item">
-                  <span>Fiber:</span>
-                  <span>{todayData.nutrients?.Fiber_g || 0}g</span>
-                </div>
-                <div className="nutrient-item">
-                  <span>Collagen:</span>
-                  <span>{todayData.nutrients?.Collagen_g || 0}g</span>
-                </div>
-              </>
-            )}
-          </div>
-          
-          <button 
-            className="toggle-nutrients-button"
-            onClick={() => setShowAllNutrients(!showAllNutrients)}
-          >
-            {showAllNutrients ? 'Show Less' : 'Show All Nutrients'}
-          </button>
-        </div>
+      </div>
+      
+      <div className="right-panel">
+        <TodaySummary todayData={todayData} needToday={needToday} />
       </div>
     </div>
   )

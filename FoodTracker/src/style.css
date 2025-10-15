@@ -73,18 +73,19 @@ body {
 .today-tab {
   display: flex;
   gap: 2rem;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
+  min-height: calc(100vh - 200px);
 }
 
 .left-panel {
-  flex: 1;
+  flex: 0 0 500px;
   max-width: 500px;
 }
 
 .right-panel {
   flex: 1;
-  max-width: 400px;
+  min-width: 600px;
 }
 
 .food-input-section {
@@ -801,6 +802,434 @@ body {
   }
 }
 
+/* Nutrient Visualization Styles - Clean & Modern */
+.today-summary-right {
+  flex: 1;
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.nutrient-visualization {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  height: 100%;
+  flex: 1;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(26, 26, 26, 0.8) 0%, rgba(36, 36, 36, 0.6) 100%);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Summary Header Styles */
+.summary-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.summary-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.5rem 0;
+  background: linear-gradient(135deg, #646cff 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.encouragement-message {
+  font-size: 0.9rem;
+  color: #a0a0a0;
+  margin: 0;
+  font-style: italic;
+}
+
+/* Calorie Overview - Main Focus */
+.calorie-overview {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  flex: 0 0 auto;
+}
+
+.calorie-donut {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+}
+
+.calorie-donut-container {
+  flex-shrink: 0;
+  width: 160px;
+  height: 160px;
+}
+
+.calorie-donut-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #fff;
+  flex: 1;
+}
+
+.calorie-donut-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.calorie-donut-target {
+  font-size: 1rem;
+  color: #ccc;
+  margin: 0;
+}
+
+.calorie-donut-percentage {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #646cff;
+  margin: 0;
+}
+
+/* Macro Breakdown - Clean Row */
+.macro-breakdown {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  flex: 0 0 auto;
+}
+
+.macro-donuts {
+  display: flex;
+  justify-content: space-around;
+  gap: 1rem;
+  align-items: center;
+}
+
+.macro-donut-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.macro-donut-container {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 0.5rem;
+}
+
+.macro-donut-label {
+  text-align: center;
+  color: #fff;
+}
+
+.macro-donut-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.macro-donut-target {
+  font-size: 0.8rem;
+  color: #ccc;
+  margin-bottom: 0.25rem;
+}
+
+.macro-donut-percentage {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #646cff;
+}
+
+/* Micro Overview - Compact & Smart */
+.micro-overview {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.micro-bars-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.micro-bars-title {
+  margin: 0;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.toggle-micros-button {
+  background: rgba(100, 108, 255, 0.2);
+  color: #646cff;
+  border: 1px solid rgba(100, 108, 255, 0.3);
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-micros-button:hover {
+  background: rgba(100, 108, 255, 0.3);
+  border-color: rgba(100, 108, 255, 0.5);
+}
+
+.micro-bars-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.micro-bar-item {
+  position: relative;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.micro-bar-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.micro-bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  gap: 0.5rem;
+}
+
+.micro-bar-icon-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.micro-bar-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.micro-bar-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.micro-bar-values {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.micro-bar-current {
+  color: #fff;
+  font-weight: 500;
+}
+
+.micro-bar-separator {
+  color: #888;
+}
+
+.micro-bar-target {
+  color: #aaa;
+}
+
+.micro-bar-percentage {
+  color: #646cff;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.micro-bar-track {
+  position: relative;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.3rem;
+}
+
+.micro-bar-encouragement {
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(26, 26, 26, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  color: #ccc;
+  white-space: nowrap;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+}
+
+.micro-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.8s ease-in-out, background-color 0.3s ease;
+}
+
+.micro-bar-excess {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  border-radius: 0 3px 3px 0;
+}
+
+.micro-bar-percentage {
+  text-align: right;
+  font-size: 0.75rem;
+  color: #646cff;
+  font-weight: 500;
+}
+
+/* Tooltip Styles */
+.micro-bar-tooltip {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  min-width: 150px;
+}
+
+.tooltip-content {
+  text-align: center;
+}
+
+.tooltip-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.tooltip-details {
+  font-size: 0.8rem;
+  color: #ccc;
+  line-height: 1.4;
+}
+
+.tooltip-details div {
+  margin-bottom: 0.25rem;
+}
+
+/* Loading Message */
+.loading-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: #ccc;
+  font-style: italic;
+}
+
+/* Responsive Design for Nutrient Visualization */
+@media (max-width: 1200px) {
+  .today-tab {
+    flex-direction: column;
+    max-width: 800px;
+  }
+  
+  .left-panel {
+    flex: none;
+    max-width: none;
+  }
+  
+  .right-panel {
+    min-width: auto;
+  }
+  
+  .nutrient-visualization {
+    padding: 1rem;
+  }
+  
+  .macro-donuts {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .macro-donut-item {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .macro-donut-container {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 0;
+  }
+  
+  .calorie-donut {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .calorie-donut-container {
+    width: 140px;
+    height: 140px;
+  }
+  
+  .calorie-donut-info {
+    align-items: center;
+  }
+  
+  .micro-overview {
+    max-height: 400px;
+  }
+}
+
 /* Light mode styles for dev mode */
 @media (prefers-color-scheme: light) {
   .dev-mode-content {
@@ -910,5 +1339,112 @@ body {
   .cancel-button:hover:not(:disabled) {
     background-color: #f5f5f5;
     color: #1a1a1a;
+  }
+
+  /* Light mode styles for nutrient visualization */
+  .nutrient-visualization {
+    background: linear-gradient(135deg, rgba(249, 249, 249, 0.9) 0%, rgba(255, 255, 255, 0.8) 100%);
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .summary-title {
+    background: linear-gradient(135deg, #646cff 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .encouragement-message {
+    color: #666;
+  }
+
+  .calorie-overview,
+  .macro-breakdown,
+  .micro-overview {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .micro-bars-title {
+    color: #1a1a1a;
+  }
+
+  .toggle-micros-button {
+    background: rgba(100, 108, 255, 0.1);
+    color: #646cff;
+    border-color: rgba(100, 108, 255, 0.2);
+  }
+
+  .toggle-micros-button:hover {
+    background: rgba(100, 108, 255, 0.2);
+    border-color: rgba(100, 108, 255, 0.3);
+  }
+
+  .calorie-donut-info {
+    color: #1a1a1a;
+  }
+
+  .calorie-donut-title {
+    color: #1a1a1a;
+  }
+
+  .calorie-donut-target {
+    color: #666;
+  }
+
+  .calorie-donut-percentage {
+    color: #646cff;
+  }
+
+  .macro-donut-label {
+    color: #1a1a1a;
+  }
+
+  .macro-donut-target {
+    color: #666;
+  }
+
+  .micro-bar-item {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .micro-bar-item:hover {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(0, 0, 0, 0.15);
+  }
+
+  .micro-bar-name {
+    color: #1a1a1a;
+  }
+
+  .micro-bar-current {
+    color: #1a1a1a;
+  }
+
+  .micro-bar-separator {
+    color: #999;
+  }
+
+  .micro-bar-target {
+    color: #666;
+  }
+
+  .micro-bar-percentage {
+    color: #646cff;
+  }
+
+  .micro-bar-track {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  .micro-bar-encouragement {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(0, 0, 0, 0.15);
+    color: #666;
+  }
+
+  .loading-message {
+    color: #666;
   }
 }
