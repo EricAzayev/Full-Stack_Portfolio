@@ -203,6 +203,18 @@ const TodayTab = () => {
           )}
         </div>
 
+        <div className="recommended-meal-section">
+          <h3>Recommended Next Meal</h3>
+          <div className="recommended-meal-content">
+            <p className="recommended-meal-placeholder">
+              🍽️ Smart meal recommendations coming soon!
+            </p>
+            <p className="recommended-meal-description">
+              Based on your current nutrient intake, we'll suggest foods to help you reach your daily goals.
+            </p>
+          </div>
+        </div>
+
       </div>
       
       <div className="right-panel">

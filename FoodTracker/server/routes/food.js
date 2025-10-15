@@ -38,6 +38,212 @@ router.get("/foodLibrary", (req, res) => {
   res.status(200).json(foodLibrary);
 });
 
+// Route to add new food to foodLibrary
+router.post("/foodLibrary", (req, res) => {
+  try {
+    const { name, category, servingSize, calories, isProbiotic, nutrients } = req.body;
+
+    // Validate required fields
+    if (!name || !category || !servingSize || calories === undefined) {
+      return res.status(400).json({ error: "Name, category, serving size, and calories are required" });
+    }
+
+    // Check if food already exists
+    if (foodLibrary[name]) {
+      return res.status(400).json({ error: "Food with this name already exists" });
+    }
+
+    // Validate numeric fields
+    if (servingSize <= 0 || calories < 0) {
+      return res.status(400).json({ error: "Serving size must be > 0 and calories must be >= 0" });
+    }
+
+    // Create the new food entry with the same structure as existing foods
+    const newFood = {
+      Metadata: {
+        Category: category,
+        ServingSize_g: parseFloat(servingSize),
+        Calories_kcal: parseFloat(calories),
+        IsProbiotic: Boolean(isProbiotic)
+      },
+      Nutrients: {
+        Protein_g: parseFloat(nutrients.Protein_g) || 0,
+        Carbohydrates_g: parseFloat(nutrients.Carbohydrates_g) || 0,
+        Fats_g: parseFloat(nutrients.Fats_g) || 0,
+        Omega3_DHA_EPA_mg: parseFloat(nutrients.Omega3_DHA_EPA_mg) || 0,
+        Vitamin_B12_mcg: parseFloat(nutrients.Vitamin_B12_mcg) || 0,
+        Choline_mg: parseFloat(nutrients.Choline_mg) || 0,
+        Magnesium_mg: parseFloat(nutrients.Magnesium_mg) || 0,
+        Iron_mg: parseFloat(nutrients.Iron_mg) || 0,
+        Zinc_mg: parseFloat(nutrients.Zinc_mg) || 0,
+        Calcium_mg: parseFloat(nutrients.Calcium_mg) || 0,
+        Vitamin_D_mcg: parseFloat(nutrients.Vitamin_D_mcg) || 0,
+        Vitamin_C_mg: parseFloat(nutrients.Vitamin_C_mg) || 0,
+        Fiber_g: parseFloat(nutrients.Fiber_g) || 0,
+        Collagen_g: parseFloat(nutrients.Collagen_g) || 0
+      },
+      CollagenSupport: {
+        DerivedFrom: ["Protein_g"],
+        SupportsCollagenSynthesis: true
+      },
+      Supports: {
+        Brain: ["Omega3_DHA_EPA_mg", "Vitamin_B12_mcg", "Choline_mg", "Magnesium_mg", "Iron_mg"],
+        Muscle: ["Protein_g", "Vitamin_D_mcg", "Magnesium_mg", "Iron_mg", "Zinc_mg", "Calcium_mg"],
+        Skin: ["Omega3_DHA_EPA_mg", "CollagenSupport", "Zinc_mg"]
+      },
+      Synergy: {
+        Vitamin_D_mcg: ["Calcium_mg"]
+      }
+    };
+
+    // Add the new food to the library
+    foodLibrary[name] = newFood;
+
+    // Write updated food library to file
+    const foodLibraryFilePath = path.join(__dirname, "../data/foodLibrary.js");
+    const foodLibraryFileContent = `const foodLibrary = ${JSON.stringify(foodLibrary, null, 2)}
+
+export default foodLibrary;`;
+
+    fs.writeFileSync(foodLibraryFilePath, foodLibraryFileContent);
+
+    console.log(`New food "${name}" added to food library`);
+
+    res.status(200).json({
+      message: `Food "${name}" added successfully`,
+      foodLibrary: foodLibrary
+    });
+  } catch (error) {
+    console.error("Error adding food to library:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Route to update an existing food in foodLibrary
+router.put("/foodLibrary/:foodName", (req, res) => {
+  try {
+    const { foodName } = req.params;
+    const { name, category, servingSize, calories, isProbiotic, nutrients } = req.body;
+
+    // Validate required fields
+    if (!name || !category || !servingSize || calories === undefined) {
+      return res.status(400).json({ error: "Name, category, serving size, and calories are required" });
+    }
+
+    // Check if the food exists
+    if (!foodLibrary[foodName]) {
+      return res.status(404).json({ error: "Food not found" });
+    }
+
+    // If the name is being changed, check if the new name already exists
+    if (name !== foodName && foodLibrary[name]) {
+      return res.status(400).json({ error: "Food with this name already exists" });
+    }
+
+    // Validate numeric fields
+    if (servingSize <= 0 || calories < 0) {
+      return res.status(400).json({ error: "Serving size must be > 0 and calories must be >= 0" });
+    }
+
+    // Create the updated food entry
+    const updatedFood = {
+      Metadata: {
+        Category: category,
+        ServingSize_g: parseFloat(servingSize),
+        Calories_kcal: parseFloat(calories),
+        IsProbiotic: Boolean(isProbiotic)
+      },
+      Nutrients: {
+        Protein_g: parseFloat(nutrients.Protein_g) || 0,
+        Carbohydrates_g: parseFloat(nutrients.Carbohydrates_g) || 0,
+        Fats_g: parseFloat(nutrients.Fats_g) || 0,
+        Omega3_DHA_EPA_mg: parseFloat(nutrients.Omega3_DHA_EPA_mg) || 0,
+        Vitamin_B12_mcg: parseFloat(nutrients.Vitamin_B12_mcg) || 0,
+        Choline_mg: parseFloat(nutrients.Choline_mg) || 0,
+        Magnesium_mg: parseFloat(nutrients.Magnesium_mg) || 0,
+        Iron_mg: parseFloat(nutrients.Iron_mg) || 0,
+        Zinc_mg: parseFloat(nutrients.Zinc_mg) || 0,
+        Calcium_mg: parseFloat(nutrients.Calcium_mg) || 0,
+        Vitamin_D_mcg: parseFloat(nutrients.Vitamin_D_mcg) || 0,
+        Vitamin_C_mg: parseFloat(nutrients.Vitamin_C_mg) || 0,
+        Fiber_g: parseFloat(nutrients.Fiber_g) || 0,
+        Collagen_g: parseFloat(nutrients.Collagen_g) || 0
+      },
+      CollagenSupport: {
+        DerivedFrom: ["Protein_g"],
+        SupportsCollagenSynthesis: true
+      },
+      Supports: {
+        Brain: ["Omega3_DHA_EPA_mg", "Vitamin_B12_mcg", "Choline_mg", "Magnesium_mg", "Iron_mg"],
+        Muscle: ["Protein_g", "Vitamin_D_mcg", "Magnesium_mg", "Iron_mg", "Zinc_mg", "Calcium_mg"],
+        Skin: ["Omega3_DHA_EPA_mg", "CollagenSupport", "Zinc_mg"]
+      },
+      Synergy: {
+        Vitamin_D_mcg: ["Calcium_mg"]
+      }
+    };
+
+    // If the name is being changed, remove the old entry and add the new one
+    if (name !== foodName) {
+      delete foodLibrary[foodName];
+    }
+
+    // Add/update the food in the library
+    foodLibrary[name] = updatedFood;
+
+    // Write updated food library to file
+    const foodLibraryFilePath = path.join(__dirname, "../data/foodLibrary.js");
+    const foodLibraryFileContent = `const foodLibrary = ${JSON.stringify(foodLibrary, null, 2)}
+
+export default foodLibrary;`;
+
+    fs.writeFileSync(foodLibraryFilePath, foodLibraryFileContent);
+
+    console.log(`Food "${foodName}" updated to "${name}" in food library`);
+
+    res.status(200).json({
+      message: `Food "${name}" updated successfully`,
+      foodLibrary: foodLibrary
+    });
+  } catch (error) {
+    console.error("Error updating food in library:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Route to delete a food from foodLibrary
+router.delete("/foodLibrary/:foodName", (req, res) => {
+  try {
+    const { foodName } = req.params;
+
+    // Check if the food exists
+    if (!foodLibrary[foodName]) {
+      return res.status(404).json({ error: "Food not found" });
+    }
+
+    // Remove the food from the library
+    delete foodLibrary[foodName];
+
+    // Write updated food library to file
+    const foodLibraryFilePath = path.join(__dirname, "../data/foodLibrary.js");
+    const foodLibraryFileContent = `const foodLibrary = ${JSON.stringify(foodLibrary, null, 2)}
+
+export default foodLibrary;`;
+
+    fs.writeFileSync(foodLibraryFilePath, foodLibraryFileContent);
+
+    console.log(`Food "${foodName}" deleted from food library`);
+
+    res.status(200).json({
+      message: `Food "${foodName}" deleted successfully`,
+      foodLibrary: foodLibrary
+    });
+  } catch (error) {
+    console.error("Error deleting food from library:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Function to check if we need to reset for a new day
 const shouldResetForNewDay = () => {
   const today = new Date();

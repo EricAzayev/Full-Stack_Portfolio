@@ -9,7 +9,7 @@ const foodLibrary = {
     "Nutrients": {
       "Protein_g": 6.3,
       "Carbohydrates_g": 0.6,
-      "Fats_g": 5.0,
+      "Fats_g": 5,
       "Omega3_DHA_EPA_mg": 93,
       "Vitamin_B12_mcg": 0.45,
       "Choline_mg": 147,
@@ -23,16 +23,37 @@ const foodLibrary = {
       "Collagen_g": 0
     },
     "CollagenSupport": {
-      "DerivedFrom": ["Protein_g"],
+      "DerivedFrom": [
+        "Protein_g"
+      ],
       "SupportsCollagenSynthesis": true
     },
     "Supports": {
-      "Brain": ["Omega3_DHA_EPA_mg", "Vitamin_B12_mcg", "Choline_mg", "Magnesium_mg", "Iron_mg"],
-      "Muscle": ["Protein_g", "Vitamin_D_mcg", "Magnesium_mg", "Iron_mg", "Zinc_mg", "Calcium_mg"],
-      "Skin": ["Omega3_DHA_EPA_mg", "CollagenSupport", "Zinc_mg"]
+      "Brain": [
+        "Omega3_DHA_EPA_mg",
+        "Vitamin_B12_mcg",
+        "Choline_mg",
+        "Magnesium_mg",
+        "Iron_mg"
+      ],
+      "Muscle": [
+        "Protein_g",
+        "Vitamin_D_mcg",
+        "Magnesium_mg",
+        "Iron_mg",
+        "Zinc_mg",
+        "Calcium_mg"
+      ],
+      "Skin": [
+        "Omega3_DHA_EPA_mg",
+        "CollagenSupport",
+        "Zinc_mg"
+      ]
     },
     "Synergy": {
-      "Vitamin_D_mcg": ["Calcium_mg"]
+      "Vitamin_D_mcg": [
+        "Calcium_mg"
+      ]
     }
   },
   "Plain Yogurt": {
@@ -45,32 +66,53 @@ const foodLibrary = {
     "Nutrients": {
       "Protein_g": 8.5,
       "Carbohydrates_g": 11.4,
-      "Fats_g": 8.0,
+      "Fats_g": 8,
       "Omega3_DHA_EPA_mg": 30,
-      "Vitamin_B12_mcg": 1.0,
+      "Vitamin_B12_mcg": 1,
       "Choline_mg": 37,
       "Magnesium_mg": 27,
       "Iron_mg": 0.1,
       "Zinc_mg": 1.1,
       "Calcium_mg": 296,
-      "Vitamin_D_mcg": 1.45,
+      "Vitamin_D_mcg": 1.4,
       "Vitamin_C_mg": 0,
       "Fiber_g": 0,
       "Collagen_g": 0
     },
     "CollagenSupport": {
-      "DerivedFrom": ["Protein_g"],
+      "DerivedFrom": [
+        "Protein_g"
+      ],
       "SupportsCollagenSynthesis": true
     },
     "Supports": {
-      "Brain": ["Omega3_DHA_EPA_mg", "Vitamin_B12_mcg", "Choline_mg", "Magnesium_mg"],
-      "Muscle": ["Protein_g", "Vitamin_D_mcg", "Magnesium_mg", "Zinc_mg", "Calcium_mg"],
-      "Skin": ["Omega3_DHA_EPA_mg", "CollagenSupport", "Zinc_mg"]
+      "Brain": [
+        "Omega3_DHA_EPA_mg",
+        "Vitamin_B12_mcg",
+        "Choline_mg",
+        "Magnesium_mg",
+        "Iron_mg"
+      ],
+      "Muscle": [
+        "Protein_g",
+        "Vitamin_D_mcg",
+        "Magnesium_mg",
+        "Iron_mg",
+        "Zinc_mg",
+        "Calcium_mg"
+      ],
+      "Skin": [
+        "Omega3_DHA_EPA_mg",
+        "CollagenSupport",
+        "Zinc_mg"
+      ]
     },
     "Synergy": {
-      "Vitamin_D_mcg": ["Calcium_mg"]
+      "Vitamin_D_mcg": [
+        "Calcium_mg"
+      ]
     }
-  },
+  }
 }
 
 export default foodLibrary;
