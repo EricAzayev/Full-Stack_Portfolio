@@ -4,7 +4,7 @@ const user = {
     "gender": "male",
     "height": 180,
     "weight": 70,
-    "activityLevel": "moderate",
+    "activityLevel": "very active",
     "calorieGoal": 2000
 }
 

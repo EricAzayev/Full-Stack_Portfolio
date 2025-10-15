@@ -1,6 +1,8 @@
 import express from "express";
 import foodLibrary from "../data/foodLibrary.js";
-import today from "../data/today.js";
+import todayData from "../data/today.js";
+import { createRecommendedMicros } from "../data/nutrientCalculator.js";
+const { today, needToday } = todayData;
 import lastResetData from "../data/lastReset.js";
 import record from "../data/record.js";
 import user from "../data/user.js";
@@ -12,6 +14,21 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const router = express.Router();
+
+// Helper function to generate today.js file content with personalized nutrient targets
+function generateTodayFileContent(todayData) {
+  return `import user from "./user.js";
+import { createRecommendedMicros } from "./nutrientCalculator.js";
+
+// Generate personalized nutrient targets
+const needToday = createRecommendedMicros(user);
+// Add calorie goal to the targets
+needToday["Calories_kcal"] = user.calorieGoal;
+
+const today = ${JSON.stringify(todayData, null, 2)};
+
+export default {today, needToday};`;
+}
 
 // Middleware to parse JSON
 router.use(express.json());
@@ -117,48 +134,7 @@ router.get("/today", (req, res) => {
 
       // Update the today.js file with fresh data
       const todayFilePath = path.join(__dirname, "../data/today.js");
-      const todayFileContent = `import user from "./user.js";
-
-const recommendedMicros = {
-  "Protein_g": 100,            // base for 2000 kcal
-  "Carbohydrates_g": 250,
-  "Fats_g": 67,
-  "Omega3_DHA_EPA_mg": 250,
-  "Vitamin_B12_mcg": 2.4,
-  "Choline_mg": 550,
-  "Magnesium_mg": 400,
-  "Iron_mg": 8,
-  "Zinc_mg": 11,
-  "Calcium_mg": 1000,
-  "Vitamin_D_mcg": 15,         // 600 IU
-  "Vitamin_C_mg": 90,
-  "Fiber_g": 30,
-  "Collagen_g": 10
-};
-
-// activity multipliers
-const activityMultiplier = {
-  "sedentary": 1.0,
-  "light": 1.1,
-  "moderate": 1.25,
-  "active": 1.5,
-  "very active": 1.75
-};
-
-// pick multiplier
-const mult = activityMultiplier[user.activityLevel] || 1.0;
-
-// build nutrient targets dynamically
-const needToday = Object.fromEntries(
-  Object.entries(recommendedMicros).map(([key, value]) => [key, value * mult])
-);
-
-// also compute calorie target
-needToday["Calories_kcal"] = user.calorieGoal;
-
-const today = ${JSON.stringify(freshToday, null, 2)};
-
-export default {today, needToday};`;
+      const todayFileContent = generateTodayFileContent(freshToday);
 
       fs.writeFileSync(todayFilePath, todayFileContent);
 
@@ -198,7 +174,7 @@ router.post("/today", (req, res) => {
     const nutrients = foodData.Nutrients;
 
     // Update today's data
-    const updatedToday = { ...today.today };
+    const updatedToday = { ...today };
 
     // Update calories
     updatedToday.calories += foodData.Metadata.Calories_kcal * servings;
@@ -218,48 +194,7 @@ router.post("/today", (req, res) => {
 
     // Write updated data to file
     const todayFilePath = path.join(__dirname, "../data/today.js");
-    const todayFileContent = `import user from "./user.js";
-
-const recommendedMicros = {
-  "Protein_g": 100,            // base for 2000 kcal
-  "Carbohydrates_g": 250,
-  "Fats_g": 67,
-  "Omega3_DHA_EPA_mg": 250,
-  "Vitamin_B12_mcg": 2.4,
-  "Choline_mg": 550,
-  "Magnesium_mg": 400,
-  "Iron_mg": 8,
-  "Zinc_mg": 11,
-  "Calcium_mg": 1000,
-  "Vitamin_D_mcg": 15,         // 600 IU
-  "Vitamin_C_mg": 90,
-  "Fiber_g": 30,
-  "Collagen_g": 10
-};
-
-// activity multipliers
-const activityMultiplier = {
-  "sedentary": 1.0,
-  "light": 1.1,
-  "moderate": 1.25,
-  "active": 1.5,
-  "very active": 1.75
-};
-
-// pick multiplier
-const mult = activityMultiplier[user.activityLevel] || 1.0;
-
-// build nutrient targets dynamically
-const needToday = Object.fromEntries(
-  Object.entries(recommendedMicros).map(([key, value]) => [key, value * mult])
-);
-
-// also compute calorie target
-needToday["Calories_kcal"] = user.calorieGoal;
-
-const today = ${JSON.stringify(updatedToday, null, 2)};
-
-export default {today, needToday};`;
+    const todayFileContent = generateTodayFileContent(updatedToday);
 
     fs.writeFileSync(todayFilePath, todayFileContent);
 
@@ -303,48 +238,7 @@ router.post("/reset-day", (req, res) => {
 
     // Write reset data to file
     const todayFilePath = path.join(__dirname, "../data/today.js");
-    const todayFileContent = `import user from "./user.js";
-
-const recommendedMicros = {
-  "Protein_g": 100,            // base for 2000 kcal
-  "Carbohydrates_g": 250,
-  "Fats_g": 67,
-  "Omega3_DHA_EPA_mg": 250,
-  "Vitamin_B12_mcg": 2.4,
-  "Choline_mg": 550,
-  "Magnesium_mg": 400,
-  "Iron_mg": 8,
-  "Zinc_mg": 11,
-  "Calcium_mg": 1000,
-  "Vitamin_D_mcg": 15,         // 600 IU
-  "Vitamin_C_mg": 90,
-  "Fiber_g": 30,
-  "Collagen_g": 10
-};
-
-// activity multipliers
-const activityMultiplier = {
-  "sedentary": 1.0,
-  "light": 1.1,
-  "moderate": 1.25,
-  "active": 1.5,
-  "very active": 1.75
-};
-
-// pick multiplier
-const mult = activityMultiplier[user.activityLevel] || 1.0;
-
-// build nutrient targets dynamically
-const needToday = Object.fromEntries(
-  Object.entries(recommendedMicros).map(([key, value]) => [key, value * mult])
-);
-
-// also compute calorie target
-needToday["Calories_kcal"] = user.calorieGoal;
-
-const today = ${JSON.stringify(resetToday, null, 2)};
-
-export default {today, needToday};`;
+    const todayFileContent = generateTodayFileContent(resetToday);
 
     fs.writeFileSync(todayFilePath, todayFileContent);
 
