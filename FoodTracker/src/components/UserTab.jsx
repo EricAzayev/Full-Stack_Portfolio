@@ -14,10 +14,13 @@ const UserTab = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
   const [errors, setErrors] = useState({});
+  const [recommendations, setRecommendations] = useState({});
+  const [showAllNutrients, setShowAllNutrients] = useState(false);
 
-  // Fetch user data on component mount
+  // Fetch user data and recommendations on component mount
   useEffect(() => {
     fetchUserData();
+    fetchRecommendations();
   }, []);
 
   const fetchUserData = async () => {
@@ -28,6 +31,20 @@ const UserTab = () => {
     } catch (error) {
       console.error("Error fetching user data:", error);
       setSaveMessage("Failed to load user data");
+    }
+  };
+
+  const fetchRecommendations = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/api/recommendations");
+      if (response.ok) {
+        const data = await response.json();
+        setRecommendations(data);
+      } else {
+        console.error("Error fetching recommendations");
+      }
+    } catch (error) {
+      console.error("Error fetching recommendations:", error);
     }
   };
 
@@ -107,8 +124,11 @@ const UserTab = () => {
       });
 
       if (response.ok) {
+        const result = await response.json();
         setSaveMessage("Settings saved successfully!");
         setIsEditing(false);
+        // Update recommendations with the fresh data returned from the server
+        setRecommendations(result.recommendations);
         setTimeout(() => setSaveMessage(""), 3000);
       } else {
         setSaveMessage("Failed to save settings");
@@ -359,6 +379,89 @@ const UserTab = () => {
             </div>
           </section>
 
+          {/* Daily Recommendations Section */}
+          <section className="settings-section">
+            <h3 className="section-title">Daily Recommendations</h3>
+            <p style={{ color: '#ccc', marginBottom: '1.5rem', lineHeight: '1.5' }}>
+              Your personalized daily nutrient targets based on your profile settings.
+            </p>
+            
+            <div className="nutrient-summary">
+              <div className="nutrient-item">
+                <span>Calories:</span>
+                <span>{recommendations.Calories_kcal || 0}</span>
+              </div>
+              <div className="nutrient-item">
+                <span>Protein:</span>
+                <span>{recommendations.Protein_g || 0}g</span>
+              </div>
+              <div className="nutrient-item">
+                <span>Carbs:</span>
+                <span>{recommendations.Carbohydrates_g || 0}g</span>
+              </div>
+              <div className="nutrient-item">
+                <span>Fats:</span>
+                <span>{recommendations.Fats_g || 0}g</span>
+              </div>
+              <div className="nutrient-item">
+                <span>Omega-3:</span>
+                <span>{recommendations.Omega3_DHA_EPA_mg || 0}mg</span>
+              </div>
+              <div className="nutrient-item">
+                <span>Vitamin B12:</span>
+                <span>{recommendations.Vitamin_B12_mcg || 0}μg</span>
+              </div>
+              <div className="nutrient-item">
+                <span>Calcium:</span>
+                <span>{recommendations.Calcium_mg || 0}mg</span>
+              </div>
+              <div className="nutrient-item">
+                <span>Magnesium:</span>
+                <span>{recommendations.Magnesium_mg || 0}mg</span>
+              </div>
+              
+              {showAllNutrients && (
+                <>
+                  <div className="nutrient-item">
+                    <span>Choline:</span>
+                    <span>{recommendations.Choline_mg || 0}mg</span>
+                  </div>
+                  <div className="nutrient-item">
+                    <span>Iron:</span>
+                    <span>{recommendations.Iron_mg || 0}mg</span>
+                  </div>
+                  <div className="nutrient-item">
+                    <span>Zinc:</span>
+                    <span>{recommendations.Zinc_mg || 0}mg</span>
+                  </div>
+                  <div className="nutrient-item">
+                    <span>Vitamin D:</span>
+                    <span>{recommendations.Vitamin_D_mcg || 0}μg</span>
+                  </div>
+                  <div className="nutrient-item">
+                    <span>Vitamin C:</span>
+                    <span>{recommendations.Vitamin_C_mg || 0}mg</span>
+                  </div>
+                  <div className="nutrient-item">
+                    <span>Fiber:</span>
+                    <span>{recommendations.Fiber_g || 0}g</span>
+                  </div>
+                  <div className="nutrient-item">
+                    <span>Collagen:</span>
+                    <span>{recommendations.Collagen_g || 0}g</span>
+                  </div>
+                </>
+              )}
+            </div>
+            
+            <button 
+              className="toggle-nutrients-button"
+              onClick={() => setShowAllNutrients(!showAllNutrients)}
+            >
+              {showAllNutrients ? 'Show Less' : 'Show All Nutrients'}
+            </button>
+          </section>
+
           {/* Info Card */}
           <div className="info-card">
             <div className="info-icon">ℹ️</div>
@@ -366,8 +469,8 @@ const UserTab = () => {
               <h4>About Your Settings</h4>
               <p>
                 Your activity level and calorie goal help determine your daily
-                nutrient targets. Changes to these settings will affect the
-                recommended values shown in the Today tab.
+                nutrient targets. Changes to these settings will automatically
+                update your personalized recommendations shown above.
               </p>
             </div>
           </div>

@@ -283,6 +283,22 @@ router.get("/user", (req, res) => {
   }
 });
 
+// Route to get today's recommendations
+router.get("/recommendations", async (req, res) => {
+  try {
+    // Dynamically import current user data to get fresh values
+    const userModule = await import("../data/user.js");
+    const currentUser = userModule.default;
+    const dynamicRecommendations = createRecommendedMicros(currentUser);
+    dynamicRecommendations["Calories_kcal"] = currentUser.calorieGoal;
+    
+    res.status(200).json(dynamicRecommendations);
+  } catch (error) {
+    console.error("Error fetching recommendations:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Route to update user data
 router.post("/user", (req, res) => {
   try {
@@ -361,11 +377,16 @@ router.post("/user", (req, res) => {
 
     fs.writeFileSync(userFilePath, userFileContent);
 
+    // Calculate updated recommendations immediately
+    const dynamicRecommendations = createRecommendedMicros(updatedUser);
+    dynamicRecommendations["Calories_kcal"] = updatedUser.calorieGoal;
+
     console.log("User data updated successfully");
 
     res.status(200).json({
       message: "User data updated successfully",
       user: updatedUser,
+      recommendations: dynamicRecommendations,
     });
   } catch (error) {
     console.error("Error updating user data:", error);
