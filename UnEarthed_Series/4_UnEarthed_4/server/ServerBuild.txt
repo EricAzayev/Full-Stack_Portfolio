@@ -1,0 +1,6 @@
+To create a specific route:
+
+1. add query to controllers/ so the controller can access the db
+
+
+2. add route to routes/
