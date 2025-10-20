@@ -47,10 +47,10 @@ const AnimationComponent = () => {
       if (currentScene < scenes.length - 1) {
         setCurrentScene(currentScene + 1);
       } else {
-        // After all scenes, redirect to armories
-        navigate("/armories");
+        // After all scenes, redirect to shop first
+        navigate("/shop");
       }
-    }, 10000); // 10 seconds
+    }, 6000); // 6 seconds
 
     return () => clearTimeout(timer);
   }, [currentScene, navigate, scenes.length]);

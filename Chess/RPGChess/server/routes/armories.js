@@ -8,4 +8,6 @@ router.get("/", ArmoriesController.getArmories);
 
 router.get('/:armoryId', ArmoriesController.getArmoryById);
 
+
+
 export default router;

@@ -16,7 +16,6 @@ const App = () => {
     const response = await fetch("/gifts");
     const data = await response.json();
     console.log(data);
-    console.log(data);
     setGifts(data);
   };
 

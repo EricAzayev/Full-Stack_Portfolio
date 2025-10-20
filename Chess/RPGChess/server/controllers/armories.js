@@ -12,7 +12,7 @@ const getArmories = async (req, res) => {
 const getArmoryById = async (req, res) => {
   try {
     const selectQuery = `
-      SELECT name, description, cost, type, stats
+      SELECT name, description, cost, type
       FROM armories
       WHERE id=$1
     `;
@@ -25,7 +25,38 @@ const getArmoryById = async (req, res) => {
   }
 };
 
+
+const updateArmory = async (req, res) => {
+  try {
+    const updateQuery = `
+      UPDATE armories
+      SET name = $1, description = $2, cost = $3, type = $4
+      WHERE id = $5
+    `;
+    const values = [req.body.name, req.body.description, req.body.cost, req.body.type, req.params.armoryId];
+    await pool.query(updateQuery, values);
+    res.status(200).json({ message: "Armory updated successfully" });
+  } catch (error) {
+    res.status(409).json({ error: error.message });
+  }
+};
+
+const deleteArmory = async (req, res) => {
+  try {
+    const deleteQuery = `
+      DELETE FROM armories
+      WHERE id = $1
+    `;
+    const values = [req.params.armoryId];
+    await pool.query(deleteQuery, values);
+    res.status(200).json({ message: "Armory deleted successfully" });
+  } catch (error) {
+    res.status(409).json({ error: error.message });
+  }
+};
+
 export default {
   getArmories,
   getArmoryById,
+  updateArmory,
 };

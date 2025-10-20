@@ -16,7 +16,7 @@ if (missing.length > 0) {
   );
   process.exit(1);
 }
-import armoryData from "../data/armories.js";
+import { armorys, descriptions, costs } from "../data/armories.js";
 
 const createArmoriesTable = async () => {
   const createTableQuery = `
@@ -27,8 +27,7 @@ const createArmoriesTable = async () => {
         name VARCHAR(255) NOT NULL,
         description TEXT NOT NULL,
         cost INTEGER NOT NULL,
-        type VARCHAR(50) NOT NULL,
-        stats JSONB
+        type VARCHAR(50) NOT NULL
     )
   `;
   try {
@@ -43,9 +42,17 @@ const createArmoriesTable = async () => {
 const seedArmoriesTable = async () => {
   await createArmoriesTable(); // Ensure the table is created before seeding
 
+  // Convert the object structure to array format for database insertion
+  const armoryData = Object.keys(descriptions).map(name => ({
+    name: name,
+    description: descriptions[name],
+    cost: costs[name],
+    type: name.includes('Pawn') ? 'pawn' : name.includes('Knight') ? 'knight' : 'special'
+  }));
+
   for (const armory of armoryData) {
     const insertQuery = {
-      text: "INSERT INTO armories (name, description, cost, type, stats) VALUES ($1, $2, $3, $4, $5)",
+      text: "INSERT INTO armories (name, description, cost, type) VALUES ($1, $2, $3, $4)",
     };
 
     const values = [
@@ -53,7 +60,6 @@ const seedArmoriesTable = async () => {
       armory.description,
       armory.cost,
       armory.type,
-      armory.stats,
     ];
 
     try {
