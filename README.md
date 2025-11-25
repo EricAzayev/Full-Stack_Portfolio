@@ -1,3 +1,8 @@
+Affiliated Projects
+
+https://github.com/EricAzayev/Lexington-Links
+
+
 💡 Overview
 
 This folder contains multiple subprojects I’ve worked on to deepen my understanding of full-stack JavaScript development.
