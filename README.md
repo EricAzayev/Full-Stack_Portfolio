@@ -1,6 +1,12 @@
 Affiliated Projects
 
-https://github.com/EricAzayev/Lexington-Links
+[Findr Animal Education App](https://github.com/BorowskiKacper/divhacks)
+
+[Lexington Links](https://github.com/EricAzayev/Lexington-Links)
+
+[Recipal](https://github.com/EricAzayev/reciPal)
+
+
 
 
 💡 Overview
