@@ -37,7 +37,8 @@ Local JSON data storage
 
 A full-stack nutrition tracking application that helps users monitor their daily caloric intake, macronutrients, and meal history with an intuitive visual interface.
 
-## 📹 Demo
+## Demo
+<img width="1871" height="901" alt="FoodTracker" src="https://github.com/user-attachments/assets/e54235f2-9c72-45d1-8d37-419908178f03" />
 
 
 ## Overview
@@ -46,8 +47,11 @@ Food Tracker is a comprehensive nutrition management system that allows users to
 - Track daily food consumption with detailed nutritional breakdowns
 - Visualize caloric and macronutrient data through interactive donut charts
 - Manage a custom food library with nutritional information
+  <img width="1087" height="911" alt="image" src="https://github.com/user-attachments/assets/2193ca6a-f6ce-4a93-add7-e49e04edba84" />
+
 - View historical data and analytics across multiple days
 - Configure personalized caloric and macro goals
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/8bac3f50-8013-41fe-b25e-f0d6218b682f" />
 
 ## Key Learnings
 
