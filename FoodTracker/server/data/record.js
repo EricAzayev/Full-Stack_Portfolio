@@ -4,28 +4,26 @@ const record = {
   {
     "date": "2025-12-04",
     "nutrients": {
-      "Protein_g": 85.69999999999999,
-      "Carbohydrates_g": 87.8,
-      "Fats_g": 58,
-      "Omega3_DHA_EPA_mg": 452,
-      "Vitamin_B12_mcg": 4.3,
-      "Choline_mg": 745,
-      "Magnesium_mg": 187,
-      "Iron_mg": 9.299999999999999,
-      "Zinc_mg": 9.5,
-      "Calcium_mg": 758,
-      "Vitamin_D_mcg": 5.699999999999999,
-      "Vitamin_C_mg": 19,
-      "Fiber_g": 11,
-      "Collagen_g": 0
+      "Protein_g": 50,
+      "Carbohydrates_g": 80,
+      "Fats_g": 56,
+      "Omega3_DHA_EPA_mg": 30,
+      "Vitamin_B12_mcg": 4.8,
+      "Choline_mg": 190,
+      "Magnesium_mg": 60,
+      "Iron_mg": 6.999999999999999,
+      "Zinc_mg": 9,
+      "Calcium_mg": 300,
+      "Vitamin_D_mcg": 0.8,
+      "Vitamin_C_mg": 6,
+      "Fiber_g": 4,
+      "Collagen_g": 3
     },
-    "calories": 1166,
+    "calories": 1000,
     "food": {
-      "Egg": 4,
-      "Chipotle Chicken Bowl": 1,
-      "Plain Yogurt": 1
+      "Burger": 2
     },
-    "timestamp": "2025-12-04T03:53:42.094Z"
+    "timestamp": "2025-12-04T05:29:20.984Z"
   },
   {
     "date": "2025-10-15",

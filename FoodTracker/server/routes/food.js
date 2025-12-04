@@ -6,6 +6,7 @@ let { today, needToday } = todayData;
 import lastResetData from "../data/lastReset.js";
 import record from "../data/record.js";
 import user from "../data/user.js";
+import foodDeletedLibrary from "../data/foodDeletedLibrary.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -224,6 +225,9 @@ router.delete("/foodLibrary/:foodName", (req, res) => {
       return res.status(404).json({ error: "Food not found" });
     }
 
+    // Move the food to deletedLibrary before removing (for today's intake cleanup)
+    foodDeletedLibrary[foodName] = foodLibrary[foodName];
+
     // Remove the food from the library
     delete foodLibrary[foodName];
 
@@ -235,7 +239,17 @@ export default foodLibrary;`;
 
     fs.writeFileSync(foodLibraryFilePath, foodLibraryFileContent);
 
-    console.log(`Food "${foodName}" deleted from food library`);
+    // Write updated deleted library to file
+    const deletedLibraryFilePath = path.join(__dirname, "../data/foodDeletedLibrary.js");
+    const deletedLibraryFileContent = `// Temporary storage for deleted foods (cleared daily)
+// This allows users to remove deleted foods from today's intake
+const foodDeletedLibrary = ${JSON.stringify(foodDeletedLibrary, null, 2)};
+
+export default foodDeletedLibrary;`;
+
+    fs.writeFileSync(deletedLibraryFilePath, deletedLibraryFileContent);
+
+    console.log(`Food "${foodName}" deleted from food library and moved to temporary deleted library`);
 
     res.status(200).json({
       message: `Food "${foodName}" deleted successfully`,
@@ -253,43 +267,83 @@ router.put("/today", (req, res) => {
     console.log("PUT /today route called with body:", req.body);
     const { foodName, servings } = req.body;
 
-    if (!foodName || servings === undefined || !foodLibrary[foodName]) {
+    if (!foodName || servings === undefined) {
       return res.status(400).json({ error: "Invalid food name or servings" });
     }
 
-    // Get the food data
-    const foodData = foodLibrary[foodName];
-    const nutrients = foodData.Nutrients;
+    // Check if food exists in today's intake
+    if (!today.food[foodName]) {
+      return res.status(400).json({ error: "Food not found in today's intake" });
+    }
 
     // Get current servings of this food
     const currentServings = today.food[foodName] || 0;
     const servingsDifference = servings - currentServings;
 
     // Update today's data
-    const updatedToday = { ...today };
+    const updatedToday = { 
+      ...today,
+      nutrients: { ...today.nutrients },
+      food: { ...today.food }
+    };
 
-    // Update calories
-    updatedToday.calories += foodData.Metadata.Calories_kcal * servingsDifference;
+    // Try to get food data from library or deleted library
+    const foodData = foodLibrary[foodName] || foodDeletedLibrary[foodName];
 
-    // Update nutrients
-    Object.keys(nutrients).forEach((nutrient) => {
-      if (typeof nutrients[nutrient] === "number") {
-        updatedToday.nutrients[nutrient] += nutrients[nutrient] * servingsDifference;
-        // Ensure no negative values
-        updatedToday.nutrients[nutrient] = Math.max(0, updatedToday.nutrients[nutrient]);
-      }
-    });
-
-    // Update food servings
-    if (servings <= 0) {
-      // Remove the food if servings is 0 or negative
-      delete updatedToday.food[foodName];
-    } else {
-      updatedToday.food[foodName] = servings;
+    if (!foodData) {
+      return res.status(400).json({ 
+        error: `Cannot find nutrient data for ${foodName}. Food may have been deleted before being added to today's intake.`
+      });
     }
 
-    // Ensure calories is not negative
-    updatedToday.calories = Math.max(0, updatedToday.calories);
+    // Get nutrients from the food data
+    const nutrients = foodData.Nutrients;
+
+    // Special case: If removing (servings <= 0)
+    if (servings <= 0) {
+      // Subtract the calories
+      updatedToday.calories -= foodData.Metadata.Calories_kcal * currentServings;
+      
+      // Subtract the nutrients
+      Object.keys(nutrients).forEach((nutrient) => {
+        if (typeof nutrients[nutrient] === "number") {
+          updatedToday.nutrients[nutrient] -= nutrients[nutrient] * currentServings;
+          // Ensure no negative values
+          updatedToday.nutrients[nutrient] = Math.max(0, updatedToday.nutrients[nutrient]);
+        }
+      });
+      
+      console.log(`Removed ${foodName} and subtracted nutrients (from ${foodLibrary[foodName] ? 'library' : 'deleted library'})`);
+      
+      // Remove from food list
+      delete updatedToday.food[foodName];
+      
+      // Ensure calories is not negative
+      updatedToday.calories = Math.max(0, updatedToday.calories);
+    } else {
+      // Normal update (works for both active and deleted foods)
+      // Update calories
+      updatedToday.calories += foodData.Metadata.Calories_kcal * servingsDifference;
+
+      // Update nutrients
+      Object.keys(nutrients).forEach((nutrient) => {
+        if (typeof nutrients[nutrient] === "number") {
+          updatedToday.nutrients[nutrient] += nutrients[nutrient] * servingsDifference;
+          // Ensure no negative values
+          updatedToday.nutrients[nutrient] = Math.max(0, updatedToday.nutrients[nutrient]);
+        }
+      });
+
+      // Update food servings
+      updatedToday.food[foodName] = servings;
+
+      // Ensure calories is not negative
+      updatedToday.calories = Math.max(0, updatedToday.calories);
+      
+      if (foodDeletedLibrary[foodName]) {
+        console.log(`Updated ${foodName} servings (food is in deleted library, will be removed at daily reset)`);
+      }
+    }
 
     // Update the in-memory today object
     today.calories = updatedToday.calories;
@@ -431,6 +485,17 @@ export default lastResetData;`;
       // Update lastResetData in memory to match file
       lastResetData.lastResetDate = newLastResetData.lastResetDate;
 
+      // Clear the deleted foods library (new day, fresh start)
+      Object.keys(foodDeletedLibrary).forEach(key => delete foodDeletedLibrary[key]);
+      const deletedLibraryFilePath = path.join(__dirname, "../data/foodDeletedLibrary.js");
+      const deletedLibraryFileContent = `// Temporary storage for deleted foods (cleared daily)
+// This allows users to remove deleted foods from today's intake
+const foodDeletedLibrary = {};
+
+export default foodDeletedLibrary;`;
+      fs.writeFileSync(deletedLibraryFilePath, deletedLibraryFileContent);
+      console.log("Cleared deleted foods library");
+
       // Set the session flag to prevent multiple resets
       resetPerformedToday = true;
 
@@ -547,6 +612,16 @@ export default lastResetData;`;
 
     // Update lastResetData in memory
     lastResetData.lastResetDate = newLastResetData.lastResetDate;
+
+    // Clear the deleted foods library
+    Object.keys(foodDeletedLibrary).forEach(key => delete foodDeletedLibrary[key]);
+    const deletedLibraryFilePath = path.join(__dirname, "../data/foodDeletedLibrary.js");
+    const deletedLibraryFileContent = `// Temporary storage for deleted foods (cleared daily)
+// This allows users to remove deleted foods from today's intake
+const foodDeletedLibrary = {};
+
+export default foodDeletedLibrary;`;
+    fs.writeFileSync(deletedLibraryFilePath, deletedLibraryFileContent);
 
     // Set the session flag
     resetPerformedToday = true;

@@ -61,4 +61,12 @@
 - Contains single field: `lastResetDate` (date string in "Day Mon DD YYYY" format)
 - **Function**: Prevents multiple resets on the same day
 - **Updated**: When automatic reset occurs (midnight) or manual reset is triggered
-- **Check**: Compared against current date to determine if reset is needed 
+- **Check**: Compared against current date to determine if reset is needed
+
+## foodDeletedLibrary.js
+**Purpose**: Temporary storage for foods deleted from the library during the current day
+- Stores complete nutritional data of deleted foods
+- **Function**: Allows users to properly remove deleted foods from today's intake with accurate nutrient subtraction
+- **Lifecycle**: Cleared automatically during daily reset (automatic or manual)
+- **Use Case**: When a user deletes a food from the library but it's still in their today's intake, this allows proper nutrient calculation when removing it
+- **Auto-Cleanup**: Emptied at midnight reset or manual reset 

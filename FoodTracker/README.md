@@ -1,3 +1,38 @@
+What's left before deployment:
+Analytics and History Tab, Recommended Next Meal
+Implement Local AI Model to add new foods
+
+Planned Deployment Date: December 15th
+
+4. Package the Desktop App
+
+Uses electron-builder to create a standalone installer:
+
+npx electron-builder
+
+5. Distribute the Installer
+
+After building, the installer will appear in:
+
+/release/
+
+
+This includes:
+
+FoodTracker Setup.exe (Windows)
+
+or .dmg / .AppImage depending on OS
+
+Users can download the installer, run it, and launch FoodTracker as a fully local desktop application with:
+
+Local Express backend
+
+Local Vite frontend
+
+Local JSON data storage
+
+
+
 # Food Tracker
 
 A full-stack nutrition tracking application that helps users monitor their daily caloric intake, macronutrients, and meal history with an intuitive visual interface.
