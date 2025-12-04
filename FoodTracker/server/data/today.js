@@ -8,26 +8,24 @@ needToday["Calories_kcal"] = user.calorieGoal;
 
 const today = {
   "nutrients": {
-    "Protein_g": 85.69999999999999,
-    "Carbohydrates_g": 87.8,
-    "Fats_g": 58,
-    "Omega3_DHA_EPA_mg": 452,
-    "Vitamin_B12_mcg": 4.3,
-    "Choline_mg": 745,
-    "Magnesium_mg": 187,
-    "Iron_mg": 9.299999999999999,
-    "Zinc_mg": 9.5,
-    "Calcium_mg": 758,
-    "Vitamin_D_mcg": 5.699999999999999,
-    "Vitamin_C_mg": 19,
-    "Fiber_g": 11,
+    "Protein_g": 18.899999999999995,
+    "Carbohydrates_g": 1.7999999999999994,
+    "Fats_g": 15,
+    "Omega3_DHA_EPA_mg": 279,
+    "Vitamin_B12_mcg": 1.35,
+    "Choline_mg": 441,
+    "Magnesium_mg": 15,
+    "Iron_mg": 2.7,
+    "Zinc_mg": 1.8000000000000012,
+    "Calcium_mg": 84,
+    "Vitamin_D_mcg": 3.0749999999999997,
+    "Vitamin_C_mg": 0,
+    "Fiber_g": 0,
     "Collagen_g": 0
   },
-  "calories": 1166,
+  "calories": 216,
   "food": {
-    "Egg": 4,
-    "Chipotle Chicken Bowl": 1,
-    "Plain Yogurt": 1
+    "Egg": 3
   }
 };
 

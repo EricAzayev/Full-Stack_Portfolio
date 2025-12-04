@@ -2,7 +2,7 @@ import express from "express";
 import foodLibrary from "../data/foodLibrary.js";
 import todayData from "../data/today.js";
 import { createRecommendedMicros } from "../data/nutrientCalculator.js";
-const { today, needToday } = todayData;
+let { today, needToday } = todayData;
 import lastResetData from "../data/lastReset.js";
 import record from "../data/record.js";
 import user from "../data/user.js";
@@ -14,6 +14,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const router = express.Router();
+
+// Track if reset has been performed in this session to prevent multiple resets
+let resetPerformedToday = false;
 
 // Helper function to generate today.js file content with personalized nutrient targets
 function generateTodayFileContent(todayData) {
@@ -288,6 +291,11 @@ router.put("/today", (req, res) => {
     // Ensure calories is not negative
     updatedToday.calories = Math.max(0, updatedToday.calories);
 
+    // Update the in-memory today object
+    today.calories = updatedToday.calories;
+    today.nutrients = updatedToday.nutrients;
+    today.food = updatedToday.food;
+
     // Write updated data to file
     const todayFilePath = path.join(__dirname, "../data/today.js");
     const todayFileContent = generateTodayFileContent(updatedToday);
@@ -298,7 +306,7 @@ router.put("/today", (req, res) => {
 
     res.status(200).json({
       message: `Updated ${foodName} to ${servings} servings`,
-      updatedToday: today,
+      updatedToday: updatedToday,
       needToday: needToday
     });
   } catch (error) {
@@ -309,11 +317,11 @@ router.put("/today", (req, res) => {
 
 // Function to check if we need to reset for a new day
 const shouldResetForNewDay = () => {
-  const today = new Date();
-  const todayString = today.toDateString();
+  const now = new Date();
+  const todayString = now.toDateString();
 
-  // If no last reset date or it's a different day, we need to reset
-  return lastResetData.lastResetDate !== todayString;
+  // If no last reset date or it's a different day, AND we haven't already reset in this session
+  return lastResetData.lastResetDate !== todayString && !resetPerformedToday;
 };
 
 // Function to create a fresh today object
@@ -389,22 +397,24 @@ export default record;`;
 // Route to serve today data with automatic daily reset
 router.get("/today", (req, res) => {
   try {
-    let todayData = today;
-
     // Check if we need to reset for a new day
     if (shouldResetForNewDay()) {
       console.log("New day detected, saving record and resetting data...");
 
-      // Save today's data to record before resetting
-      saveDailyRecord(today);
+      // Save today's data to record before resetting (only if there's data to save)
+      if (today.calories > 0 || Object.keys(today.food).length > 0) {
+        saveDailyRecord(today);
+      }
 
       // Create fresh today data
       const freshToday = createFreshToday();
 
+      // Update the IN-MEMORY today object so subsequent requests use fresh data
+      today = freshToday;
+
       // Update the today.js file with fresh data
       const todayFilePath = path.join(__dirname, "../data/today.js");
       const todayFileContent = generateTodayFileContent(freshToday);
-
       fs.writeFileSync(todayFilePath, todayFileContent);
 
       // Update the lastReset.js file
@@ -418,11 +428,16 @@ const lastResetData = ${JSON.stringify(newLastResetData, null, 2)};
 export default lastResetData;`;
       fs.writeFileSync(lastResetFilePath, lastResetFileContent);
 
-      // Use the fresh data for the response
-      todayData = freshToday;
+      // Update lastResetData in memory to match file
+      lastResetData.lastResetDate = newLastResetData.lastResetDate;
+
+      // Set the session flag to prevent multiple resets
+      resetPerformedToday = true;
+
+      console.log("Daily reset completed successfully");
     }
 
-    res.status(200).json({ today: todayData, needToday });
+    res.status(200).json({ today, needToday });
   } catch (error) {
     console.error("Error in /today GET endpoint:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -460,6 +475,11 @@ router.post("/today", (req, res) => {
       updatedToday.food = {};
     }
     updatedToday.food[foodName] = (updatedToday.food[foodName] || 0) + servings;
+
+    // Update the in-memory today object
+    today.calories = updatedToday.calories;
+    today.nutrients = updatedToday.nutrients;
+    today.food = updatedToday.food;
 
     // Write updated data to file
     const todayFilePath = path.join(__dirname, "../data/today.js");
@@ -506,10 +526,12 @@ router.post("/reset-day", (req, res) => {
       food: {},
     };
 
+    // Update the IN-MEMORY today object
+    today = resetToday;
+
     // Write reset data to file
     const todayFilePath = path.join(__dirname, "../data/today.js");
     const todayFileContent = generateTodayFileContent(resetToday);
-
     fs.writeFileSync(todayFilePath, todayFileContent);
 
     // Also update the lastReset.js file
@@ -522,6 +544,12 @@ const lastResetData = ${JSON.stringify(newLastResetData, null, 2)};
 
 export default lastResetData;`;
     fs.writeFileSync(lastResetFilePath, lastResetFileContent);
+
+    // Update lastResetData in memory
+    lastResetData.lastResetDate = newLastResetData.lastResetDate;
+
+    // Set the session flag
+    resetPerformedToday = true;
 
     res.status(200).json({
       message: "Day reset successfully",

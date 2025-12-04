@@ -32,7 +32,7 @@ const MacroDonuts = ({ nutrients, targets }) => {
                 text={`${Math.round(current)}`}
                 styles={buildStyles({
                   pathColor: color,
-                  textColor: '#fff',
+                  textColor: '#000',
                   trailColor: '#333',
                   backgroundColor: '#1a1a1a',
                   textSize: '16px',

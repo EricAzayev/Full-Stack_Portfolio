@@ -169,6 +169,120 @@ const foodLibrary = {
         "Calcium_mg"
       ]
     }
+  },
+  "Milk Cup": {
+    "Metadata": {
+      "Category": "Dairy",
+      "ServingSize_g": 244,
+      "Calories_kcal": 150,
+      "IsProbiotic": false
+    },
+    "Nutrients": {
+      "Protein_g": 8,
+      "Carbohydrates_g": 12,
+      "Fats_g": 8,
+      "Omega3_DHA_EPA_mg": 0,
+      "Vitamin_B12_mcg": 1.1,
+      "Choline_mg": 43,
+      "Magnesium_mg": 27,
+      "Iron_mg": 0.1,
+      "Zinc_mg": 1,
+      "Calcium_mg": 276,
+      "Vitamin_D_mcg": 2.5,
+      "Vitamin_C_mg": 0,
+      "Fiber_g": 0,
+      "Collagen_g": 0
+    },
+    "CollagenSupport": {
+      "DerivedFrom": [
+        "Protein_g"
+      ],
+      "SupportsCollagenSynthesis": true
+    },
+    "Supports": {
+      "Brain": [
+        "Omega3_DHA_EPA_mg",
+        "Vitamin_B12_mcg",
+        "Choline_mg",
+        "Magnesium_mg",
+        "Iron_mg"
+      ],
+      "Muscle": [
+        "Protein_g",
+        "Vitamin_D_mcg",
+        "Magnesium_mg",
+        "Iron_mg",
+        "Zinc_mg",
+        "Calcium_mg"
+      ],
+      "Skin": [
+        "Omega3_DHA_EPA_mg",
+        "CollagenSupport",
+        "Zinc_mg"
+      ]
+    },
+    "Synergy": {
+      "Vitamin_D_mcg": [
+        "Calcium_mg"
+      ]
+    }
+  },
+  "Pizza Slice": {
+    "Metadata": {
+      "Category": "Fast Food",
+      "ServingSize_g": 107,
+      "Calories_kcal": 285,
+      "IsProbiotic": false
+    },
+    "Nutrients": {
+      "Protein_g": 12,
+      "Carbohydrates_g": 36,
+      "Fats_g": 10,
+      "Omega3_DHA_EPA_mg": 5,
+      "Vitamin_B12_mcg": 0.7,
+      "Choline_mg": 28,
+      "Magnesium_mg": 22,
+      "Iron_mg": 2.5,
+      "Zinc_mg": 1.3,
+      "Calcium_mg": 200,
+      "Vitamin_D_mcg": 0.2,
+      "Vitamin_C_mg": 2,
+      "Fiber_g": 2.5,
+      "Collagen_g": 0
+    },
+    "CollagenSupport": {
+      "DerivedFrom": [
+        "Protein_g"
+      ],
+      "SupportsCollagenSynthesis": true
+    },
+    "Supports": {
+      "Brain": [
+        "Omega3_DHA_EPA_mg",
+        "Vitamin_B12_mcg",
+        "Choline_mg",
+        "Magnesium_mg",
+        "Iron_mg"
+      ],
+      "Muscle": [
+        "Protein_g",
+        "Vitamin_D_mcg",
+        "Magnesium_mg",
+        "Iron_mg",
+        "Zinc_mg",
+        "Calcium_mg"
+      ],
+      "Skin": [
+        "Omega3_DHA_EPA_mg",
+        "CollagenSupport",
+        "Zinc_mg"
+      ]
+    },
+    "Synergy": {
+      "Vitamin_D_mcg": [
+        "Calcium_mg"
+      ]
+    }
   }
 }
 

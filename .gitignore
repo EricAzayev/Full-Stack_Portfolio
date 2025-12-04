@@ -27,8 +27,6 @@ dist-ssr
 *.config.js
 *.config.ts
 
-package-lock.json
-package.json
 
 
 
@@ -36,7 +34,7 @@ package.json
 !*.png
 !*.css
 
-!.gitignore
+
 
 .env
 
