@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import TodaySummary from './TodaySummary'
+import SmartRecommendations from './SmartRecommendations'
 
 const TodayTab = () => {
   const [foodLibrary, setFoodLibrary] = useState({})
@@ -59,8 +60,11 @@ const TodayTab = () => {
   }
 
   // Handle adding food to today's intake
-  const handleAddFood = async () => {
-    if (!searchTerm || !foodLibrary[searchTerm]) {
+  const handleAddFood = async (foodName = null, servingsAmount = null) => {
+    const food = foodName || searchTerm;
+    const amount = servingsAmount || servings;
+    
+    if (!food || !foodLibrary[food]) {
       alert('Please select a valid food from the search results')
       return
     }
@@ -72,8 +76,8 @@ const TodayTab = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          foodName: searchTerm,
-          servings: servings
+          foodName: food,
+          servings: amount
         })
       })
 
@@ -85,14 +89,16 @@ const TodayTab = () => {
         setNeedToday(result.needToday)
         
         // Show success message
-        setSuccessMessage(`✓ Added ${servings} serving(s) of ${searchTerm} to today's intake!`)
+        setSuccessMessage(`✓ Added ${amount} serving(s) of ${food} to today's intake!`)
         
         // Clear success message after 3 seconds
         setTimeout(() => setSuccessMessage(''), 3000)
         
-        // Reset form
-        setSearchTerm('')
-        setServings(1)
+        // Reset form only if using the search interface
+        if (!foodName) {
+          setSearchTerm('')
+          setServings(1)
+        }
       } else {
         const error = await response.json()
         alert(`Error: ${error.error}`)
@@ -273,17 +279,11 @@ const TodayTab = () => {
           )}
         </div>
 
-        <div className="recommended-meal-section">
-          <h3>Recommended Next Meal</h3>
-          <div className="recommended-meal-content">
-            <p className="recommended-meal-placeholder">
-              🍽️ Smart meal recommendations coming soon!
-            </p>
-            <p className="recommended-meal-description">
-              Based on your current nutrient intake, we'll suggest foods to help you reach your daily goals.
-            </p>
-          </div>
-        </div>
+        <SmartRecommendations 
+          todayData={todayData} 
+          needToday={needToday}
+          onAddFood={handleAddFood}
+        />
 
       </div>
       

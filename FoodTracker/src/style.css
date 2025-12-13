@@ -102,35 +102,207 @@ body {
   margin-bottom: 1.5rem;
 }
 
-.recommended-meal-section {
+/* Smart Recommendations Section - Simplified */
+.smart-recommendations {
   background-color: #1a1a1a;
   padding: 2rem;
   border-radius: 8px;
+  border: 1px solid #333;
 }
 
-.foods-eaten-section h3,
-.recommended-meal-section h3 {
+.smart-recommendations h3 {
+  margin: 0 0 0.5rem 0;
+  color: #646cff;
+  font-size: 1.4rem;
+}
+
+.rec-header-section {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #333;
+  padding-bottom: 1rem;
+}
+
+.rec-subtitle {
+  color: #888;
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+}
+
+/* Nutrient Gaps */
+.nutrient-gaps {
+  margin-bottom: 1.5rem;
+}
+
+.nutrient-gaps h4 {
+  margin: 0 0 0.8rem 0;
+  color: #ff9800;
+  font-size: 1rem;
+}
+
+.gaps-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.gap-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  background-color: rgba(255, 152, 0, 0.1);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  border-radius: 20px;
+}
+
+.gap-name {
+  color: #ccc;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.gap-percent {
+  color: #ff9800;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* Food Recommendations */
+.food-recommendations {
+  margin-bottom: 1rem;
+}
+
+.food-recommendations h4 {
   margin: 0 0 1rem 0;
   color: #646cff;
+  font-size: 1rem;
 }
 
-.recommended-meal-content {
-  text-align: center;
-  padding: 1rem 0;
+.food-rec-card {
+  background-color: #242424;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.8rem;
+  transition: all 0.2s ease;
 }
 
-.recommended-meal-placeholder {
-  font-size: 1.1rem;
-  color: #646cff;
-  font-weight: 500;
-  margin: 0 0 0.5rem 0;
+.food-rec-card:hover {
+  border-color: #646cff;
+  transform: translateY(-1px);
 }
 
-.recommended-meal-description {
+.food-rec-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.food-rec-info {
+  flex: 1;
+}
+
+.food-rec-name {
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.food-rec-fills {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.fill-item {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.fill-nutrient {
+  color: #4caf50;
+  font-weight: 600;
+}
+
+.fill-impact {
+  color: #aaa;
+}
+
+.food-rec-meta {
+  color: #888;
+  font-size: 0.8rem;
+}
+
+.add-food-btn {
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(135deg, #646cff 0%, #535bf2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
   font-size: 0.9rem;
-  color: #ccc;
-  margin: 0;
-  line-height: 1.5;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.add-food-btn:hover {
+  background: linear-gradient(135deg, #535bf2 0%, #4348cc 100%);
+  box-shadow: 0 4px 12px rgba(100, 108, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.refresh-rec-btn {
+  width: 100%;
+  padding: 0.7rem;
+  background-color: rgba(100, 108, 255, 0.1);
+  color: #646cff;
+  border: 1px solid rgba(100, 108, 255, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.refresh-rec-btn:hover {
+  background-color: rgba(100, 108, 255, 0.2);
+  border-color: #646cff;
+}
+
+/* Loading and Error States */
+.loading-message, .error-message, .empty-message {
+  text-align: center;
+  padding: 2rem;
+  color: #888;
+}
+
+.error-message p {
+  margin-bottom: 1rem;
+}
+
+.retry-btn {
+  padding: 0.6rem 1.2rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.retry-btn:hover {
+  background-color: #535bf2;
+}
+
+.foods-eaten-section h3 {
+  margin: 0 0 1rem 0;
+  color: #646cff;
 }
 
 .food-input-section h2 {
@@ -2079,6 +2251,29 @@ body {
   
   .form-actions {
     flex-direction: column;
+  }
+
+  /* Smart Recommendations Responsive */
+  .smart-recommendations {
+    padding: 1.5rem;
+  }
+
+  .food-rec-main {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .add-food-btn {
+    width: 100%;
+  }
+
+  .gaps-grid {
+    flex-direction: column;
+  }
+
+  .gap-badge {
+    width: 100%;
+    justify-content: space-between;
   }
 }
 

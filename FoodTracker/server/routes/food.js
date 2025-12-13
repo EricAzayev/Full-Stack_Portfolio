@@ -647,9 +647,12 @@ router.get("/records", (req, res) => {
 });
 
 // Route to get user data
-router.get("/user", (req, res) => {
+router.get("/user", async (req, res) => {
   try {
-    res.status(200).json(user);
+    // Dynamically import current user data to get fresh values
+    const userModule = await import("../data/user.js");
+    const currentUser = userModule.default;
+    res.status(200).json(currentUser);
   } catch (error) {
     console.error("Error fetching user data:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -763,6 +766,138 @@ router.post("/user", (req, res) => {
     });
   } catch (error) {
     console.error("Error updating user data:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Route to get meal recommendations based on nutrient gaps
+router.get("/smart-recommendations", async (req, res) => {
+  try {
+    // Dynamically import fresh data
+    const userModule = await import("../data/user.js");
+    const currentUser = userModule.default;
+    const todayModule = await import("../data/today.js");
+    const { today: currentToday, needToday } = todayModule.default;
+
+    // Calculate nutrient deficits (what's missing)
+    const nutrientDeficits = [];
+    let totalCaloriesConsumed = currentToday.calories || 0;
+    let remainingCalories = Math.max(0, currentUser.calorieGoal - totalCaloriesConsumed);
+
+    // Get consumed nutrients from the nutrients object
+    const consumedNutrients = currentToday.nutrients || {};
+
+    for (const [nutrient, target] of Object.entries(needToday)) {
+      const consumed = consumedNutrients[nutrient] || 0;
+      const deficit = target - consumed;
+      const percentMet = target > 0 ? (consumed / target) * 100 : 100;
+      
+      // Only consider deficits where less than 90% of the need is met
+      if (deficit > 0 && percentMet < 90) {
+        nutrientDeficits.push({
+          nutrient,
+          deficit,
+          percentMet
+        });
+      }
+    }
+
+    // Sort by lowest percentage met (biggest gaps first)
+    nutrientDeficits.sort((a, b) => a.percentMet - b.percentMet);
+
+    // Rank foods by how well they fill the nutrient gaps
+    const foodScores = [];
+    
+    for (const [foodName, foodData] of Object.entries(foodLibrary)) {
+      const nutrients = foodData.Nutrients || {};
+      const metadata = foodData.Metadata || {};
+      const caloriesPerServing = metadata.Calories_kcal || 0;
+
+      // Skip if exceeds remaining calories significantly
+      if (caloriesPerServing > remainingCalories && remainingCalories > 100) continue;
+
+      let score = 0;
+      let nutrientsProvided = [];
+
+      // Check how much this food helps with each deficit
+      for (let i = 0; i < nutrientDeficits.length; i++) {
+        const deficit = nutrientDeficits[i];
+        const nutrientKey = deficit.nutrient;
+        const foodNutrientValue = nutrients[nutrientKey] || 0;
+        const target = needToday[nutrientKey];
+        
+        if (foodNutrientValue > 0) {
+          // Calculate what % of the deficit this food fills
+          const percentOfDeficit = (foodNutrientValue / deficit.deficit) * 100;
+          
+          // Calculate what % of the TOTAL daily need this food provides
+          const percentOfDailyNeed = target > 0 ? (foodNutrientValue / target) * 100 : 0;
+          
+          if (percentOfDeficit > 5) {
+            // Weight by priority: top gaps get much higher weight
+            // First deficit gets 3x weight, second gets 2.5x, gradually decreasing
+            const priorityWeight = Math.max(1, 3 - (i * 0.15));
+            const weightedScore = percentOfDeficit * priorityWeight;
+            
+            score += weightedScore;
+            nutrientsProvided.push({
+              nutrient: nutrientKey,
+              amount: foodNutrientValue,
+              percentOfDeficit: Math.round(percentOfDeficit),
+              percentOfDailyNeed: Math.round(percentOfDailyNeed)
+            });
+          }
+        }
+      }
+
+      // Only include foods that actually help
+      if (score > 0 && nutrientsProvided.length > 0) {
+        foodScores.push({
+          foodName,
+          score,
+          caloriesPerServing,
+          servingSize: metadata.ServingSize_g || 100,
+          category: metadata.Category || '',
+          nutrientsProvided: nutrientsProvided.sort((a, b) => b.percentOfDeficit - a.percentOfDeficit)
+        });
+      }
+    }
+
+    // Sort by score (best matches first)
+    foodScores.sort((a, b) => b.score - a.score);
+
+    // Format top 5 recommendations
+    const recommendations = foodScores.slice(0, 5).map(food => {
+      // Get top 2ailyNeed: n.percentOfDailyNeed with
+      const topFills = food.nutrientsProvided.slice(0, 2).map(n => ({
+        nutrient: n.nutrient.replace(/_/g, ' ').replace(/\s*(mcg|mg|g|kcal)\s*/gi, '').trim(),
+        amount: n.amount,
+        percentOfDeficit: n.percentOfDeficit
+      }));
+      
+      return {
+        foodName: food.foodName,
+        calories: food.caloriesPerServing,
+        servingSize: food.servingSize,
+        category: food.category,
+        topFills: topFills
+      };
+    });
+
+    // Format top 5 nutrient gaps
+    const topGaps = nutrientDeficits.slice(0, 5).map(d => ({
+      nutrient: d.nutrient.replace(/_/g, ' ').replace(/\s*(mcg|mg|g|kcal)\s*/gi, '').trim(),
+      percentMet: Math.round(d.percentMet)
+    }));
+
+    res.status(200).json({
+      remainingCalories,
+      nutrientGaps: topGaps,
+      recommendations
+    });
+
+  } catch (error) {
+    console.error("Error generating recommendations:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
