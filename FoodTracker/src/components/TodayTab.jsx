@@ -61,8 +61,9 @@ const TodayTab = () => {
 
   // Handle adding food to today's intake
   const handleAddFood = async (foodName = null, servingsAmount = null) => {
-    const food = foodName || searchTerm;
-    const amount = servingsAmount || servings;
+    // Check if foodName is actually a string (not an event object)
+    const food = (typeof foodName === 'string' && foodName) ? foodName : searchTerm;
+    const amount = (typeof servingsAmount === 'number' && servingsAmount) ? servingsAmount : servings;
     
     if (!food || !foodLibrary[food]) {
       alert('Please select a valid food from the search results')
