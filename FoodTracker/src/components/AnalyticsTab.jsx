@@ -4,21 +4,26 @@ const AnalyticsTab = ({ onDateClick }) => {
   const [records, setRecords] = useState([])
   const [timeRange, setTimeRange] = useState('week') // 'week' or 'month'
   const [user, setUser] = useState(null)
+  const [recommendations, setRecommendations] = useState(null)
+  const [showAllNutrients, setShowAllNutrients] = useState(false)
 
   // Fetch historical records and user data
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [recordRes, userRes] = await Promise.all([
+        const [recordRes, userRes, recRes] = await Promise.all([
           fetch('http://localhost:3001/api/records'),
-          fetch('http://localhost:3001/api/user')
+          fetch('http://localhost:3001/api/user'),
+          fetch('http://localhost:3001/api/recommendations')
         ])
         
         const recordData = await recordRes.json()
         const userData = await userRes.json()
+        const recData = await recRes.json()
         
         setRecords(recordData.records || [])
         setUser(userData)
+        setRecommendations(recData)
       } catch (error) {
         console.error('Error fetching analytics data:', error)
       }
@@ -158,43 +163,111 @@ const AnalyticsTab = ({ onDateClick }) => {
   }
 
   // Render macro breakdown pie chart (simple representation)
-  const renderMacroBreakdown = () => {
-    if (stats.totalDays === 0) {
+  const renderNutrientGoalTracking = () => {
+    if (stats.totalDays === 0 || !recommendations) {
       return <div className="chart-empty">No data to display</div>
     }
 
-    const totalMacros = stats.avgProtein + stats.avgCarbs + stats.avgFats
-    const proteinPercent = (stats.avgProtein / totalMacros) * 100
-    const carbsPercent = (stats.avgCarbs / totalMacros) * 100
-    const fatsPercent = (stats.avgFats / totalMacros) * 100
+    const rangeRecords = getRecordsInRange()
+    const nutrientTracking = {}
+
+    // Get all nutrients from recommendations
+    const allNutrients = Object.keys(recommendations).filter(key => 
+      !['Calories_kcal'].includes(key) && recommendations[key] > 0
+    )
+
+    // Calculate how often each nutrient goal was met
+    allNutrients.forEach(nutrient => {
+      const target = recommendations[nutrient]
+      let metCount = 0
+
+      rangeRecords.forEach(record => {
+        const current = record.nutrients?.[nutrient] || 0
+        if (current >= target) {
+          metCount++
+        }
+      })
+
+      nutrientTracking[nutrient] = {
+        metCount,
+        totalDays: rangeRecords.length,
+        percentage: (metCount / rangeRecords.length) * 100,
+        target
+      }
+    })
+
+    // Sort nutrients by how often they were met
+    const sortedNutrients = Object.entries(nutrientTracking).sort((a, b) => 
+      b[1].percentage - a[1].percentage
+    )
+
+    // Get top 5 most met and bottom 5 least met
+    const mostMet = sortedNutrients.slice(0, showAllNutrients ? sortedNutrients.length : 5)
+    const leastMet = sortedNutrients.slice(showAllNutrients ? 0 : -5).reverse()
+
+    // Format nutrient name for display
+    const formatNutrientName = (key) => {
+      return key
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, l => l.toUpperCase())
+    }
+
+    const renderNutrientBar = (nutrient, data, index, type) => {
+      const percentage = data.percentage
+      const barColor = percentage >= 80 ? '#10b981' : percentage >= 50 ? '#f59e0b' : '#ef4444'
+
+      // Show placeholder message if needed
+      if (type === 'most' && data.percentage === 0 && index >= mostMet.filter(n => n[1].percentage > 0).length) {
+        return (
+          <div key={nutrient} className="nutrient-placeholder">
+            <span className="placeholder-text">Time to put in the work! 💪</span>
+          </div>
+        )
+      }
+
+      return (
+        <div key={nutrient} className="nutrient-bar-item">
+          <div className="nutrient-bar-header">
+            <span className="nutrient-name">{formatNutrientName(nutrient)}</span>
+            <span className="nutrient-percentage">{percentage.toFixed(0)}%</span>
+          </div>
+          <div className="nutrient-bar-container">
+            <div 
+              className="nutrient-bar-fill" 
+              style={{ width: `${percentage}%`, backgroundColor: barColor }}
+            />
+          </div>
+          <span className="nutrient-count">{data.metCount}/{data.totalDays} days</span>
+        </div>
+      )
+    }
 
     return (
-      <div className="macro-breakdown">
-        <div className="macro-bar">
-          <div className="macro-segment protein" style={{ width: `${proteinPercent}%` }}>
-            <span>{proteinPercent.toFixed(0)}%</span>
+      <div className="nutrient-goal-tracking">
+        <div className="nutrient-tracking-columns">
+          <div className="nutrient-column most-met">
+            <h4>Most Often Met</h4>
+            <div className="nutrient-list">
+              {mostMet.map(([nutrient, data], index) => renderNutrientBar(nutrient, data, index, 'most'))}
+            </div>
           </div>
-          <div className="macro-segment carbs" style={{ width: `${carbsPercent}%` }}>
-            <span>{carbsPercent.toFixed(0)}%</span>
-          </div>
-          <div className="macro-segment fats" style={{ width: `${fatsPercent}%` }}>
-            <span>{fatsPercent.toFixed(0)}%</span>
-          </div>
-        </div>
-        <div className="macro-legend">
-          <div className="legend-item">
-            <span className="legend-color protein"></span>
-            <span>Protein: {stats.avgProtein.toFixed(1)}g</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-color carbs"></span>
-            <span>Carbs: {stats.avgCarbs.toFixed(1)}g</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-color fats"></span>
-            <span>Fats: {stats.avgFats.toFixed(1)}g</span>
+
+          <div className="nutrient-column least-met">
+            <h4>Least Often Met</h4>
+            <div className="nutrient-list">
+              {leastMet.map(([nutrient, data], index) => renderNutrientBar(nutrient, data, index, 'least'))}
+            </div>
           </div>
         </div>
+
+        {sortedNutrients.length > 10 && (
+          <button 
+            className="expand-nutrients-btn"
+            onClick={() => setShowAllNutrients(!showAllNutrients)}
+          >
+            {showAllNutrients ? 'Show Less' : `Show All ${sortedNutrients.length} Nutrients`}
+          </button>
+        )}
       </div>
     )
   }
@@ -256,8 +329,9 @@ const AnalyticsTab = ({ onDateClick }) => {
 
         {/* Macro Breakdown */}
         <div className="chart-section">
-          <h3>Average Macro Breakdown</h3>
-          {renderMacroBreakdown()}
+          <h3>Nutrient Goal Achievement</h3>
+          <p className="chart-subtitle">Track your most and least consistently met nutrients</p>
+          {renderNutrientGoalTracking()}
         </div>
 
         {/* Best/Worst Days */}
