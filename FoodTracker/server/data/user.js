@@ -1,11 +1,11 @@
 const user = {
     "name": "Jane Doe",
-    "age": 81,
+    "age": 20,
     "gender": "male",
-    "height": 180,
-    "weight": 120,
+    "height": 187.95,
+    "weight": 77,
     "activityLevel": "light",
-    "calorieGoal": 1900
+    "calorieGoal": 2000
 }
 
 export default user;

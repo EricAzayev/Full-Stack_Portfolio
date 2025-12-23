@@ -3,9 +3,23 @@ import TodayTab from "./components/TodayTab";
 import DevModeTab from "./components/DevModeTab";
 import UserTab from "./components/UserTab";
 import FoodLibraryTab from "./components/FoodLibraryTab";
+import HistoryTab from "./components/HistoryTab";
+import AnalyticsTab from "./components/AnalyticsTab";
 
 function App() {
   const [activeTab, setActiveTab] = useState("today");
+  const [selectedDate, setSelectedDate] = useState(null);
+
+  //Analytics to History date click handler
+  const handleAnalyticsDateClick = (dateString) => {
+    setSelectedDate(dateString);
+    setActiveTab("history");
+  };
+
+  //(for potential future use)
+  const handleHistoryDateSelect = (dateString) => {
+    setSelectedDate(dateString);
+  };
 
   return (
     <div className="app">
@@ -55,8 +69,15 @@ function App() {
 
       <main className="app-main">
         {activeTab === "today" && <TodayTab />}
-        {activeTab === "history" && <div>History tab coming soon...</div>}
-        {activeTab === "analytics" && <div>Analytics tab coming soon...</div>}
+        {activeTab === "history" && (
+          <HistoryTab 
+            selectedDate={selectedDate} 
+            onDateSelect={handleHistoryDateSelect} 
+          />
+        )}
+        {activeTab === "analytics" && (
+          <AnalyticsTab onDateClick={handleAnalyticsDateClick} />
+        )}
         {activeTab === "foodLibrary" && <FoodLibraryTab />}
         {activeTab === "user" && <UserTab />}
         {activeTab === "dev" && <DevModeTab />}

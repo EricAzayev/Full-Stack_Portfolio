@@ -2,6 +2,59 @@
 const record = {
   records: [
   {
+    "date": "2025-12-23",
+    "nutrients": {
+      "Protein_g": 103,
+      "Carbohydrates_g": 131,
+      "Fats_g": 77,
+      "Omega3_DHA_EPA_mg": 80,
+      "Vitamin_B12_mcg": 7.300000000000001,
+      "Choline_mg": 342,
+      "Magnesium_mg": 277,
+      "Iron_mg": 8.999999999999998,
+      "Zinc_mg": 14.899999999999999,
+      "Calcium_mg": 1200,
+      "Vitamin_D_mcg": 7.799999999999997,
+      "Vitamin_C_mg": 19,
+      "Fiber_g": 15,
+      "Collagen_g": 1.5
+    },
+    "calories": 1645,
+    "food": {
+      "Burger Patty made at home": 1,
+      "Chipotle Chicken Bowl": 1,
+      "Homade Bowl of Popcorn": 1,
+      "Milk Cup": 3
+    },
+    "timestamp": "2025-12-23T02:17:57.460Z"
+  },
+  {
+    "date": "2025-12-13",
+    "nutrients": {
+      "Protein_g": 111,
+      "Carbohydrates_g": 186,
+      "Fats_g": 83,
+      "Omega3_DHA_EPA_mg": 150,
+      "Vitamin_B12_mcg": 9.700000000000001,
+      "Choline_mg": 453,
+      "Magnesium_mg": 251,
+      "Iron_mg": 16.6,
+      "Zinc_mg": 20.9,
+      "Calcium_mg": 157,
+      "Vitamin_D_mcg": 0.7,
+      "Vitamin_C_mg": 9,
+      "Fiber_g": 16,
+      "Collagen_g": 4.5
+    },
+    "calories": 1955,
+    "food": {
+      "Homade Bowl of Popcorn": 1,
+      "Pasta with Ground Beef": 3,
+      "Burger Patty made at home": 1
+    },
+    "timestamp": "2025-12-13T05:01:00.550Z"
+  },
+  {
     "date": "2025-12-04",
     "nutrients": {
       "Protein_g": 50,

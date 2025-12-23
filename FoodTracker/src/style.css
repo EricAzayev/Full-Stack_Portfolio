@@ -167,6 +167,39 @@ body {
   font-weight: 700;
 }
 
+/* Category Tabs */
+.category-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #333;
+}
+
+.category-tab {
+  padding: 0.5rem 1rem;
+  background-color: rgba(100, 108, 255, 0.1);
+  color: #888;
+  border: 1px solid rgba(100, 108, 255, 0.2);
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.category-tab:hover {
+  background-color: rgba(100, 108, 255, 0.2);
+  color: #aaa;
+}
+
+.category-tab.active {
+  background: linear-gradient(135deg, #646cff 0%, #535bf2 100%);
+  color: white;
+  border-color: #646cff;
+}
+
 /* Food Recommendations */
 .food-recommendations {
   margin-bottom: 1rem;
@@ -2681,5 +2714,710 @@ body {
   .cancel-delete-button:hover {
     background-color: #f5f5f5;
     color: #1a1a1a;
+  }
+}
+
+/* ============================================
+   HISTORY TAB STYLES
+   ============================================ */
+
+.history-tab {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.history-header h2 {
+  margin: 0;
+  font-size: 2rem;
+  color: #646cff;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.toggle-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #333;
+  background-color: transparent;
+  color: #ccc;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.toggle-button:hover {
+  background-color: #333;
+  color: white;
+}
+
+.toggle-button.active {
+  background-color: #646cff;
+  color: white;
+  border-color: #646cff;
+}
+
+.history-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  min-height: 600px;
+}
+
+.history-content.list-mode {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Calendar Section */
+.calendar-section {
+  background-color: #1a1a1a;
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.calendar-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.month-nav-button {
+  background: transparent;
+  border: 1px solid #333;
+  color: #ccc;
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.month-nav-button:hover {
+  background-color: #333;
+  color: white;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.weekday {
+  text-align: center;
+  font-weight: 600;
+  color: #888;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 80px;
+}
+
+.calendar-day.empty {
+  background-color: transparent;
+  border-color: transparent;
+  cursor: default;
+}
+
+.calendar-day:not(.empty):hover {
+  background-color: #2a2a2a;
+  border-color: #555;
+}
+
+.calendar-day.has-data {
+  background-color: #1e1e2e;
+  border-color: #444;
+}
+
+.calendar-day.selected {
+  background-color: #646cff;
+  border-color: #646cff;
+}
+
+.calendar-day.today {
+  border: 2px solid #10b981;
+}
+
+.day-number {
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+}
+
+.day-indicator {
+  width: 100%;
+  text-align: center;
+}
+
+.calorie-badge {
+  font-size: 0.75rem;
+  color: #10b981;
+  font-weight: 500;
+}
+
+/* Daily Detail Section */
+.detail-section {
+  background-color: #1a1a1a;
+  padding: 2rem;
+  border-radius: 8px;
+  max-height: 700px;
+  overflow-y: auto;
+}
+
+.daily-detail-empty {
+  text-align: center;
+  color: #888;
+  padding: 3rem 1rem;
+}
+
+.daily-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #333;
+}
+
+.daily-detail-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: white;
+}
+
+.edit-day-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #646cff;
+  background-color: transparent;
+  color: #646cff;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.edit-day-button:hover {
+  background-color: #646cff;
+  color: white;
+}
+
+.daily-meals {
+  margin-bottom: 2rem;
+}
+
+.meal-section h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: #10b981;
+}
+
+.food-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background-color: #2a2a2a;
+  border-radius: 4px;
+}
+
+.food-name {
+  color: white;
+  font-weight: 500;
+}
+
+.food-servings {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.daily-summary h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: #646cff;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.summary-item {
+  background-color: #2a2a2a;
+  padding: 1rem;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.summary-label {
+  display: block;
+  color: #888;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.summary-value {
+  display: block;
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+/* List View */
+.list-section {
+  background-color: #1a1a1a;
+  padding: 2rem;
+  border-radius: 8px;
+  max-height: 700px;
+  overflow-y: auto;
+}
+
+.list-view-empty {
+  text-align: center;
+  color: #888;
+  padding: 3rem 1rem;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.list-item:hover {
+  background-color: #333;
+  border-color: #555;
+}
+
+.list-item.selected {
+  background-color: #646cff;
+  border-color: #646cff;
+}
+
+.list-item-date {
+  flex: 1;
+  color: white;
+  font-weight: 600;
+}
+
+.list-item-calories {
+  color: #10b981;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.list-item-macros {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+/* ============================================
+   ANALYTICS TAB STYLES
+   ============================================ */
+
+.analytics-tab {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.analytics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.analytics-header h2 {
+  margin: 0;
+  font-size: 2rem;
+  color: #646cff;
+}
+
+.time-range-toggle {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.analytics-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Stats Section */
+.stats-section {
+  background-color: #1a1a1a;
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+.stats-section h3 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.stat-card {
+  background-color: #2a2a2a;
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid #333;
+}
+
+.stat-label {
+  display: block;
+  color: #888;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  display: block;
+  color: #646cff;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.stat-unit {
+  display: block;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+/* Chart Section */
+.chart-section {
+  background-color: #1a1a1a;
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+.chart-section h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.chart-subtitle {
+  color: #888;
+  font-size: 0.85rem;
+  margin: 0 0 1.5rem 0;
+}
+
+.chart-empty {
+  text-align: center;
+  color: #888;
+  padding: 3rem 1rem;
+}
+
+.calorie-chart {
+  position: relative;
+  display: flex;
+  gap: 1rem;
+  min-height: 300px;
+}
+
+.chart-y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #666;
+  font-size: 0.85rem;
+  padding: 1rem 0;
+}
+
+.chart-bars {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding: 1rem 0;
+  position: relative;
+}
+
+.chart-bar-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  min-height: 100%;
+}
+
+.chart-bar {
+  width: 100%;
+  background: linear-gradient(to top, #10b981, #059669);
+  border-radius: 4px 4px 0 0;
+  position: relative;
+  transition: all 0.2s;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 0.5rem;
+}
+
+.chart-bar:hover {
+  background: linear-gradient(to top, #10b981, #34d399);
+}
+
+.chart-bar.above-goal {
+  background: linear-gradient(to top, #f59e0b, #d97706);
+}
+
+.chart-bar.below-goal {
+  background: linear-gradient(to top, #ef4444, #dc2626);
+}
+
+.bar-value {
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.chart-bar-label {
+  margin-top: 0.5rem;
+  color: #888;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.goal-line {
+  position: absolute;
+  left: 3rem;
+  right: 0;
+  height: 2px;
+  background-color: #646cff;
+  z-index: 10;
+}
+
+.goal-label {
+  position: absolute;
+  right: 0;
+  top: -20px;
+  color: #646cff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: #1a1a1a;
+  padding: 0 0.5rem;
+}
+
+/* Macro Breakdown */
+.macro-breakdown {
+  max-width: 800px;
+}
+
+.macro-bar {
+  display: flex;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.macro-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.macro-segment:hover {
+  opacity: 0.8;
+}
+
+.macro-segment.protein {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.macro-segment.carbs {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.macro-segment.fats {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.macro-legend {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: white;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+.legend-color.protein {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.legend-color.carbs {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.legend-color.fats {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+/* Insights Section */
+.insights-section {
+  background-color: #1a1a1a;
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+.insights-section h3 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.insight-card {
+  background-color: #2a2a2a;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #333;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.insight-card:hover {
+  transform: translateY(-2px);
+  border-color: #555;
+}
+
+.insight-card.best-day {
+  border-left: 4px solid #10b981;
+}
+
+.insight-card.highest-day {
+  border-left: 4px solid #f59e0b;
+}
+
+.insight-card.lowest-day {
+  border-left: 4px solid #ef4444;
+}
+
+.insight-label {
+  display: block;
+  color: #888;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.insight-date {
+  display: block;
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.insight-value {
+  display: block;
+  color: #646cff;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .history-content {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-section {
+    max-height: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .calendar-day {
+    min-height: 60px;
+    padding: 0.25rem;
+  }
+
+  .day-number {
+    font-size: 0.85rem;
+  }
+
+  .calorie-badge {
+    font-size: 0.65rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .chart-bars {
+    gap: 0.25rem;
   }
 }

@@ -866,13 +866,13 @@ router.get("/smart-recommendations", async (req, res) => {
     // Sort by score (best matches first)
     foodScores.sort((a, b) => b.score - a.score);
 
-    // Format top 5 recommendations
-    const recommendations = foodScores.slice(0, 5).map(food => {
-      // Get top 2ailyNeed: n.percentOfDailyNeed with
+    // Format top 15 recommendations (to have enough for category filtering)
+    const recommendations = foodScores.slice(0, 15).map(food => {
+      // Get top 2 nutrients this food helps with
       const topFills = food.nutrientsProvided.slice(0, 2).map(n => ({
         nutrient: n.nutrient.replace(/_/g, ' ').replace(/\s*(mcg|mg|g|kcal)\s*/gi, '').trim(),
         amount: n.amount,
-        percentOfDeficit: n.percentOfDeficit
+        percentOfDailyNeed: n.percentOfDailyNeed
       }));
       
       return {

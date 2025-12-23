@@ -283,6 +283,120 @@ const foodLibrary = {
         "Calcium_mg"
       ]
     }
+  },
+  "Homade Bowl of Popcorn": {
+    "Metadata": {
+      "Category": "Snack",
+      "ServingSize_g": 30,
+      "Calories_kcal": 105,
+      "IsProbiotic": false
+    },
+    "Nutrients": {
+      "Protein_g": 3,
+      "Carbohydrates_g": 21,
+      "Fats_g": 1,
+      "Omega3_DHA_EPA_mg": 0,
+      "Vitamin_B12_mcg": 0,
+      "Choline_mg": 8,
+      "Magnesium_mg": 36,
+      "Iron_mg": 0.9,
+      "Zinc_mg": 0.9,
+      "Calcium_mg": 2,
+      "Vitamin_D_mcg": 0,
+      "Vitamin_C_mg": 0,
+      "Fiber_g": 4,
+      "Collagen_g": 0
+    },
+    "CollagenSupport": {
+      "DerivedFrom": [
+        "Protein_g"
+      ],
+      "SupportsCollagenSynthesis": true
+    },
+    "Supports": {
+      "Brain": [
+        "Omega3_DHA_EPA_mg",
+        "Vitamin_B12_mcg",
+        "Choline_mg",
+        "Magnesium_mg",
+        "Iron_mg"
+      ],
+      "Muscle": [
+        "Protein_g",
+        "Vitamin_D_mcg",
+        "Magnesium_mg",
+        "Iron_mg",
+        "Zinc_mg",
+        "Calcium_mg"
+      ],
+      "Skin": [
+        "Omega3_DHA_EPA_mg",
+        "CollagenSupport",
+        "Zinc_mg"
+      ]
+    },
+    "Synergy": {
+      "Vitamin_D_mcg": [
+        "Calcium_mg"
+      ]
+    }
+  },
+  "Pasta with Ground Beef": {
+    "Metadata": {
+      "Category": "Main Dish",
+      "ServingSize_g": 350,
+      "Calories_kcal": 520,
+      "IsProbiotic": false
+    },
+    "Nutrients": {
+      "Protein_g": 28,
+      "Carbohydrates_g": 55,
+      "Fats_g": 20,
+      "Omega3_DHA_EPA_mg": 40,
+      "Vitamin_B12_mcg": 2.4,
+      "Choline_mg": 120,
+      "Magnesium_mg": 65,
+      "Iron_mg": 4.5,
+      "Zinc_mg": 5,
+      "Calcium_mg": 45,
+      "Vitamin_D_mcg": 0.2,
+      "Vitamin_C_mg": 3,
+      "Fiber_g": 4,
+      "Collagen_g": 1
+    },
+    "CollagenSupport": {
+      "DerivedFrom": [
+        "Protein_g"
+      ],
+      "SupportsCollagenSynthesis": true
+    },
+    "Supports": {
+      "Brain": [
+        "Omega3_DHA_EPA_mg",
+        "Vitamin_B12_mcg",
+        "Choline_mg",
+        "Magnesium_mg",
+        "Iron_mg"
+      ],
+      "Muscle": [
+        "Protein_g",
+        "Vitamin_D_mcg",
+        "Magnesium_mg",
+        "Iron_mg",
+        "Zinc_mg",
+        "Calcium_mg"
+      ],
+      "Skin": [
+        "Omega3_DHA_EPA_mg",
+        "CollagenSupport",
+        "Zinc_mg"
+      ]
+    },
+    "Synergy": {
+      "Vitamin_D_mcg": [
+        "Calcium_mg"
+      ]
+    }
   }
 }
 

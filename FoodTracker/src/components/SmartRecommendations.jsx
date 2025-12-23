@@ -4,6 +4,7 @@ const SmartRecommendations = ({ todayData, needToday, onAddFood }) => {
   const [recommendations, setRecommendations] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeCategory, setActiveCategory] = useState('All');
 
   useEffect(() => {
     fetchRecommendations();
@@ -69,6 +70,14 @@ const SmartRecommendations = ({ todayData, needToday, onAddFood }) => {
     );
   }
 
+  // Get unique categories from recommendations
+  const categories = ['All', ...new Set(foods.map(f => f.category).filter(c => c))];
+  
+  // Filter foods by active category
+  const filteredFoods = activeCategory === 'All' 
+    ? foods 
+    : foods.filter(f => f.category === activeCategory);
+
   return (
     <div className="smart-recommendations">
       <div className="rec-header-section">
@@ -92,9 +101,21 @@ const SmartRecommendations = ({ todayData, needToday, onAddFood }) => {
         </div>
       )}
 
+      <div className="category-tabs">
+        {categories.map(category => (
+          <button
+            key={category}
+            className={`category-tab ${activeCategory === category ? 'active' : ''}`}
+            onClick={() => setActiveCategory(category)}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
+
       <div className="food-recommendations">
         <h4>Recommended Foods</h4>
-        {foods.map((food, index) => (
+        {filteredFoods.map((food, index) => (
           <div key={index} className="food-rec-card">
             <div className="food-rec-main">
               <div className="food-rec-info">
