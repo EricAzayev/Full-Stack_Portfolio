@@ -397,6 +397,63 @@ const foodLibrary = {
         "Calcium_mg"
       ]
     }
+  },
+  "Tomato": {
+    "Metadata": {
+      "Category": "Fruits",
+      "ServingSize_g": 99.9,
+      "Calories_kcal": 149.8,
+      "IsProbiotic": false
+    },
+    "Nutrients": {
+      "Protein_g": 0,
+      "Carbohydrates_g": 0,
+      "Fats_g": 0,
+      "Omega3_DHA_EPA_mg": 0,
+      "Vitamin_B12_mcg": 0,
+      "Choline_mg": 0,
+      "Magnesium_mg": 0,
+      "Iron_mg": 0,
+      "Zinc_mg": 0,
+      "Calcium_mg": 0,
+      "Vitamin_D_mcg": 0,
+      "Vitamin_C_mg": 0,
+      "Fiber_g": 0,
+      "Collagen_g": 0
+    },
+    "CollagenSupport": {
+      "DerivedFrom": [
+        "Protein_g"
+      ],
+      "SupportsCollagenSynthesis": true
+    },
+    "Supports": {
+      "Brain": [
+        "Omega3_DHA_EPA_mg",
+        "Vitamin_B12_mcg",
+        "Choline_mg",
+        "Magnesium_mg",
+        "Iron_mg"
+      ],
+      "Muscle": [
+        "Protein_g",
+        "Vitamin_D_mcg",
+        "Magnesium_mg",
+        "Iron_mg",
+        "Zinc_mg",
+        "Calcium_mg"
+      ],
+      "Skin": [
+        "Omega3_DHA_EPA_mg",
+        "CollagenSupport",
+        "Zinc_mg"
+      ]
+    },
+    "Synergy": {
+      "Vitamin_D_mcg": [
+        "Calcium_mg"
+      ]
+    }
   }
 }
 

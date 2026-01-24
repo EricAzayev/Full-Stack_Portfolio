@@ -637,9 +637,40 @@ export default foodDeletedLibrary;`;
 });
 
 // Route to get daily records
-router.get("/records", (req, res) => {
+router.get("/records", async (req, res) => {
   try {
-    res.status(200).json(record);
+    // Dynamically import today's data to get fresh values
+    const todayModule = await import("../data/today.js");
+    const { today } = todayModule.default;
+    
+    // Create a copy of the records array
+    const recordsWithToday = [...record.records];
+    
+    // Get today's date in YYYY-MM-DD format
+    const todayDate = new Date().toISOString().split('T')[0];
+    
+    // Create today's record entry
+    const todayRecord = {
+      date: todayDate,
+      nutrients: today.nutrients,
+      calories: today.calories,
+      food: today.food,
+      timestamp: new Date().toISOString(),
+      isToday: true // Flag to identify this as today's data
+    };
+    
+    // Check if there's already a record for today in the history
+    const existingTodayIndex = recordsWithToday.findIndex(r => r.date === todayDate);
+    
+    if (existingTodayIndex !== -1) {
+      // Replace existing today's record with current data
+      recordsWithToday[existingTodayIndex] = todayRecord;
+    } else {
+      // Add today's record
+      recordsWithToday.push(todayRecord);
+    }
+    
+    res.status(200).json({ records: recordsWithToday });
   } catch (error) {
     console.error("Error fetching records:", error);
     res.status(500).json({ error: "Internal server error" });

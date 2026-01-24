@@ -2,7 +2,31 @@
 const record = {
   records: [
   {
-    "date": "2025-12-23",
+    "date": "2025-12-24",
+    "nutrients": {
+      "Protein_g": 24,
+      "Carbohydrates_g": 72,
+      "Fats_g": 20,
+      "Omega3_DHA_EPA_mg": 10,
+      "Vitamin_B12_mcg": 1.3999999999999997,
+      "Choline_mg": 56,
+      "Magnesium_mg": 44,
+      "Iron_mg": 5,
+      "Zinc_mg": 2.6000000000000005,
+      "Calcium_mg": 400,
+      "Vitamin_D_mcg": 0.4000000000000001,
+      "Vitamin_C_mg": 4,
+      "Fiber_g": 5,
+      "Collagen_g": 0
+    },
+    "calories": 570,
+    "food": {
+      "Pizza Slice": 2
+    },
+    "timestamp": "2025-12-24T05:13:24.249Z"
+  },
+  {
+    "date": "2025-12-22",
     "nutrients": {
       "Protein_g": 103,
       "Carbohydrates_g": 131,

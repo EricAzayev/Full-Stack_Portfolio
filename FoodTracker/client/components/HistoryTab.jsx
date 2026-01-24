@@ -57,6 +57,7 @@ const HistoryTab = ({ selectedDate, onDateSelect }) => {
   }
 
   const handleDayClick = (dateString) => {
+    console.log('DATE CLICKED:', dateString)
     setSelectedDay(dateString)
     if (onDateSelect) {
       onDateSelect(dateString)
@@ -79,7 +80,10 @@ const HistoryTab = ({ selectedDate, onDateSelect }) => {
       const dateString = formatDate(currentMonth.getFullYear(), currentMonth.getMonth(), day)
       const record = getRecordForDate(dateString)
       const isSelected = selectedDay === dateString
-      const isToday = dateString === new Date().toISOString().split('T')[0]
+      // Get today's date in local timezone, not UTC
+      const today = new Date()
+      const todayString = formatDate(today.getFullYear(), today.getMonth(), today.getDate())
+      const isToday = dateString === todayString
 
       days.push(
         <div
@@ -108,10 +112,25 @@ const HistoryTab = ({ selectedDate, onDateSelect }) => {
 
     const record = getRecordForDate(selectedDay)
     
+    console.log('SELECTED DAY:', selectedDay)
+    console.log('RAW PARSE:', selectedDay.split('-'))
+    
+    // Parse date components directly - no Date object conversion to avoid any timezone issues
+    const [year, month, day] = selectedDay.split('-')
+    console.log('PARSED:', { year, month, day })
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                        'July', 'August', 'September', 'October', 'November', 'December']
+    const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+    console.log('DATE OBJ:', dateObj)
+    console.log('DATE OBJ toString:', dateObj.toString())
+    const dayOfWeek = dateObj.toLocaleDateString('en-US', { weekday: 'long' })
+    const formattedDate = `${dayOfWeek}, ${monthNames[parseInt(month) - 1]} ${parseInt(day)}, ${year}`
+    console.log('FORMATTED:', formattedDate)
+    
     if (!record) {
       return (
         <div className="daily-detail-empty">
-          <p>No entries for {new Date(selectedDay).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          <p>No entries for {formattedDate}</p>
         </div>
       )
     }
@@ -122,7 +141,7 @@ const HistoryTab = ({ selectedDate, onDateSelect }) => {
     return (
       <div className="daily-detail">
         <div className="daily-detail-header">
-          <h3>{new Date(selectedDay).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</h3>
+          <h3>🔴 TEST - {formattedDate}</h3>
           <button className="edit-day-button">Edit Day</button>
         </div>
 
@@ -177,20 +196,24 @@ const HistoryTab = ({ selectedDate, onDateSelect }) => {
 
     return (
       <div className="list-view">
-        {sortedRecords.map(record => (
-          <div
-            key={record.date}
-            className={`list-item ${selectedDay === record.date ? 'selected' : ''}`}
-            onClick={() => handleDayClick(record.date)}
-          >
-            <div className="list-item-date">
-              {new Date(record.date).toLocaleDateString('en-US', { 
-                weekday: 'short', 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric' 
-              })}
-            </div>
+        {sortedRecords.map(record => {
+          const [year, month, day] = record.date.split('-').map(Number)
+          const displayDate = new Date(year, month - 1, day)
+          
+          return (
+            <div
+              key={record.date}
+              className={`list-item ${selectedDay === record.date ? 'selected' : ''}`}
+              onClick={() => handleDayClick(record.date)}
+            >
+              <div className="list-item-date">
+                {displayDate.toLocaleDateString('en-US', { 
+                  weekday: 'short', 
+                  year: 'numeric', 
+                  month: 'short', 
+                  day: 'numeric' 
+                })}
+              </div>
             <div className="list-item-calories">{record.calories} cal</div>
             <div className="list-item-macros">
               P: {record.nutrients?.Protein_g?.toFixed(0) || 0}g • 
@@ -198,7 +221,8 @@ const HistoryTab = ({ selectedDate, onDateSelect }) => {
               F: {record.nutrients?.Fats_g?.toFixed(0) || 0}g
             </div>
           </div>
-        ))}
+        )})
+        })
       </div>
     )
   }

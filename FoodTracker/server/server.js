@@ -19,6 +19,15 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server listening on http://localhost:${PORT}`);
-}); //npm start
+// Export startServer function for Electron
+export function startServer() {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server listening on http://localhost:${PORT}`);
+  });
+  return app;
+}
+
+// If running directly (not in Electron), start the server
+if (import.meta.url === `file://${process.argv[1]}`) {
+  startServer();
+}

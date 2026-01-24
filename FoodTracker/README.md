@@ -1,45 +1,31 @@
-What's left before deployment:
-Analytics and History Tab, Recommended Next Meal
-Implement Local AI Model to add new foods
-
-Planned Deployment Date: December 15th
-
-4. Package the Desktop App
-
-Uses electron-builder to create a standalone installer:
-
-npx electron-builder
-
-5. Distribute the Installer
-
-After building, the installer will appear in:
-
-/release/
-
-
-This includes:
-
-FoodTracker Setup.exe (Windows)
-
-or .dmg / .AppImage depending on OS
-
-Users can download the installer, run it, and launch FoodTracker as a fully local desktop application with:
-
-Local Express backend
-
-Local Vite frontend
-
-Local JSON data storage
-
-
-
 # Food Tracker
 
-A full-stack nutrition tracking application that helps users monitor their daily caloric intake, macronutrients, and meal history with an intuitive visual interface.
+A full-stack nutrition tracking application that runs as a **Windows desktop app** or web application. Track your daily caloric intake, macronutrients, and meal history with an intuitive visual interface - all running completely offline on your computer.
+
+## 🚀 Quick Start
+
+### Want the Desktop App? (.exe)
+**See [QUICK_START.md](QUICK_START.md)** for step-by-step instructions to build a Windows executable.
+
+### Want to Run as Web App?
+```bash
+# Terminal 1: Start backend
+cd server
+npm start
+
+# Terminal 2: Start frontend  
+npm run dev
+```
+
+## 📚 Documentation
+
+- **[QUICK_START.md](QUICK_START.md)** - Build your .exe in 5 steps
+- **[ELECTRON_SETUP.md](ELECTRON_SETUP.md)** - Complete desktop app documentation
+- **[BUILD_CHECKLIST.md](BUILD_CHECKLIST.md)** - Pre-build verification checklist
+- **[ELECTRON_IMPLEMENTATION.md](ELECTRON_IMPLEMENTATION.md)** - Technical implementation details
 
 ## Demo
 <img width="1871" height="901" alt="FoodTracker" src="https://github.com/user-attachments/assets/e54235f2-9c72-45d1-8d37-419908178f03" />
-
 
 ## Overview
 
@@ -47,6 +33,8 @@ Food Tracker is a comprehensive nutrition management system that allows users to
 - Track daily food consumption with detailed nutritional breakdowns
 - Visualize caloric and macronutrient data through interactive donut charts
 - Manage a custom food library with nutritional information
+- **Run as a native Windows desktop application**
+- **Store all data locally (no internet required)**
   <img width="1087" height="911" alt="image" src="https://github.com/user-attachments/assets/2193ca6a-f6ce-4a93-add7-e49e04edba84" />
 
 - View historical data and analytics across multiple days
