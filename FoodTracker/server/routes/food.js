@@ -5,31 +5,35 @@ import { fileURLToPath } from "url";
 import { getDataDir, getDataFileUrl } from "../utils/pathUtils.js";
 
 console.log("📍 [Routes] Food router loading...");
+console.log("📍 [Routes] Data Directory resolved to:", getDataDir());
 
 // Import with error handling
 let foodLibrary, todayData, lastResetData, record, user, foodDeletedLibrary, createRecommendedMicros;
 
 try {
-  console.log("📍 [Routes] Importing foodLibrary...");
-  foodLibrary = (await import(getDataFileUrl("foodLibrary.js"))).default;
-  console.log("✅ [Routes] foodLibrary imported");
+  const url = getDataFileUrl("foodLibrary.js");
+  console.log("📍 [Routes] Importing foodLibrary from:", url);
+  foodLibrary = (await import(url)).default;
+  console.log("✅ [Routes] foodLibrary imported. Keys:", Object.keys(foodLibrary).length);
 } catch (e) {
   console.error("❌ [Routes] Failed to import foodLibrary:", e.message);
   foodLibrary = {};
 }
 
 try {
-  console.log("📍 [Routes] Importing todayData...");
-  todayData = (await import(getDataFileUrl("today.js"))).default;
-  console.log("✅ [Routes] todayData imported");
+  const url = getDataFileUrl("today.js");
+  console.log("📍 [Routes] Importing todayData from:", url);
+  todayData = (await import(url)).default;
+  console.log("✅ [Routes] todayData imported:", JSON.stringify(todayData));
 } catch (e) {
   console.error("❌ [Routes] Failed to import todayData:", e.message);
   todayData = { today: {}, needToday: {} };
 }
 
 try {
-  console.log("📍 [Routes] Importing nutrientCalculator...");
-  createRecommendedMicros = (await import(getDataFileUrl("nutrientCalculator.js"))).createRecommendedMicros;
+  const url = getDataFileUrl("nutrientCalculator.js");
+  console.log("📍 [Routes] Importing nutrientCalculator from:", url);
+  createRecommendedMicros = (await import(url)).createRecommendedMicros;
   console.log("✅ [Routes] nutrientCalculator imported");
 } catch (e) {
   console.error("❌ [Routes] Failed to import nutrientCalculator:", e.message);
@@ -37,35 +41,39 @@ try {
 }
 
 try {
-  console.log("📍 [Routes] Importing lastResetData...");
-  lastResetData = (await import(getDataFileUrl("lastReset.js"))).default;
-  console.log("✅ [Routes] lastResetData imported");
+  const url = getDataFileUrl("lastReset.js");
+  console.log("📍 [Routes] Importing lastResetData from:", url);
+  lastResetData = (await import(url)).default;
+  console.log("✅ [Routes] lastResetData imported:", JSON.stringify(lastResetData));
 } catch (e) {
   console.error("❌ [Routes] Failed to import lastResetData:", e.message);
   lastResetData = { lastResetDate: new Date().toDateString() };
 }
 
 try {
-  console.log("📍 [Routes] Importing record...");
-  record = (await import(getDataFileUrl("record.js"))).default;
-  console.log("✅ [Routes] record imported");
+  const url = getDataFileUrl("record.js");
+  console.log("📍 [Routes] Importing record from:", url);
+  record = (await import(url)).default;
+  console.log("✅ [Routes] record imported. Count:", record.records?.length || 0);
 } catch (e) {
   console.error("❌ [Routes] Failed to import record:", e.message);
   record = {};
 }
 
 try {
-  console.log("📍 [Routes] Importing user...");
-  user = (await import(getDataFileUrl("user.js"))).default;
-  console.log("✅ [Routes] user imported");
+  const url = getDataFileUrl("user.js");
+  console.log("📍 [Routes] Importing user from:", url);
+  user = (await import(url)).default;
+  console.log("✅ [Routes] user imported:", user.name);
 } catch (e) {
   console.error("❌ [Routes] Failed to import user:", e.message);
   user = {};
 }
 
 try {
-  console.log("📍 [Routes] Importing foodDeletedLibrary...");
-  foodDeletedLibrary = (await import(getDataFileUrl("foodDeletedLibrary.js"))).default;
+  const url = getDataFileUrl("foodDeletedLibrary.js");
+  console.log("📍 [Routes] Importing foodDeletedLibrary from:", url);
+  foodDeletedLibrary = (await import(url)).default;
   console.log("✅ [Routes] foodDeletedLibrary imported");
 } catch (e) {
   console.error("❌ [Routes] Failed to import foodDeletedLibrary:", e.message);
@@ -174,7 +182,7 @@ router.post("/foodLibrary", (req, res) => {
 export default foodLibrary;`;
 
     fs.writeFileSync(foodLibraryFilePath, foodLibraryFileContent);
-
+    console.log("💾 [Routes] Saved foodLibrary.js to:", foodLibraryFilePath);
     console.log(`New food "${name}" added to food library`);
 
     res.status(200).json({
@@ -266,6 +274,7 @@ router.put("/foodLibrary/:foodName", (req, res) => {
 export default foodLibrary;`;
 
     fs.writeFileSync(foodLibraryFilePath, foodLibraryFileContent);
+    console.log("💾 [Routes] Saved foodLibrary.js to:", foodLibraryFilePath);
 
     console.log(`Food "${foodName}" updated to "${name}" in food library`);
 
@@ -302,6 +311,7 @@ router.delete("/foodLibrary/:foodName", (req, res) => {
 export default foodLibrary;`;
 
     fs.writeFileSync(foodLibraryFilePath, foodLibraryFileContent);
+    console.log("💾 [Routes] Saved foodLibrary.js to:", foodLibraryFilePath);
 
     // Write updated deleted library to file
     const deletedLibraryFilePath = path.join(getDataDir(), "foodDeletedLibrary.js");
@@ -312,6 +322,7 @@ const foodDeletedLibrary = ${JSON.stringify(foodDeletedLibrary, null, 2)};
 export default foodDeletedLibrary;`;
 
     fs.writeFileSync(deletedLibraryFilePath, deletedLibraryFileContent);
+    console.log("💾 [Routes] Saved foodDeletedLibrary.js to:", deletedLibraryFilePath);
 
     console.log(`Food "${foodName}" deleted from food library and moved to temporary deleted library`);
 
@@ -419,6 +430,7 @@ router.put("/today", (req, res) => {
     const todayFileContent = generateTodayFileContent(updatedToday);
 
     fs.writeFileSync(todayFilePath, todayFileContent);
+    console.log("💾 [Routes] Saved today.js to:", todayFilePath);
 
     console.log(`Updated ${foodName} to ${servings} servings in today's intake`);
 
@@ -493,6 +505,7 @@ const saveDailyRecord = (todayData) => {
 
 export default record;`;
     fs.writeFileSync(recordFilePath, recordFileContent);
+    console.log("💾 [Routes] Saved record.js to:", recordFilePath);
     console.log("Daily record saved");
   } catch (error) {
     console.error("Error saving daily record:", error);
@@ -502,8 +515,30 @@ export default record;`;
 // Router endpoints
 
 // GET /today - Retrieve today's data
-router.get("/today", (req, res) => {
+router.get("/today", async (req, res) => {
   try {
+    // DYNAMIC IMPORT: Force reload from file to ensure we carry over data
+    // This is crucial because nodemon ignores the data folder, so the server process 
+    // persists while the file changes. We need to read the file again.
+    const todayUrl = getDataFileUrl("today.js") + "?t=" + Date.now(); // Cache busting
+    const userUrl = getDataFileUrl("user.js") + "?t=" + Date.now();
+
+    try {
+      const todayModule = await import(todayUrl);
+      todayData = todayModule.default || { today: {}, needToday: {} };
+      // Update in-memory reference
+      today = todayData.today;
+    } catch (e) {
+      console.error("Error re-importing today.js:", e);
+    }
+
+    try {
+      const userModule = await import(userUrl);
+      user = userModule.default || {};
+    } catch (e) {
+      console.error("Error re-importing user.js:", e);
+    }
+
     // Read current data from JSON storage
     const currentToday = getToday();
     const currentUser = getUser();
@@ -607,7 +642,16 @@ router.post("/today", (req, res) => {
     // Save updated data to JSON storage
     setToday(updatedToday);
 
-    // Calculate needToday
+    // Write updated data to file
+    const todayFilePath = path.join(getDataDir(), "today.js");
+    const todayFileContent = generateTodayFileContent(updatedToday);
+
+    try {
+      fs.writeFileSync(todayFilePath, todayFileContent);
+      console.log("💾 [Routes] Saved today.js to:", todayFilePath);
+    } catch (writeError) {
+      console.error("❌ [Routes] Failed to write today.js:", writeError);
+    } // Calculate needToday
     const needToday = createRecommendedMicros(currentUser);
     needToday["Calories_kcal"] = currentUser.calorieGoal;
 
@@ -657,6 +701,7 @@ router.post("/reset-day", (req, res) => {
     const todayFilePath = path.join(getDataDir(), "today.js");
     const todayFileContent = generateTodayFileContent(resetToday);
     fs.writeFileSync(todayFilePath, todayFileContent);
+    console.log("💾 [Routes] Saved today.js (reset) to:", todayFilePath);
 
     // Also update the lastReset.js file
     const lastResetFilePath = path.join(getDataDir(), "lastReset.js");
@@ -668,6 +713,7 @@ const lastResetData = ${JSON.stringify(newLastResetData, null, 2)};
 
 export default lastResetData;`;
     fs.writeFileSync(lastResetFilePath, lastResetFileContent);
+    console.log("💾 [Routes] Saved lastReset.js to:", lastResetFilePath);
 
     // Update lastResetData in memory
     lastResetData.lastResetDate = newLastResetData.lastResetDate;
@@ -705,8 +751,12 @@ router.get("/records", async (req, res) => {
     // Create a copy of the records array
     const recordsWithToday = [...(allRecords.records || [])];
 
-    // Get today's date in YYYY-MM-DD format
-    const todayDate = new Date().toISOString().split('T')[0];
+    // Get today's date in YYYY-MM-DD format (using local time)
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const todayDate = `${year}-${month}-${day}`;
 
     // Create today's record entry
     const todayRecord = {

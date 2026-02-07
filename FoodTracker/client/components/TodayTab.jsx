@@ -20,10 +20,13 @@ const TodayTab = () => {
           fetch('http://localhost:3001/api/foodLibrary'),
           fetch('http://localhost:3001/api/today')
         ])
-        
+
         const foodLibraryData = await foodLibraryRes.json()
         const todayResponse = await todayRes.json()
-        
+
+        console.log("📅 [TodayTab] Fetched today data:", todayResponse);
+        console.log("📅 [TodayTab] Setting todayData to:", todayResponse.today);
+
         // Data loaded successfully
         setFoodLibrary(foodLibraryData)
         setTodayData(todayResponse.today)
@@ -40,7 +43,7 @@ const TodayTab = () => {
   const handleSearchChange = (e) => {
     const value = e.target.value
     setSearchTerm(value)
-    
+
     if (value.length > 0 && Object.keys(foodLibrary).length > 0) {
       const results = Object.keys(foodLibrary).filter(food =>
         food.toLowerCase().includes(value.toLowerCase())
@@ -64,7 +67,7 @@ const TodayTab = () => {
     // Check if foodName is actually a string (not an event object)
     const food = (typeof foodName === 'string' && foodName) ? foodName : searchTerm;
     const amount = (typeof servingsAmount === 'number' && servingsAmount) ? servingsAmount : servings;
-    
+
     if (!food || !foodLibrary[food]) {
       alert('Please select a valid food from the search results')
       return
@@ -84,17 +87,17 @@ const TodayTab = () => {
 
       if (response.ok) {
         const result = await response.json()
-        
+
         // Update local state with the new data
         setTodayData(result.updatedToday)
         setNeedToday(result.needToday)
-        
+
         // Show success message
         setSuccessMessage(`✓ Added ${amount} serving(s) of ${food} to today's intake!`)
-        
+
         // Clear success message after 3 seconds
         setTimeout(() => setSuccessMessage(''), 3000)
-        
+
         // Reset form only if using the search interface
         if (!foodName) {
           setSearchTerm('')
@@ -128,18 +131,18 @@ const TodayTab = () => {
 
       if (response.ok) {
         const result = await response.json()
-        
+
         // Update local state with the new data
         setTodayData(result.updatedToday)
         setNeedToday(result.needToday)
-        
+
         // Show success message
         if (newQuantity === 0) {
           setSuccessMessage(`✓ Removed ${foodName} from today's intake!`)
         } else {
           setSuccessMessage(`✓ Updated ${foodName} to ${newQuantity} serving${newQuantity !== 1 ? 's' : ''}!`)
         }
-        
+
         // Clear success message after 3 seconds
         setTimeout(() => setSuccessMessage(''), 3000)
       } else {
@@ -176,13 +179,13 @@ const TodayTab = () => {
       <div className="left-panel">
         <div className="food-input-section">
           <h2>Add Food to Today's Intake</h2>
-          
+
           {successMessage && (
             <div className="success-message">
               {successMessage}
             </div>
           )}
-          
+
           <div className="input-group">
             <div className="search-container">
               <input
@@ -194,7 +197,7 @@ const TodayTab = () => {
                 onFocus={() => searchResults.length > 0 && setShowResults(true)}
                 className="search-input"
               />
-              
+
               {showResults && searchResults.length > 0 && (
                 <div className="search-results">
                   {searchResults.map((food, index) => (
@@ -216,7 +219,7 @@ const TodayTab = () => {
                 </div>
               )}
             </div>
-            
+
             <input
               type="number"
               min="1"
@@ -225,7 +228,7 @@ const TodayTab = () => {
               className="servings-input"
               placeholder="Servings"
             />
-            
+
             <button
               onClick={handleAddFood}
               className="add-button"
@@ -247,7 +250,7 @@ const TodayTab = () => {
                     <span className="food-servings">{servings} serving{servings !== 1 ? 's' : ''}</span>
                   </div>
                   <div className="quantity-controls">
-                    <button 
+                    <button
                       className="quantity-btn decrease-btn"
                       onClick={() => handleUpdateQuantity(foodName, servings - 1)}
                       title="Decrease quantity"
@@ -255,7 +258,7 @@ const TodayTab = () => {
                       −
                     </button>
                     <span className="quantity-display">{servings}</span>
-                    <button 
+                    <button
                       className="quantity-btn increase-btn"
                       onClick={() => handleUpdateQuantity(foodName, servings + 1)}
                       title="Increase quantity"
@@ -263,7 +266,7 @@ const TodayTab = () => {
                       +
                     </button>
                     {servings > 0 && (
-                      <button 
+                      <button
                         className="quantity-btn remove-btn"
                         onClick={() => handleUpdateQuantity(foodName, 0)}
                         title="Remove food"
@@ -280,14 +283,14 @@ const TodayTab = () => {
           )}
         </div>
 
-        <SmartRecommendations 
-          todayData={todayData} 
+        <SmartRecommendations
+          todayData={todayData}
           needToday={needToday}
           onAddFood={handleAddFood}
         />
 
       </div>
-      
+
       <div className="right-panel">
         <TodaySummary todayData={todayData} needToday={needToday} />
       </div>

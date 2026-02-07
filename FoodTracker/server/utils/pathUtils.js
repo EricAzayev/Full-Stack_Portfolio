@@ -11,8 +11,10 @@ const __dirname = path.dirname(__filename);
  */
 export function getDataDir() {
   if (process.env.USER_DATA_PATH) {
+    console.log("📍 [pathUtils] Using USER_DATA_PATH:", process.env.USER_DATA_PATH);
     return process.env.USER_DATA_PATH;
   }
+  console.log("📍 [pathUtils] USER_DATA_PATH not set, using local fallback");
   // Fallback for development: use local ../data directory
   return path.join(__dirname, "../data");
 }

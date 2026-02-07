@@ -1,0 +1,7 @@
+{
+    "ignore": [
+        "data/*"
+    ],
+    "verbose": true,
+    "ext": "js,json"
+}

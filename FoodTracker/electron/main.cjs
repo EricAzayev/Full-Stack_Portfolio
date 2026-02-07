@@ -6,64 +6,46 @@ let mainWindow;
 let serverProcess = null;
 
 function startServer() {
-  return new Promise((resolve, reject) => {
-    try {
-      const serverPath = path.join(__dirname, "../server/server.js");
-      console.log("📍 [Electron] Starting server from:", serverPath);
-      console.log("📍 [Electron] __dirname:", __dirname);
+  try {
+    const serverPath = path.join(__dirname, "../server/server.js");
+    console.log("📍 [Electron] Starting server from:", serverPath);
+    console.log("📍 [Electron] __dirname:", __dirname);
 
-      // Use fork to run the server in a separate Node process
-      // fork preserves the working directory and NODE_PATH better
-      const userDataPath = app.getPath("userData");
-      const appDataPath = path.join(userDataPath, "data");
+    // Use fork to run the server in a separate Node process
+    // fork preserves the working directory and NODE_PATH better
+    const userDataPath = app.getPath("userData");
+    const appDataPath = path.join(userDataPath, "data");
 
-      serverProcess = fork(serverPath, [], {
-        silent: false, // Show console output
-        stdio: ["ignore", "inherit", "inherit", "ipc"],
-        env: {
-          ...process.env,
-          USER_DATA_PATH: appDataPath
-        }
-      });
-      console.log("📍 [Electron] Server process forked with USER_DATA_PATH:", appDataPath);
+    serverProcess = fork(serverPath, [], {
+      silent: false, // Show console output
+      stdio: ["ignore", "inherit", "inherit", "ipc"],
+      env: {
+        ...process.env,
+        USER_DATA_PATH: appDataPath
+      }
+    });
+    console.log("📍 [Electron] Server process forked with USER_DATA_PATH:", appDataPath);
 
-      console.log("📍 [Electron] Server process forked, PID:", serverProcess.pid);
-      let serverReady = false;
+    console.log("📍 [Electron] Server process forked, PID:", serverProcess.pid);
 
-      serverProcess.on("message", (message) => {
-        console.log("📍 [Electron] Received message from server:", message);
-        if (message === "server-ready") {
-          if (!serverReady) {
-            serverReady = true;
-            console.log("✅ [Electron] Server confirmed ready");
-            resolve();
-          }
-        }
-      });
+    serverProcess.on("message", (message) => {
+      console.log("📍 [Electron] Received message from server:", message);
+      if (message === "server-ready") {
+        console.log("✅ [Electron] Server confirmed ready");
+      }
+    });
 
-      serverProcess.on("error", (error) => {
-        console.error("❌ [Electron] Failed to start server:", error);
-        if (!serverReady) {
-          reject(error);
-        }
-      });
+    serverProcess.on("error", (error) => {
+      console.error("❌ [Electron] Failed to start server:", error);
+    });
 
-      serverProcess.on("exit", (code, signal) => {
-        console.log(`⚠️  [Electron] Server process exited with code ${code} and signal ${signal}`);
-      });
+    serverProcess.on("exit", (code, signal) => {
+      console.log(`⚠️  [Electron] Server process exited with code ${code} and signal ${signal}`);
+    });
 
-      // Timeout after 15 seconds
-      setTimeout(() => {
-        if (!serverReady) {
-          console.warn("⚠️  [Electron] Server startup timeout, proceeding anyway");
-          resolve();
-        }
-      }, 15000);
-    } catch (error) {
-      console.error("❌ [Electron] Error starting server:", error);
-      reject(error);
-    }
-  });
+  } catch (error) {
+    console.error("❌ [Electron] Error starting server:", error);
+  }
 }
 
 function createWindow() {
@@ -122,14 +104,12 @@ app.whenReady().then(async () => {
       initializeDataFiles();
     }
 
-    await startServer();
-    console.log("✅ [Electron] Server startup complete");
+    startServer();
+    console.log("✅ [Electron] Server startup initiated");
 
     // Give server time to bind to port
-    setTimeout(() => {
-      console.log("📍 [Electron] Creating main window...");
-      createWindow();
-    }, 1000);
+    console.log("📍 [Electron] Creating main window...");
+    createWindow();
   } catch (error) {
     console.error("❌ [Electron] Failed to start application:", error);
     createWindow(); // Still try to show window even if server fails

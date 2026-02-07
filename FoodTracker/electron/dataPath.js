@@ -37,6 +37,19 @@ export function initializeDataFiles() {
   const destDir = getDataPath();
 
 
+  // Ensure data directory exists
+  if (!fs.existsSync(destDir)) {
+    fs.mkdirSync(destDir, { recursive: true });
+  }
+
+  // CRITICAL: Write package.json to ensure Node treats these .js files as ESM (modules)
+  // causing imports to fail if this is missing (since they use export default)
+  const pkgJsonPath = path.join(destDir, "package.json");
+  if (!fs.existsSync(pkgJsonPath)) {
+    fs.writeFileSync(pkgJsonPath, JSON.stringify({ type: "module" }, null, 2));
+    console.log(`✅ Created package.json in data directory`);
+  }
+
   const dataFiles = [
     "foodLibrary.js",
     "foodDeletedLibrary.js",
