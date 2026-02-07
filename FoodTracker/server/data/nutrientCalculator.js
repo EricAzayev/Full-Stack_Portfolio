@@ -50,12 +50,18 @@ function ageAdjustment(age) {
 
 // Function to generate personalized nutrient targets
 export function createRecommendedMicros(user) {
+  if (!user) {
+    console.warn("createRecommendedMicros called with null/undefined user");
+    return {};
+  }
   const activityMult = activityMultiplier[user.activityLevel] || 1.0;
   const genderMult = genderMultiplier[user.gender] || {};
-  const ageMult = ageAdjustment(user.age);
+  const ageMult = ageAdjustment(user.age || 30); // Default to 30 if age missing
 
   // Scale based on calorie goal relative to 2000 kcal baseline
-  const calorieFactor = user.calorieGoal / 2000;
+  // Default to 2000 if missing
+  const calorieGoal = user.calorieGoal || 2000;
+  const calorieFactor = calorieGoal / 2000;
 
   const recommendedMicros = {};
 

@@ -27,3 +27,8 @@ out/
 *.sln
 *.sw?
 
+
+release/
+dist/
+
+

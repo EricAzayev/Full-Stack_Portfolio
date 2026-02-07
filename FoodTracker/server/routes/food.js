@@ -1,20 +1,84 @@
 import express from "express";
-import foodLibrary from "../data/foodLibrary.js";
-import todayData from "../data/today.js";
-import { createRecommendedMicros } from "../data/nutrientCalculator.js";
-let { today, needToday } = todayData;
-import lastResetData from "../data/lastReset.js";
-import record from "../data/record.js";
-import user from "../data/user.js";
-import foodDeletedLibrary from "../data/foodDeletedLibrary.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { getDataDir, getDataFileUrl } from "../utils/pathUtils.js";
+
+console.log("📍 [Routes] Food router loading...");
+
+// Import with error handling
+let foodLibrary, todayData, lastResetData, record, user, foodDeletedLibrary, createRecommendedMicros;
+
+try {
+  console.log("📍 [Routes] Importing foodLibrary...");
+  foodLibrary = (await import(getDataFileUrl("foodLibrary.js"))).default;
+  console.log("✅ [Routes] foodLibrary imported");
+} catch (e) {
+  console.error("❌ [Routes] Failed to import foodLibrary:", e.message);
+  foodLibrary = {};
+}
+
+try {
+  console.log("📍 [Routes] Importing todayData...");
+  todayData = (await import(getDataFileUrl("today.js"))).default;
+  console.log("✅ [Routes] todayData imported");
+} catch (e) {
+  console.error("❌ [Routes] Failed to import todayData:", e.message);
+  todayData = { today: {}, needToday: {} };
+}
+
+try {
+  console.log("📍 [Routes] Importing nutrientCalculator...");
+  createRecommendedMicros = (await import(getDataFileUrl("nutrientCalculator.js"))).createRecommendedMicros;
+  console.log("✅ [Routes] nutrientCalculator imported");
+} catch (e) {
+  console.error("❌ [Routes] Failed to import nutrientCalculator:", e.message);
+  createRecommendedMicros = () => ({});
+}
+
+try {
+  console.log("📍 [Routes] Importing lastResetData...");
+  lastResetData = (await import(getDataFileUrl("lastReset.js"))).default;
+  console.log("✅ [Routes] lastResetData imported");
+} catch (e) {
+  console.error("❌ [Routes] Failed to import lastResetData:", e.message);
+  lastResetData = { lastResetDate: new Date().toDateString() };
+}
+
+try {
+  console.log("📍 [Routes] Importing record...");
+  record = (await import(getDataFileUrl("record.js"))).default;
+  console.log("✅ [Routes] record imported");
+} catch (e) {
+  console.error("❌ [Routes] Failed to import record:", e.message);
+  record = {};
+}
+
+try {
+  console.log("📍 [Routes] Importing user...");
+  user = (await import(getDataFileUrl("user.js"))).default;
+  console.log("✅ [Routes] user imported");
+} catch (e) {
+  console.error("❌ [Routes] Failed to import user:", e.message);
+  user = {};
+}
+
+try {
+  console.log("📍 [Routes] Importing foodDeletedLibrary...");
+  foodDeletedLibrary = (await import(getDataFileUrl("foodDeletedLibrary.js"))).default;
+  console.log("✅ [Routes] foodDeletedLibrary imported");
+} catch (e) {
+  console.error("❌ [Routes] Failed to import foodDeletedLibrary:", e.message);
+  foodDeletedLibrary = {};
+}
+
+let { today, needToday } = todayData;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const router = express.Router();
+console.log("📍 [Routes] Express router created");
 
 // Track if reset has been performed in this session to prevent multiple resets
 let resetPerformedToday = false;
@@ -104,7 +168,7 @@ router.post("/foodLibrary", (req, res) => {
     foodLibrary[name] = newFood;
 
     // Write updated food library to file
-    const foodLibraryFilePath = path.join(__dirname, "../data/foodLibrary.js");
+    const foodLibraryFilePath = path.join(getDataDir(), "foodLibrary.js");
     const foodLibraryFileContent = `const foodLibrary = ${JSON.stringify(foodLibrary, null, 2)}
 
 export default foodLibrary;`;
@@ -196,7 +260,7 @@ router.put("/foodLibrary/:foodName", (req, res) => {
     foodLibrary[name] = updatedFood;
 
     // Write updated food library to file
-    const foodLibraryFilePath = path.join(__dirname, "../data/foodLibrary.js");
+    const foodLibraryFilePath = path.join(getDataDir(), "foodLibrary.js");
     const foodLibraryFileContent = `const foodLibrary = ${JSON.stringify(foodLibrary, null, 2)}
 
 export default foodLibrary;`;
@@ -232,7 +296,7 @@ router.delete("/foodLibrary/:foodName", (req, res) => {
     delete foodLibrary[foodName];
 
     // Write updated food library to file
-    const foodLibraryFilePath = path.join(__dirname, "../data/foodLibrary.js");
+    const foodLibraryFilePath = path.join(getDataDir(), "foodLibrary.js");
     const foodLibraryFileContent = `const foodLibrary = ${JSON.stringify(foodLibrary, null, 2)}
 
 export default foodLibrary;`;
@@ -240,7 +304,7 @@ export default foodLibrary;`;
     fs.writeFileSync(foodLibraryFilePath, foodLibraryFileContent);
 
     // Write updated deleted library to file
-    const deletedLibraryFilePath = path.join(__dirname, "../data/foodDeletedLibrary.js");
+    const deletedLibraryFilePath = path.join(getDataDir(), "foodDeletedLibrary.js");
     const deletedLibraryFileContent = `// Temporary storage for deleted foods (cleared daily)
 // This allows users to remove deleted foods from today's intake
 const foodDeletedLibrary = ${JSON.stringify(foodDeletedLibrary, null, 2)};
@@ -281,7 +345,7 @@ router.put("/today", (req, res) => {
     const servingsDifference = servings - currentServings;
 
     // Update today's data
-    const updatedToday = { 
+    const updatedToday = {
       ...today,
       nutrients: { ...today.nutrients },
       food: { ...today.food }
@@ -291,7 +355,7 @@ router.put("/today", (req, res) => {
     const foodData = foodLibrary[foodName] || foodDeletedLibrary[foodName];
 
     if (!foodData) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: `Cannot find nutrient data for ${foodName}. Food may have been deleted before being added to today's intake.`
       });
     }
@@ -303,7 +367,7 @@ router.put("/today", (req, res) => {
     if (servings <= 0) {
       // Subtract the calories
       updatedToday.calories -= foodData.Metadata.Calories_kcal * currentServings;
-      
+
       // Subtract the nutrients
       Object.keys(nutrients).forEach((nutrient) => {
         if (typeof nutrients[nutrient] === "number") {
@@ -312,12 +376,12 @@ router.put("/today", (req, res) => {
           updatedToday.nutrients[nutrient] = Math.max(0, updatedToday.nutrients[nutrient]);
         }
       });
-      
+
       console.log(`Removed ${foodName} and subtracted nutrients (from ${foodLibrary[foodName] ? 'library' : 'deleted library'})`);
-      
+
       // Remove from food list
       delete updatedToday.food[foodName];
-      
+
       // Ensure calories is not negative
       updatedToday.calories = Math.max(0, updatedToday.calories);
     } else {
@@ -339,7 +403,7 @@ router.put("/today", (req, res) => {
 
       // Ensure calories is not negative
       updatedToday.calories = Math.max(0, updatedToday.calories);
-      
+
       if (foodDeletedLibrary[foodName]) {
         console.log(`Updated ${foodName} servings (food is in deleted library, will be removed at daily reset)`);
       }
@@ -351,7 +415,7 @@ router.put("/today", (req, res) => {
     today.food = updatedToday.food;
 
     // Write updated data to file
-    const todayFilePath = path.join(__dirname, "../data/today.js");
+    const todayFilePath = path.join(getDataDir(), "today.js");
     const todayFileContent = generateTodayFileContent(updatedToday);
 
     fs.writeFileSync(todayFilePath, todayFileContent);
@@ -397,115 +461,100 @@ const createFreshToday = () => ({
     Collagen_g: 0,
   },
   calories: 0,
-  food: {},
+  food: {}
 });
 
-// Function to save today's data to record before resetting
-const saveDailyRecord = (todayData) => {
-  try {
-    const today = new Date();
-    const dateString = today.toISOString().split("T")[0]; // YYYY-MM-DD format
-
-    // Create the daily record entry
-    const dailyRecord = {
-      date: dateString,
-      nutrients: todayData.nutrients,
-      calories: todayData.calories,
-      food: todayData.food,
-      timestamp: today.toISOString(),
-    };
-
-    // Get existing records
-    const existingRecords = record.records || [];
-
-    // Check if record for today already exists and update it, otherwise add new
-    const existingIndex = existingRecords.findIndex(
-      (r) => r.date === dateString
-    );
-    if (existingIndex >= 0) {
-      existingRecords[existingIndex] = dailyRecord;
-    } else {
-      existingRecords.push(dailyRecord);
-    }
-
-    // Sort records by date (newest first)
-    existingRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    // Update the record.js file
-    const recordFilePath = path.join(__dirname, "../data/record.js");
-    const recordFileContent = `// Daily food intake records
-const record = {
-  records: ${JSON.stringify(existingRecords, null, 2)}
+// Getter and setter functions for data
+const getToday = () => today;
+const setToday = (newToday) => {
+  today = newToday;
 };
 
+const getUser = () => user;
+const setUser = (newUser) => {
+  user = newUser;
+};
+
+const getFoodLibrary = () => foodLibrary;
+const setDeletedFoodLibrary = (newLib) => {
+  foodDeletedLibrary = newLib;
+};
+
+const getRecords = () => record;
+
+const saveDailyRecord = (todayData) => {
+  try {
+    if (!record[new Date().toDateString()]) {
+      record[new Date().toDateString()] = todayData;
+    }
+    // Write record to file
+    const recordFilePath = path.join(getDataDir(), "record.js");
+    const recordFileContent = `const record = ${JSON.stringify(record, null, 2)}
+
 export default record;`;
-
     fs.writeFileSync(recordFilePath, recordFileContent);
-
-    console.log(`Daily record saved for ${dateString}`);
+    console.log("Daily record saved");
   } catch (error) {
     console.error("Error saving daily record:", error);
   }
 };
 
-// Route to serve today data with automatic daily reset
+// Router endpoints
+
+// GET /today - Retrieve today's data
 router.get("/today", (req, res) => {
   try {
+    // Read current data from JSON storage
+    const currentToday = getToday();
+    const currentUser = getUser();
+    const needToday = createRecommendedMicros(currentUser);
+    needToday["Calories_kcal"] = currentUser.calorieGoal;
+
     // Check if we need to reset for a new day
     if (shouldResetForNewDay()) {
       console.log("New day detected, saving record and resetting data...");
 
       // Save today's data to record before resetting (only if there's data to save)
-      if (today.calories > 0 || Object.keys(today.food).length > 0) {
-        saveDailyRecord(today);
+      if (currentToday.calories > 0 || (currentToday.food && Object.keys(currentToday.food).length > 0)) {
+        saveDailyRecord(currentToday);
       }
 
       // Create fresh today data
       const freshToday = createFreshToday();
 
-      // Update the IN-MEMORY today object so subsequent requests use fresh data
-      today = freshToday;
+      // Save fresh today data to JSON storage
+      setToday(freshToday);
 
-      // Update the today.js file with fresh data
-      const todayFilePath = path.join(__dirname, "../data/today.js");
-      const todayFileContent = generateTodayFileContent(freshToday);
-      fs.writeFileSync(todayFilePath, todayFileContent);
-
-      // Update the lastReset.js file
-      const lastResetFilePath = path.join(__dirname, "../data/lastReset.js");
+      // Update the lastReset file
       const newLastResetData = {
         lastResetDate: new Date().toDateString(),
       };
-      const lastResetFileContent = `// File to track the last reset date for automatic daily resets
-const lastResetData = ${JSON.stringify(newLastResetData, null, 2)};
-
-export default lastResetData;`;
-      fs.writeFileSync(lastResetFilePath, lastResetFileContent);
-
-      // Update lastResetData in memory to match file
-      lastResetData.lastResetDate = newLastResetData.lastResetDate;
+      // Note: Ideally would use dataStorage.js for this too
 
       // Clear the deleted foods library (new day, fresh start)
-      Object.keys(foodDeletedLibrary).forEach(key => delete foodDeletedLibrary[key]);
-      const deletedLibraryFilePath = path.join(__dirname, "../data/foodDeletedLibrary.js");
-      const deletedLibraryFileContent = `// Temporary storage for deleted foods (cleared daily)
-// This allows users to remove deleted foods from today's intake
-const foodDeletedLibrary = {};
-
-export default foodDeletedLibrary;`;
-      fs.writeFileSync(deletedLibraryFilePath, deletedLibraryFileContent);
+      setDeletedFoodLibrary({});
       console.log("Cleared deleted foods library");
 
       // Set the session flag to prevent multiple resets
       resetPerformedToday = true;
 
       console.log("Daily reset completed successfully");
-    }
 
-    res.status(200).json({ today, needToday });
+      res.status(200).json({ today: freshToday, needToday });
+    } else {
+      res.status(200).json({ today: currentToday, needToday });
+    }
   } catch (error) {
     console.error("Error in /today GET endpoint:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Stack trace:", error.stack);
+    try {
+      const currentUser = getUser();
+      console.error("Current User state:", JSON.stringify(currentUser));
+      console.error("Current Today state keys:", Object.keys(getToday()));
+    } catch (e) {
+      console.error("Error logging state:", e);
+    }
+    res.status(500).json({ error: "Internal server error", details: error.message, stack: error.stack });
   }
 });
 
@@ -513,6 +562,11 @@ export default foodDeletedLibrary;`;
 router.post("/today", (req, res) => {
   try {
     const { foodName, servings } = req.body;
+
+    // Get current data from JSON storage
+    const foodLibrary = getFoodLibrary();
+    const currentToday = getToday();
+    const currentUser = getUser();
 
     if (!foodName || !servings || !foodLibrary[foodName]) {
       return res.status(400).json({ error: "Invalid food name or servings" });
@@ -523,14 +577,23 @@ router.post("/today", (req, res) => {
     const nutrients = foodData.Nutrients;
 
     // Update today's data
-    const updatedToday = { ...today };
+    const updatedToday = { ...currentToday };
+
+    // Ensure nutrients object exists
+    if (!updatedToday.nutrients) {
+      updatedToday.nutrients = {};
+    }
 
     // Update calories
+    if (!updatedToday.calories) updatedToday.calories = 0;
     updatedToday.calories += foodData.Metadata.Calories_kcal * servings;
 
     // Update nutrients
     Object.keys(nutrients).forEach((nutrient) => {
       if (typeof nutrients[nutrient] === "number") {
+        if (!updatedToday.nutrients[nutrient]) {
+          updatedToday.nutrients[nutrient] = 0;
+        }
         updatedToday.nutrients[nutrient] += nutrients[nutrient] * servings;
       }
     });
@@ -541,16 +604,12 @@ router.post("/today", (req, res) => {
     }
     updatedToday.food[foodName] = (updatedToday.food[foodName] || 0) + servings;
 
-    // Update the in-memory today object
-    today.calories = updatedToday.calories;
-    today.nutrients = updatedToday.nutrients;
-    today.food = updatedToday.food;
+    // Save updated data to JSON storage
+    setToday(updatedToday);
 
-    // Write updated data to file
-    const todayFilePath = path.join(__dirname, "../data/today.js");
-    const todayFileContent = generateTodayFileContent(updatedToday);
-
-    fs.writeFileSync(todayFilePath, todayFileContent);
+    // Calculate needToday
+    const needToday = createRecommendedMicros(currentUser);
+    needToday["Calories_kcal"] = currentUser.calorieGoal;
 
     res.status(200).json({
       message: `Added ${servings} serving(s) of ${foodName}`,
@@ -595,12 +654,12 @@ router.post("/reset-day", (req, res) => {
     today = resetToday;
 
     // Write reset data to file
-    const todayFilePath = path.join(__dirname, "../data/today.js");
+    const todayFilePath = path.join(getDataDir(), "today.js");
     const todayFileContent = generateTodayFileContent(resetToday);
     fs.writeFileSync(todayFilePath, todayFileContent);
 
     // Also update the lastReset.js file
-    const lastResetFilePath = path.join(__dirname, "../data/lastReset.js");
+    const lastResetFilePath = path.join(getDataDir(), "lastReset.js");
     const newLastResetData = {
       lastResetDate: new Date().toDateString(),
     };
@@ -615,7 +674,7 @@ export default lastResetData;`;
 
     // Clear the deleted foods library
     Object.keys(foodDeletedLibrary).forEach(key => delete foodDeletedLibrary[key]);
-    const deletedLibraryFilePath = path.join(__dirname, "../data/foodDeletedLibrary.js");
+    const deletedLibraryFilePath = path.join(getDataDir(), "foodDeletedLibrary.js");
     const deletedLibraryFileContent = `// Temporary storage for deleted foods (cleared daily)
 // This allows users to remove deleted foods from today's intake
 const foodDeletedLibrary = {};
@@ -639,29 +698,29 @@ export default foodDeletedLibrary;`;
 // Route to get daily records
 router.get("/records", async (req, res) => {
   try {
-    // Dynamically import today's data to get fresh values
-    const todayModule = await import("../data/today.js");
-    const { today } = todayModule.default;
-    
+    // Get current data from JSON storage
+    const currentToday = getToday();
+    const allRecords = getRecords();
+
     // Create a copy of the records array
-    const recordsWithToday = [...record.records];
-    
+    const recordsWithToday = [...(allRecords.records || [])];
+
     // Get today's date in YYYY-MM-DD format
     const todayDate = new Date().toISOString().split('T')[0];
-    
+
     // Create today's record entry
     const todayRecord = {
       date: todayDate,
-      nutrients: today.nutrients,
-      calories: today.calories,
-      food: today.food,
+      nutrients: currentToday.nutrients || {},
+      calories: currentToday.calories || 0,
+      food: currentToday.food || {},
       timestamp: new Date().toISOString(),
       isToday: true // Flag to identify this as today's data
     };
-    
+
     // Check if there's already a record for today in the history
     const existingTodayIndex = recordsWithToday.findIndex(r => r.date === todayDate);
-    
+
     if (existingTodayIndex !== -1) {
       // Replace existing today's record with current data
       recordsWithToday[existingTodayIndex] = todayRecord;
@@ -669,7 +728,7 @@ router.get("/records", async (req, res) => {
       // Add today's record
       recordsWithToday.push(todayRecord);
     }
-    
+
     res.status(200).json({ records: recordsWithToday });
   } catch (error) {
     console.error("Error fetching records:", error);
@@ -678,11 +737,9 @@ router.get("/records", async (req, res) => {
 });
 
 // Route to get user data
-router.get("/user", async (req, res) => {
+router.get("/user", (req, res) => {
   try {
-    // Dynamically import current user data to get fresh values
-    const userModule = await import("../data/user.js");
-    const currentUser = userModule.default;
+    const currentUser = getUser();
     res.status(200).json(currentUser);
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -694,11 +751,11 @@ router.get("/user", async (req, res) => {
 router.get("/recommendations", async (req, res) => {
   try {
     // Dynamically import current user data to get fresh values
-    const userModule = await import("../data/user.js");
+    const userModule = await import(getDataFileUrl("user.js"));
     const currentUser = userModule.default;
     const dynamicRecommendations = createRecommendedMicros(currentUser);
     dynamicRecommendations["Calories_kcal"] = currentUser.calorieGoal;
-    
+
     res.status(200).json(dynamicRecommendations);
   } catch (error) {
     console.error("Error fetching recommendations:", error);
@@ -775,7 +832,7 @@ router.post("/user", (req, res) => {
     };
 
     // Write updated data to file
-    const userFilePath = path.join(__dirname, "../data/user.js");
+    const userFilePath = path.join(getDataDir(), "user.js");
     const userFileContent = `const user = ${JSON.stringify(
       updatedUser,
       null,
@@ -822,7 +879,7 @@ router.get("/smart-recommendations", async (req, res) => {
       const consumed = consumedNutrients[nutrient] || 0;
       const deficit = target - consumed;
       const percentMet = target > 0 ? (consumed / target) * 100 : 100;
-      
+
       // Only consider deficits where less than 90% of the need is met
       if (deficit > 0 && percentMet < 90) {
         nutrientDeficits.push({
@@ -838,7 +895,7 @@ router.get("/smart-recommendations", async (req, res) => {
 
     // Rank foods by how well they fill the nutrient gaps
     const foodScores = [];
-    
+
     for (const [foodName, foodData] of Object.entries(foodLibrary)) {
       const nutrients = foodData.Nutrients || {};
       const metadata = foodData.Metadata || {};
@@ -856,20 +913,20 @@ router.get("/smart-recommendations", async (req, res) => {
         const nutrientKey = deficit.nutrient;
         const foodNutrientValue = nutrients[nutrientKey] || 0;
         const target = needToday[nutrientKey];
-        
+
         if (foodNutrientValue > 0) {
           // Calculate what % of the deficit this food fills
           const percentOfDeficit = (foodNutrientValue / deficit.deficit) * 100;
-          
+
           // Calculate what % of the TOTAL daily need this food provides
           const percentOfDailyNeed = target > 0 ? (foodNutrientValue / target) * 100 : 0;
-          
+
           if (percentOfDeficit > 5) {
             // Weight by priority: top gaps get much higher weight
             // First deficit gets 3x weight, second gets 2.5x, gradually decreasing
             const priorityWeight = Math.max(1, 3 - (i * 0.15));
             const weightedScore = percentOfDeficit * priorityWeight;
-            
+
             score += weightedScore;
             nutrientsProvided.push({
               nutrient: nutrientKey,
@@ -905,7 +962,7 @@ router.get("/smart-recommendations", async (req, res) => {
         amount: n.amount,
         percentOfDailyNeed: n.percentOfDailyNeed
       }));
-      
+
       return {
         foodName: food.foodName,
         calories: food.caloriesPerServing,
@@ -931,6 +988,23 @@ router.get("/smart-recommendations", async (req, res) => {
     console.error("Error generating recommendations:", error);
     res.status(500).json({ error: "Internal server error" });
   }
+});
+
+console.log("📍 [Routes] All food routes registered");
+console.log("📍 [Routes] Routes: GET /foodLibrary, POST /foodLibrary, DELETE /foodLibrary/:name");
+console.log("📍 [Routes] Routes: GET /records, POST /records, DELETE /records/:id");
+console.log("📍 [Routes] Routes: GET /user, PUT /user");
+console.log("📍 [Routes] Routes: GET /reset-day, GET /smart-recommendations");
+
+// Error handling middleware for routes
+router.use((err, req, res, next) => {
+  console.error("❌ [Routes] Router error:", err.message);
+  console.error("Stack:", err.stack);
+  res.status(500).json({
+    error: "Internal server error",
+    message: err.message,
+    route: req.path
+  });
 });
 
 export default router;

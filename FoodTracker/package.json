@@ -12,6 +12,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
     "react": "^18.2.0",
     "react-circular-progressbar": "^2.2.0",
     "react-dom": "^18.2.0"
@@ -33,12 +35,15 @@
     "files": [
       "dist/**/*",
       "server/**/*",
+      "!server/node_modules",
       "electron/**/*",
       "node_modules/**/*",
       "package.json"
     ],
     "win": {
-      "target": ["nsis"]
+      "target": [
+        "nsis"
+      ]
     },
     "nsis": {
       "oneClick": false,

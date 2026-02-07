@@ -33,7 +33,7 @@ export function getDataPath(filename = "") {
 export function initializeDataFiles() {
   if (!app.isPackaged) return; // Skip in development
 
-  const sourceDir = path.join(process.resourcesPath, "server", "data");
+  const sourceDir = path.join(app.getAppPath(), "server", "data");
   const destDir = getDataPath();
 
 
@@ -52,7 +52,7 @@ export function initializeDataFiles() {
     const sourcePath = path.join(sourceDir, file);
     const destPath = path.join(destDir, file);
 
- 
+
     if (fs.existsSync(sourcePath) && !fs.existsSync(destPath)) {
       fs.copyFileSync(sourcePath, destPath);
       console.log(`✅ Initialized data file: ${file}`);
