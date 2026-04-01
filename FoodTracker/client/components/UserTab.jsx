@@ -16,11 +16,19 @@ const UserTab = () => {
   const [errors, setErrors] = useState({});
   const [recommendations, setRecommendations] = useState({});
   const [showAllNutrients, setShowAllNutrients] = useState(false);
+  const [llmSettings, setLlmSettings] = useState({
+    ollamaUrl: 'http://localhost:11434',
+    model: 'mistral:latest',
+    enabled: true,
+  });
+  const [ollamaStatus, setOllamaStatus] = useState(null);
+  const [checkingOllama, setCheckingOllama] = useState(false);
 
   // Fetch user data and recommendations on component mount
   useEffect(() => {
     fetchUserData();
     fetchRecommendations();
+    loadLlmSettings();
   }, []);
 
   const fetchUserData = async () => {
@@ -45,6 +53,43 @@ const UserTab = () => {
       }
     } catch (error) {
       console.error("Error fetching recommendations:", error);
+    }
+  };
+
+  const loadLlmSettings = () => {
+    try {
+      const saved = localStorage.getItem('llmSettings');
+      if (saved) {
+        setLlmSettings(JSON.parse(saved));
+      }
+    } catch (error) {
+      console.error('Error loading LLM settings:', error);
+    }
+  };
+
+  const saveLlmSettings = (newSettings) => {
+    try {
+      localStorage.setItem('llmSettings', JSON.stringify(newSettings));
+      setLlmSettings(newSettings);
+    } catch (error) {
+      console.error('Error saving LLM settings:', error);
+    }
+  };
+
+  const checkOllamaStatus = async () => {
+    setCheckingOllama(true);
+    try {
+      const response = await fetch(`http://localhost:3001/api/ai/check-ollama?url=${encodeURIComponent(llmSettings.ollamaUrl)}`);
+      const data = await response.json();
+      setOllamaStatus(data);
+    } catch (error) {
+      console.error('Error checking Ollama status:', error);
+      setOllamaStatus({
+        available: false,
+        error: error.message,
+      });
+    } finally {
+      setCheckingOllama(false);
     }
   };
 
@@ -375,6 +420,93 @@ const UserTab = () => {
                 {errors.calorieGoal && (
                   <span className="error-text">{errors.calorieGoal}</span>
                 )}
+              </div>
+            </div>
+          </section>
+
+          {/* Daily Recommendations Section */}
+          <section className="settings-section">
+            <h3 className="section-title">LLM Settings (AI Analysis)</h3>
+            <p style={{ color: '#ccc', marginBottom: '1.5rem', lineHeight: '1.5' }}>
+              Configure local LLM (Ollama) for AI food analysis. The LLM runs on your device for privacy and offline use.
+            </p>
+            
+            <div className="form-grid">
+              <div className="form-group">
+                <label htmlFor="ollamaUrl">Ollama URL</label>
+                <input
+                  type="text"
+                  id="ollamaUrl"
+                  value={llmSettings.ollamaUrl}
+                  onChange={(e) => saveLlmSettings({ ...llmSettings, ollamaUrl: e.target.value })}
+                  disabled={!isEditing}
+                  placeholder="http://localhost:11434"
+                />
+                <small style={{ color: '#999' }}>Default: http://localhost:11434</small>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="model">Model</label>
+                <input
+                  type="text"
+                  id="model"
+                  value={llmSettings.model}
+                  onChange={(e) => saveLlmSettings({ ...llmSettings, model: e.target.value })}
+                  disabled={!isEditing}
+                  placeholder="mistral:latest"
+                />
+                <small style={{ color: '#999' }}>E.g., mistral:latest, phi:latest, tinyllama:latest</small>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <button 
+                className="check-ollama-button"
+                onClick={checkOllamaStatus}
+                disabled={checkingOllama}
+              >
+                {checkingOllama ? '⏳ Checking...' : '🔍 Check Ollama Status'}
+              </button>
+              <a 
+                href="https://ollama.ai" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="ollama-link"
+                style={{ color: '#646cff', textDecoration: 'none', fontSize: '0.9rem' }}
+              >
+                📥 Download Ollama
+              </a>
+            </div>
+
+            {ollamaStatus && (
+              <div style={{ marginTop: '1rem', padding: '1rem', background: '#1a2a1a', border: `1px solid ${ollamaStatus.available ? '#10b981' : '#dc2626'}`, borderRadius: '6px' }}>
+                <p style={{ margin: '0 0 0.5rem 0', color: ollamaStatus.available ? '#10b981' : '#dc2626' }}>
+                  {ollamaStatus.available ? '✅ Ollama is running!' : '❌ Ollama is not available'}
+                </p>
+                {ollamaStatus.available && ollamaStatus.models && ollamaStatus.models.length > 0 && (
+                  <p style={{ margin: '0.5rem 0 0 0', color: '#ccc', fontSize: '0.9rem' }}>
+                    Available models: {ollamaStatus.models.map(m => m.name || m).join(', ')}
+                  </p>
+                )}
+                {!ollamaStatus.available && (
+                  <p style={{ margin: '0.5rem 0 0 0', color: '#ccc', fontSize: '0.9rem' }}>
+                    {ollamaStatus.error || 'Could not connect to Ollama'}
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="info-card">
+              <div className="info-icon">ℹ️</div>
+              <div className="info-content">
+                <h4>Setting Up Ollama</h4>
+                <ol style={{ margin: '0.5rem 0 0 0', paddingLeft: '1.5rem', color: '#ccc', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                  <li>Download Ollama from <a href="https://ollama.ai" target="_blank" rel="noopener noreferrer" style={{ color: '#646cff' }}>ollama.ai</a></li>
+                  <li>Install and run Ollama (it starts automatically on port 11434)</li>
+                  <li>Pull a model: <code style={{ background: '#0a0a0a', padding: '0.25rem 0.5rem', borderRadius: '3px', color: '#10b981' }}>ollama pull mistral</code></li>
+                  <li>Come back here and click "Check Ollama Status"</li>
+                  <li>Use "Analyze with Local AI" in the Food Library tab</li>
+                </ol>
               </div>
             </div>
           </section>

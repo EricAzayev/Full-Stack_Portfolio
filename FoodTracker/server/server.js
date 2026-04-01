@@ -17,9 +17,26 @@ try {
   process.exit(1);
 }
 
+console.log("📍 [Server] Importing AI router...");
+
+let aiRouter;
+try {
+  const aiModule = await import("./routes/ai.js");
+  aiRouter = aiModule.default;
+  console.log("✅ [Server] AI router imported successfully");
+} catch (importError) {
+  console.error("❌ [Server] Failed to import AI router:", importError);
+  console.error("Error message:", importError.message);
+  console.log("⚠️ [Server] AI features will not be available");
+}
+
 //middleware configs process requests before they reach the route handlers
 app.use(cors()); // Enable CORS for all routes
 console.log("📍 [Server] CORS enabled");
+
+// Parse JSON request bodies
+app.use(express.json());
+console.log("📍 [Server] JSON body parser enabled");
 
 app.use("/public", express.static("./public")); //server any images from public directory
 console.log("📍 [Server] Static /public route configured");
@@ -29,6 +46,11 @@ console.log("📍 [Server] Static /scripts route configured");
 
 app.use("/api", foodRouter); // Mount food router for API endpoints
 console.log("📍 [Server] API routes mounted");
+
+if (aiRouter) {
+  app.use("/api/ai", aiRouter); // Mount AI router for LLM endpoints
+  console.log("📍 [Server] AI routes mounted");
+}
 
 app.get("/", (req, res) => {
   console.log("📍 [Server] Root route accessed");

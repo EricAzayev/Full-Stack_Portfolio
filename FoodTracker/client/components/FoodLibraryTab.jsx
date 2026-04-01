@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import OllamaSetupModal from './OllamaSetupModal';
+import { checkOllamaStatus, clearCache } from '../services/ollamaDetection';
 
 const FoodLibraryTab = () => {
   const [foodLibrary, setFoodLibrary] = useState({});
@@ -32,6 +34,13 @@ const FoodLibraryTab = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [aiResult, setAiResult] = useState('');
   const [showAiTools, setShowAiTools] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [llmConfig, setLlmConfig] = useState({
+    ollamaUrl: 'http://localhost:11434',
+    model: 'mistral:latest',
+  });
+  const [ollamaStatus, setOllamaStatus] = useState(null);
+  const [showSetupModal, setShowSetupModal] = useState(false);
 
   // Fetch food library data
   useEffect(() => {
@@ -46,7 +55,13 @@ const FoodLibraryTab = () => {
       }
     };
 
+    const checkOllama = async () => {
+      const status = await checkOllamaStatus(llmConfig.ollamaUrl);
+      setOllamaStatus(status);
+    };
+
     fetchFoodLibrary();
+    checkOllama();
   }, []);
 
   // Handle input changes
@@ -362,6 +377,150 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
     }
   };
 
+  // Analyze food with local LLM
+  const analyzeWithLocalLLM = async () => {
+    if (!newFood.name) {
+      setMessage('Please enter a food name first');
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+
+    // Do a FRESH check right before analyzing (skip cache to ensure we have current status)
+    console.log('📍 [FoodLibrary] Doing fresh Ollama check before analysis...');
+    const freshStatus = await checkOllamaStatus(llmConfig.ollamaUrl, true);
+    setOllamaStatus(freshStatus);
+
+    // Check if Ollama is ACTUALLY available
+    if (!freshStatus?.available) {
+      console.warn('❌ [FoodLibrary] Ollama not available, showing setup modal');
+      setMessage('');
+      setShowSetupModal(true);
+      return;
+    }
+
+    // Check if we have any models
+    if (!freshStatus.models || freshStatus.models.length === 0) {
+      console.warn('❌ [FoodLibrary] No models found in Ollama');
+      setMessage('');
+      setShowSetupModal(true);
+      return;
+    }
+
+    // Check if the configured model is available
+    const configuredModelName = llmConfig.model.split(':')[0]; // e.g., "mistral" from "mistral:latest"
+    const availableModels = freshStatus.models.map(m => typeof m === 'string' ? m : m.name || '');
+    const modelAvailable = availableModels.some(m => m.includes(configuredModelName));
+
+    let modelToUse = llmConfig.model;
+    let modelWasAutoSelected = false;
+    
+    if (!modelAvailable && freshStatus.models.length > 0) {
+      // Use the first available model instead
+      modelToUse = typeof freshStatus.models[0] === 'string' 
+        ? freshStatus.models[0] 
+        : freshStatus.models[0].name || llmConfig.model;
+      
+      modelWasAutoSelected = true;
+      console.warn(`⚠️ [FoodLibrary] Configured model "${llmConfig.model}" not found. Using "${modelToUse}" instead`);
+    }
+
+    setIsAnalyzing(true);
+    
+    // Show which model is being used - VISIBLE TO USER
+    if (modelWasAutoSelected) {
+      setMessage(`🤖 Using available model: ${modelToUse} (${(freshStatus.models.length)} installed). This may take 30-120 seconds...`);
+    } else {
+      setMessage(`🤖 Analyzing with ${modelToUse}... this may take 30-120 seconds`);
+    }
+
+    try {
+      const response = await fetch('http://localhost:3001/api/ai/analyze-food', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          foodData: {
+            name: newFood.name,
+            servingSize: newFood.servingSize,
+            calories: newFood.calories,
+            category: newFood.category,
+          },
+          ollamaUrl: llmConfig.ollamaUrl,
+          model: modelToUse,
+          useLocal: true,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        // Populate the form with analyzed data
+        setNewFood({
+          name: result.data.foodName,
+          category: result.data.category,
+          servingSize: result.data.servingSize.toString(),
+          calories: result.data.calories.toString(),
+          isProbiotic: result.data.isProbiotic,
+          nutrients: result.data.nutrients,
+        });
+
+        setErrors({});
+        setMessage(`✓ AI analysis complete for "${result.data.foodName}" using ${modelToUse}!`);
+        setTimeout(() => setMessage(''), 4000);
+      } else {
+        const errorMsg = result.error || 'Unknown error';
+        console.error('❌ [FoodLibrary] Analysis error:', errorMsg);
+        
+        // Check if it's a model not found error
+        if (errorMsg.includes('404') || errorMsg.includes('model') || errorMsg.includes('not found')) {
+          setMessage(`❌ Model "${modelToUse}" not found in Ollama. Available models: ${availableModels.join(', ')}`);
+          // Show setup modal with available models info
+          setShowSetupModal(true);
+          return;
+        }
+
+        // If error is about Ollama connection, show setup modal
+        if (errorMsg.toLowerCase().includes('connection') || 
+            errorMsg.toLowerCase().includes('not available') ||
+            errorMsg.toLowerCase().includes('refused') ||
+            errorMsg.toLowerCase().includes('timeout')) {
+          setShowSetupModal(true);
+          setMessage('');
+          return;
+        }
+
+        setMessage(`❌ Analysis failed: ${errorMsg}`);
+        setTimeout(() => setMessage(''), 5000);
+      }
+    } catch (error) {
+      console.error('❌ [FoodLibrary] Network error:', error);
+      
+      // Network error usually means Ollama not running
+      setShowSetupModal(true);
+      setMessage('');
+      return;
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  // Retry Ollama detection
+  const handleRetryOllama = async () => {
+    clearCache();
+    const status = await checkOllamaStatus(llmConfig.ollamaUrl);
+    setOllamaStatus(status);
+    
+    if (status.available) {
+      setShowSetupModal(false);
+      setMessage('✓ Ollama detected! You can now use AI analysis.');
+      setTimeout(() => setMessage(''), 3000);
+    } else {
+      setMessage('❌ Ollama still not found. Make sure it\'s installed and running.');
+      setTimeout(() => setMessage(''), 5000);
+    }
+  };
+
   return (
     <div className="food-library-tab">
       <div className="food-library-container">
@@ -510,6 +669,20 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
                         >
                           📋 Copy Prompt
                         </button>
+                        <div className="analyze-button-container">
+                          <button 
+                            type="button"
+                            className={`analyze-local-button ${ollamaStatus?.available ? 'available' : 'unavailable'}`}
+                            onClick={() => analyzeWithLocalLLM()}
+                            disabled={isAnalyzing}
+                            title={ollamaStatus?.available ? 'Analyze using local Ollama LLM' : 'Click to set up Ollama'}
+                          >
+                            {isAnalyzing ? '⏳ Analyzing...' : '🤖 Analyze with Local AI'}
+                          </button>
+                          <span className={`ollama-indicator ${ollamaStatus?.available ? 'connected' : 'disconnected'}`}>
+                            {ollamaStatus?.available ? '🟢' : '🔴'}
+                          </span>
+                        </div>
                         <span className="prompt-label">Step 1: Generate AI Prompt</span>
                       </div>
                       <div className="prompt-content">
@@ -669,6 +842,15 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
           </div>
         )}
       </div>
+
+      {/* Ollama Setup Modal */}
+      <OllamaSetupModal 
+        isOpen={showSetupModal}
+        onClose={() => setShowSetupModal(false)}
+        onRetry={handleRetryOllama}
+        detectedModels={ollamaStatus?.models || []}
+        ollamaIsRunning={ollamaStatus?.available}
+      />
     </div>
   );
 };
