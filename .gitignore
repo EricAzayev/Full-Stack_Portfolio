@@ -11,6 +11,13 @@ node_modules
 dist
 dist-ssr
 *.local
+.vite/
+
+# Generated reports and outputs
+*-report.txt
+*-log.txt
+output.txt
+build-errors.log
 
 /web102_unit7lab
 
@@ -24,13 +31,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-*.config.js
-*.config.ts
+# *.config.js  -- Commented out to allow vite.config.js
+# *.config.ts  -- Commented out to allow vite.config.ts
 
 
 
-
-!*.jsx
 !*.png
 !*.css
 
