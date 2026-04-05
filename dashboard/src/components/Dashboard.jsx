@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import ProjectCard from './ProjectCard';
+import CinematicSlider from './CinematicSlider';
+import GridSection from './GridSection';
+import { starProjects } from '../data/starProjects';
 
 const Dashboard = () => {
     const [data, setData] = useState({ projects: [], statuses: [] });
@@ -22,30 +24,48 @@ const Dashboard = () => {
     }, []);
 
     if (loading) {
-        return <div className="global-loading">Loading Portfolio...</div>;
+        return (
+            <div className="global-loading">
+                <div className="loading-spinner"></div>
+                <p>Loading Portfolio...</p>
+            </div>
+        );
     }
 
-    const getStatus = (id) => {
-        const s = data.statuses.find(x => x.id === id);
-        return s ? s.status : 'not-built';
-    };
+    // Filter out star projects from the grid
+    const starProjectIds = starProjects.map(p => p.id);
+    
+    // Enhance grid projects with additional data
+    const gridProjects = data.projects
+        .filter(project => !starProjectIds.includes(project.id))
+        .map(project => {
+            const status = data.statuses.find(s => s.id === project.id);
+            return {
+                ...project,
+                thumbnailEmoji: project.thumbnail,
+                demoUrl: status?.status === 'available' ? `/projects/${project.id}/` : null,
+                // Add demo video path if exists (placeholder for now)
+                demoVideo: null // You can add video paths here later
+            };
+        });
 
     return (
         <>
-            <div className="dashboard-header">
-                <h1>Codepath Full-Stack Portfolio</h1>
-                <p>Showcase of projects from Codepath 102 & 103 coursework</p>
-            </div>
+            {/* Hero Section */}
+            <header className="portfolio-hero">
+                <div className="hero-content">
+                    <h1 className="hero-title">Systems & Solutions Engineer</h1>
+                    <p className="hero-subtitle">
+                        Full-Stack Portfolio — CodePath 102 & 103 Coursework
+                    </p>
+                </div>
+            </header>
 
-            <div className="projects-grid">
-                {data.projects.map(project => (
-                    <ProjectCard
-                        key={project.id}
-                        project={project}
-                        status={getStatus(project.id)}
-                    />
-                ))}
-            </div>
+            {/* Cinematic Slider - Star Projects */}
+            <CinematicSlider starProjects={starProjects} />
+
+            {/* Grid Section - Additional Projects */}
+            <GridSection projects={gridProjects} />
         </>
     );
 };

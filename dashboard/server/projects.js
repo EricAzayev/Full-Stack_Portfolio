@@ -1,4 +1,6 @@
 // Project metadata for the portfolio dashboard
+// Note: Star projects (Food Tracker, RPG Chess, Adirondack 46ers, Rising Economies) 
+// are now managed separately in src/data/starProjects.js for the cinematic slider
 export const projects = [
   {
     id: 'adirondack46ers',
