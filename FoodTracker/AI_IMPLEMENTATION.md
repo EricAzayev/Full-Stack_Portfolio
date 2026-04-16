@@ -22,6 +22,280 @@ Ollama (http://localhost:11434)
 LLM Response ← Parses structured data ← Returns to frontend
 ```
 
+## How Auto-Detection Works (Making AI "Just Work")
+
+The key difference from systems that require manual Ollama startup is **when and how you check for availability**, combined with **smart error handling and auto-fallback logic**.
+
+### Philosophy: Check Fresh, Not Cached
+
+Most AI integrations check Ollama once at app startup. This implementation checks **right before analysis**:
+
+```javascript
+// Fresh detection (skip 15-second cache)
+const freshStatus = await checkOllamaStatus(url, true);
+```
+
+**Why this matters**:
+- Ollama might start/stop between app launch and feature use
+- Fresh check ensures real-time status, not stale cached info
+- User gets instant feedback about actual availability
+
+### The Complete Flow
+
+```
+User clicks "Analyze with AI" button
+    ↓
+Fresh detection check (skip cache)
+    ↓
+    ├─ Ollama NOT running?
+    │  └─ Show Setup Modal (download/install instructions)
+    │
+    ├─ Ollama running?
+    │  ├─ Configured model available?
+    │  │  └─ Use configured model
+    │  │
+    │  └─ Configured model NOT available?
+    │     └─ Auto-select first available model
+    │        (show in UI which one is running)
+    │
+    └─ Call backend API → Return results
+```
+
+### Key Strategies
+
+**1. Smart Error Handling (Not Silent Failure)**
+```javascript
+if (!freshStatus.available) {
+  setShowOllamaModal(true); // Modal guides next steps
+  return; // Don't proceed without Ollama
+}
+```
+
+The modal adapts based on state:
+- **Setup Mode**: "Ollama not installed" → Download links, platform-specific instructions, FAQ
+- **Configuration Mode**: "Ollama running, wrong model" → List your installed models with "Use This" buttons
+
+**2. Auto-Model Selection (Not Manual)**
+```javascript
+const configuredModel = llmConfig.model;
+const availableModels = freshStatus.models;
+
+if (!availableModels.includes(configuredModel) && availableModels.length > 0) {
+  modelToUse = availableModels[0]; // Auto-select first available
+  autoSelected = true;
+}
+
+setMessage(`🤖 Using available model: ${modelToUse} (${availableModels.length} installed)...`);
+```
+
+**Result**: Even if you've configured "mistral" but only have "phi" installed, the app just switches automatically and tells you what's running.
+
+**3. Specific Error Classification (Not Generic Errors)**
+```javascript
+if (error.code === 'ECONNREFUSED') {
+  // Ollama not running
+  setShowOllamaModal(true);
+} else if (error.code === 'ENOTFOUND') {
+  // Wrong URL configured
+  setMessage('Check your Ollama URL configuration.');
+} else if (error.name === 'AbortError') {
+  // Timeout - model too slow
+  setMessage('Request timed out. Try a faster model.');
+}
+```
+
+**Result**: Users know exactly what went wrong and what to do next.
+
+### Complete Code Example
+
+```javascript
+async function analyzeWithLocalLLM() {
+  try {
+    // STEP 1: Fresh detection (not cached)
+    const freshStatus = await checkOllamaStatus(llmConfig.ollamaUrl, true);
+    
+    if (!freshStatus.available) {
+      setShowOllamaModal(true);
+      return;
+    }
+    
+    // STEP 2: Auto-select model if configured one not available
+    const configuredModel = llmConfig.model.split(':')[0];
+    const availableModels = freshStatus.models.map(m => 
+      typeof m === 'string' ? m : m.name || ''
+    );
+    const modelExists = availableModels.some(m => 
+      m.includes(configuredModel)
+    );
+    
+    let modelToUse = llmConfig.model;
+    let autoSelected = false;
+    
+    if (!modelExists && availableModels.length > 0) {
+      modelToUse = availableModels[0];
+      autoSelected = true;
+    }
+    
+    // STEP 3: User feedback about which model is running
+    if (autoSelected) {
+      setMessage(`🤖 Using available model: ${modelToUse} (${availableModels.length} installed).`);
+    } else {
+      setMessage(`🤖 Analyzing with ${modelToUse}...`);
+    }
+    
+    // STEP 4: Call backend API
+    const response = await fetch('/api/ai/analyze-food', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        foodData: selectedFood,
+        model: modelToUse,
+        ollamaUrl: llmConfig.ollamaUrl
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        setShowOllamaModal(true);
+      } else {
+        setMessage(`Error: ${data.error}`);
+      }
+      return;
+    }
+    
+    // Success: populate form with LLM results
+    populateFromAnalysis(data.data);
+    
+  } catch (error) {
+    if (error.code === 'ECONNREFUSED') {
+      setMessage('Ollama is not running.');
+      setShowOllamaModal(true);
+    } else if (error.code === 'ENOTFOUND') {
+      setMessage('Check your Ollama URL configuration.');
+    } else {
+      setMessage(`Error: ${error.message}`);
+    }
+  }
+}
+```
+
+### What Makes It "Automatic"
+
+| Feature | Manual Approach | This Implementation |
+|---------|-----------------|---------------------|
+| **Ollama Check** | Only on app startup | Fresh check before each feature use |
+| **If Not Running** | Silent error or vague message | Setup modal with step-by-step instructions |
+| **Model Mismatch** | User manually selects which model | Auto-selects first available automatically |
+| **User Feedback** | Generic error code | Specific guidance with next steps |
+| **Error Recovery** | User must troubleshoot | Actionable suggestions in UI |
+
+**The Secret**: Don't wait for users to start Ollama. Instead, detect when they *try* to use the feature, and guide them through setup if needed. Let them pick the configuration once, then handle everything else automatically.
+
+## Why No `OLLAMA_ORIGINS` Configuration Needed?
+
+Many AI projects require setting `OLLAMA_ORIGINS = "*"` to handle CORS (Cross-Origin Resource Sharing) issues. FoodTracker doesn't need this because of its **server-backed architecture**.
+
+### The Architecture Difference
+
+**Other Projects (Direct Browser → Ollama)**:
+```
+Browser (http://localhost:3000)
+    ↓ (CORS issue!)
+Ollama (http://localhost:11434)
+```
+
+Browser enforces CORS restrictions, so you need:
+```bash
+OLLAMA_ORIGINS = "*"  # ← Required configuration
+```
+
+**FoodTracker (Browser → Backend → Ollama)**:
+```
+Browser (React)
+    ↓
+Express Backend (localhost:3001)
+    ↓ (server-to-server, no CORS)
+Ollama (localhost:11434)
+```
+
+Node.js (the backend) doesn't enforce CORS like browsers do. Server-to-server requests work freely.
+
+### Implementation in FoodTracker
+
+**server/routes/ai.js** handles the Ollama calls server-side:
+```javascript
+app.post('/api/ai/analyze-food', async (req, res) => {
+  const { foodData, model, ollamaUrl } = req.body;
+  
+  // This runs on the SERVER (Node.js), not in the browser
+  // No CORS issues - just a normal HTTP request
+  const response = await fetch(`${ollamaUrl}/api/generate`, {
+    method: 'POST',
+    body: JSON.stringify({ model, prompt })
+  });
+  
+  const result = await response.json();
+  res.json({ success: true, data: parsedResult });
+});
+```
+
+**Frontend calls the backend, not Ollama directly**:
+```javascript
+// Browser code - talks to OUR backend, not Ollama
+const response = await fetch('/api/ai/analyze-food', {
+  method: 'POST',
+  body: JSON.stringify({ foodData, model, ollamaUrl })
+});
+```
+
+### Advantages of This Approach
+
+| Aspect | Direct Browser → Ollama | Server-Backed (FoodTracker) |
+|--------|-------------------------|---------------------------|
+| **CORS Configuration** | Required: `OLLAMA_ORIGINS = "*"` | Not needed |
+| **Setup Complexity** | More steps | Cleaner |
+| **Security** | Less control | Backend can validate/auth requests |
+| **Flexibility** | Can't change Ollama location at runtime | Can point to Ollama on different machine |
+| **Error Handling** | Limited (CORS blocks info) | Full error details and logging |
+| **Caching/Optimization** | None | Can cache responses server-side |
+
+### For Your Video Blocking Extension
+
+If building a browser extension, use server-backed approach:
+
+**Instead of** (will fail without OLLAMA_ORIGINS):
+```javascript
+// Content script - direct to Ollama ❌
+const response = await fetch('http://localhost:11434/api/generate', {
+  method: 'POST',
+  body: JSON.stringify({ model, prompt })
+});
+```
+
+**Do this** (works without any Ollama config):
+```javascript
+// Content script - call YOUR backend ✅
+const response = await fetch('/api/ai/analyze-videos', {
+  method: 'POST',
+  body: JSON.stringify({ videoHTML })
+});
+```
+
+**Your backend handles the Ollama call**:
+```javascript
+// server/routes/ai.js
+app.post('/api/ai/analyze-videos', async (req, res) => {
+  const ollamaResponse = await fetch('http://localhost:11434/api/generate', {
+    method: 'POST',
+    body: JSON.stringify({ model: 'mistral', prompt })
+  });
+  
+  res.json(await ollamaResponse.json());
+});
+```
+
 ## Core Implementation Details
 
 ### 1. **Ollama Detection Service** (`client/services/ollamaDetection.js`)
@@ -330,6 +604,42 @@ async function analyzeAndBlockVideos() {
 - `client/components/OllamaSetupModal.jsx` (200+ lines) - Smart modal
 - `client/style.css` (~200 new lines) - Modal and button styling
 - `LOCAL_LLM_SETUP.md` - User documentation
+
+### Development Setup with Nodemon
+
+**server/package.json** includes nodemon for automatic backend restart on changes:
+```json
+{
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
+```
+
+**server/nodemon.json** configures what to watch:
+```json
+{
+  "ignore": ["data/*"],
+  "verbose": true,
+  "ext": "js,json"
+}
+```
+
+**Development workflow**:
+```bash
+# Terminal 1: Backend with auto-restart
+cd server
+npm run dev
+
+# Terminal 2: Frontend build (or Electron dev)
+npm run dev:electron
+```
+
+Nodemon automatically restarts the backend whenever you edit `.js` or `.json` files in the server directory (ignoring `data/` folder since that's user data). This is essential during AI feature development since you'll be tweaking prompts, error handling, and API endpoints frequently.
 
 ## Testing Checklist
 
