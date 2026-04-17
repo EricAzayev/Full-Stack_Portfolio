@@ -377,6 +377,55 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
     }
   };
 
+  // Helper function to fill form from already-parsed data object (from backend)
+  const parseAiResultFromData = (parsedData) => {
+    try {
+      // Validate that we have the required fields
+      if (!parsedData.foodName || !parsedData.category || !parsedData.servingSize || !parsedData.calories) {
+        console.error('❌ Invalid parsed data from backend:', parsedData);
+        setMessage('Error: Backend returned incomplete data');
+        setTimeout(() => setMessage(''), 5000);
+        return;
+      }
+
+      // Update the form with parsed data
+      setNewFood({
+        name: parsedData.foodName,
+        category: parsedData.category,
+        servingSize: parsedData.servingSize.toString(),
+        calories: parsedData.calories.toString(),
+        isProbiotic: parsedData.isProbiotic || false,
+        nutrients: parsedData.nutrients || {
+          Protein_g: '',
+          Carbohydrates_g: '',
+          Fats_g: '',
+          Omega3_DHA_EPA_mg: '',
+          Vitamin_B12_mcg: '',
+          Choline_mg: '',
+          Magnesium_mg: '',
+          Iron_mg: '',
+          Zinc_mg: '',
+          Calcium_mg: '',
+          Vitamin_D_mcg: '',
+          Vitamin_C_mg: '',
+          Fiber_g: '',
+          Collagen_g: ''
+        }
+      });
+
+      // Clear any existing errors
+      setErrors({});
+      console.log(`✅ Form auto-filled with AI data for "${parsedData.foodName}"`);
+      // NOTE: Don't clear aiResult here - let user see the raw response
+      // Only the manual "Parse & Fill Form" button clears it
+      
+    } catch (error) {
+      console.error('❌ Error filling form from AI data:', error);
+      setMessage('Error processing AI data. Please try again.');
+      setTimeout(() => setMessage(''), 5000);
+    }
+  };
+
   // Analyze food with local LLM
   const analyzeWithLocalLLM = async () => {
     if (!newFood.name) {
@@ -455,15 +504,24 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
       const result = await response.json();
 
       if (result.success && result.data) {
-        // Populate the form with analyzed data
-        setNewFood({
-          name: result.data.foodName,
-          category: result.data.category,
-          servingSize: result.data.servingSize.toString(),
-          calories: result.data.calories.toString(),
-          isProbiotic: result.data.isProbiotic,
-          nutrients: result.data.nutrients,
-        });
+        // Set the raw response in the AI Result textarea (Step 2)
+        if (result.rawResponse) {
+          setAiResult(result.rawResponse);
+          // Auto-parse and fill the form
+          setTimeout(() => {
+            parseAiResultFromData(result.data);
+          }, 100);
+        } else {
+          // Fallback: directly populate the form if no raw response
+          setNewFood({
+            name: result.data.foodName,
+            category: result.data.category,
+            servingSize: result.data.servingSize.toString(),
+            calories: result.data.calories.toString(),
+            isProbiotic: result.data.isProbiotic,
+            nutrients: result.data.nutrients,
+          });
+        }
 
         setErrors({});
         setMessage(`✓ AI analysis complete for "${result.data.foodName}" using ${modelToUse}!`);
