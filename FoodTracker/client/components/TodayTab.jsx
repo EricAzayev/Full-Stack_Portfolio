@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import TodaySummary from './TodaySummary'
 import SmartRecommendations from './SmartRecommendations'
 
-const TodayTab = () => {
+const TodayTab = ({ onNavigateToFoodLibrary }) => {
   const [foodLibrary, setFoodLibrary] = useState({})
   const [todayData, setTodayData] = useState({})
   const [needToday, setNeedToday] = useState({})
@@ -75,13 +75,14 @@ const TodayTab = () => {
 
     try {
       const response = await fetch('http://localhost:3001/api/today', {
-        method: 'POST',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           foodName: food,
-          servings: amount
+          servings: amount,
+          mode: 'add' // Add servings (delta)
         })
       })
 
@@ -89,7 +90,7 @@ const TodayTab = () => {
         const result = await response.json()
 
         // Update local state with the new data
-        setTodayData(result.updatedToday)
+        setTodayData(result.today)
         setNeedToday(result.needToday)
 
         // Show success message
@@ -125,7 +126,8 @@ const TodayTab = () => {
         },
         body: JSON.stringify({
           foodName: foodName,
-          servings: newQuantity
+          servings: newQuantity,
+          mode: 'set' // Set absolute servings
         })
       })
 
@@ -133,7 +135,7 @@ const TodayTab = () => {
         const result = await response.json()
 
         // Update local state with the new data
-        setTodayData(result.updatedToday)
+        setTodayData(result.today)
         setNeedToday(result.needToday)
 
         // Show success message
@@ -214,7 +216,14 @@ const TodayTab = () => {
               {searchTerm.length > 0 && searchResults.length === 0 && Object.keys(foodLibrary).length > 0 && (
                 <div className="search-results">
                   <div className="search-result-item no-results">
-                    No foods found matching "{searchTerm}"
+                    No foods found matching "{searchTerm}".{' '}
+                    <span 
+                      className="add-food-link" 
+                      onClick={onNavigateToFoodLibrary}
+                      style={{ cursor: 'pointer', color: '#4CAF50', fontWeight: 'bold', textDecoration: 'underline' }}
+                    >
+                      Add it here!
+                    </span>
                   </div>
                 </div>
               )}

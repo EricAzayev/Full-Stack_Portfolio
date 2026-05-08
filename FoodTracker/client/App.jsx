@@ -68,7 +68,7 @@ function App() {
       </header>
 
       <main className="app-main">
-        {activeTab === "today" && <TodayTab />}
+        {activeTab === "today" && <TodayTab onNavigateToFoodLibrary={() => setActiveTab("foodLibrary")} />}
         {activeTab === "history" && (
           <HistoryTab 
             selectedDate={selectedDate} 
