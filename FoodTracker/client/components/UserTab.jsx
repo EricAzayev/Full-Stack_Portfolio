@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { checkOllamaStatus } from '../services/ollamaDetection';
 
 const UserTab = () => {
   const [userData, setUserData] = useState({
@@ -14,21 +15,91 @@ const UserTab = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
   const [errors, setErrors] = useState({});
-  const [recommendations, setRecommendations] = useState({});
+  const [recommendations, setRecommendations] = useState({
+    Calories_kcal: 0,
+    Protein_g: 0,
+    Carbohydrates_g: 0,
+    Fats_g: 0,
+    Omega3_DHA_EPA_mg: 0,
+    Vitamin_B12_mcg: 0,
+    Choline_mg: 0,
+    Magnesium_mg: 0,
+    Iron_mg: 0,
+    Zinc_mg: 0,
+    Calcium_mg: 0,
+    Vitamin_D_mcg: 0,
+    Vitamin_C_mg: 0,
+    Fiber_g: 0,
+    Collagen_g: 0,
+  });
   const [showAllNutrients, setShowAllNutrients] = useState(false);
-  const [llmSettings, setLlmSettings] = useState({
+  const [llmConfig, setLlmConfig] = useState({
     ollamaUrl: 'http://localhost:11434',
     model: 'mistral:latest',
-    enabled: true,
   });
   const [ollamaStatus, setOllamaStatus] = useState(null);
   const [checkingOllama, setCheckingOllama] = useState(false);
+  const [originalUserData, setOriginalUserData] = useState(null);
+  const [showRecommendationModal, setShowRecommendationModal] = useState(false);
+  const [updatingRecommendations, setUpdatingRecommendations] = useState(false);
+  const [unitSystem, setUnitSystem] = useState('imperial'); // 'imperial' or 'metric'
+  const [displayHeight, setDisplayHeight] = useState({ feet: '', inches: '' });
+  const [displayWeight, setDisplayWeight] = useState('');
+
+  // Conversion functions
+  const cmToFeetInches = (cm) => {
+    const totalInches = cm / 2.54;
+    const feet = Math.floor(totalInches / 12);
+    const inches = Math.round(totalInches % 12);
+    return { feet, inches };
+  };
+
+  const feetInchesToCm = (feet, inches) => {
+    const totalInches = (Number(feet) * 12) + Number(inches);
+    return Math.round(totalInches * 2.54 * 10) / 10; // Round to 1 decimal
+  };
+
+  const kgToLbs = (kg) => {
+    return Math.round(kg * 2.20462 * 10) / 10; // Round to 1 decimal
+  };
+
+  const lbsToKg = (lbs) => {
+    return Math.round(lbs / 2.20462 * 10) / 10; // Round to 1 decimal
+  };
+
+  // Update display values when unitSystem changes
+  useEffect(() => {
+    if (userData.height && userData.weight) {
+      if (unitSystem === 'imperial') {
+        setDisplayHeight(cmToFeetInches(userData.height));
+        setDisplayWeight(kgToLbs(userData.weight));
+      } else {
+        setDisplayHeight({ feet: '', inches: '' });
+        setDisplayWeight(userData.weight);
+      }
+    }
+  }, [unitSystem]); // Only run when unit system changes, not on every weight/height change
 
   // Fetch user data and recommendations on component mount
   useEffect(() => {
+    const checkOllama = async () => {
+      const status = await checkOllamaStatus(llmConfig.ollamaUrl);
+      setOllamaStatus(status);
+      
+      // Auto-select first available model if current model isn't available
+      if (status?.available && status.models && status.models.length > 0) {
+        const modelNames = status.models.map(m => typeof m === 'string' ? m : m.name);
+        if (!modelNames.includes(llmConfig.model)) {
+          const firstModel = modelNames[0];
+          console.log(`📍 [UserTab] Model "${llmConfig.model}" not found, using "${firstModel}"`);
+          setLlmConfig(prev => ({ ...prev, model: firstModel }));
+        }
+      }
+    };
+
     fetchUserData();
     fetchRecommendations();
-    loadLlmSettings();
+    checkOllama();
   }, []);
 
   const fetchUserData = async () => {
@@ -36,6 +107,18 @@ const UserTab = () => {
       const response = await fetch("http://localhost:3001/api/user");
       const data = await response.json();
       setUserData(data);
+      setOriginalUserData(data); // Store original for comparison
+      
+      // Set display values based on current unit system
+      if (data.height && data.weight) {
+        if (unitSystem === 'imperial') {
+          setDisplayHeight(cmToFeetInches(data.height));
+          setDisplayWeight(kgToLbs(data.weight));
+        } else {
+          setDisplayHeight({ feet: '', inches: '' });
+          setDisplayWeight(data.weight);
+        }
+      }
     } catch (error) {
       console.error("Error fetching user data:", error);
       setSaveMessage("Failed to load user data");
@@ -56,38 +139,23 @@ const UserTab = () => {
     }
   };
 
-  const loadLlmSettings = () => {
-    try {
-      const saved = localStorage.getItem('llmSettings');
-      if (saved) {
-        setLlmSettings(JSON.parse(saved));
-      }
-    } catch (error) {
-      console.error('Error loading LLM settings:', error);
-    }
-  };
-
-  const saveLlmSettings = (newSettings) => {
-    try {
-      localStorage.setItem('llmSettings', JSON.stringify(newSettings));
-      setLlmSettings(newSettings);
-    } catch (error) {
-      console.error('Error saving LLM settings:', error);
-    }
-  };
-
-  const checkOllamaStatus = async () => {
+  const handleCheckOllama = async () => {
     setCheckingOllama(true);
     try {
-      const response = await fetch(`http://localhost:3001/api/ai/check-ollama?url=${encodeURIComponent(llmSettings.ollamaUrl)}`);
-      const data = await response.json();
-      setOllamaStatus(data);
+      const status = await checkOllamaStatus(llmConfig.ollamaUrl);
+      setOllamaStatus(status);
+      
+      // Auto-select first available model if current model isn't available
+      if (status?.available && status.models && status.models.length > 0) {
+        const modelNames = status.models.map(m => typeof m === 'string' ? m : m.name);
+        if (!modelNames.includes(llmConfig.model)) {
+          const firstModel = modelNames[0];
+          console.log(`📍 [UserTab] Model "${llmConfig.model}" not found, using "${firstModel}"`);
+          setLlmConfig(prev => ({ ...prev, model: firstModel }));
+        }
+      }
     } catch (error) {
-      console.error('Error checking Ollama status:', error);
-      setOllamaStatus({
-        available: false,
-        error: error.message,
-      });
+      console.error('Error checking Ollama:', error);
     } finally {
       setCheckingOllama(false);
     }
@@ -104,12 +172,22 @@ const UserTab = () => {
       newErrors.age = "Please enter a valid age (1-120)";
     }
 
+    // Height validation (always stored in cm)
     if (!userData.height || userData.height < 50 || userData.height > 300) {
-      newErrors.height = "Please enter a valid height in cm (50-300)";
+      if (unitSystem === 'imperial') {
+        newErrors.height = "Please enter a valid height (3-10 feet)";
+      } else {
+        newErrors.height = "Please enter a valid height in cm (50-300)";
+      }
     }
 
+    // Weight validation (always stored in kg)
     if (!userData.weight || userData.weight < 20 || userData.weight > 500) {
-      newErrors.weight = "Please enter a valid weight in kg (20-500)";
+      if (unitSystem === 'imperial') {
+        newErrors.weight = "Please enter a valid weight (44-1100 lbs)";
+      } else {
+        newErrors.weight = "Please enter a valid weight in kg (20-500)";
+      }
     }
 
     if (
@@ -134,6 +212,34 @@ const UserTab = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    // Handle imperial height inputs
+    if (name === 'heightFeet' || name === 'heightInches') {
+      const newDisplayHeight = { ...displayHeight, [name.replace('height', '').toLowerCase()]: value };
+      setDisplayHeight(newDisplayHeight);
+      if (newDisplayHeight.feet && newDisplayHeight.inches !== '') {
+        const cm = feetInchesToCm(newDisplayHeight.feet, newDisplayHeight.inches);
+        setUserData(prev => ({ ...prev, height: cm }));
+      }
+      if (errors.height) {
+        setErrors((prev) => ({ ...prev, height: "" }));
+      }
+      return;
+    }
+    
+    // Handle imperial weight input
+    if (name === 'weightLbs') {
+      setDisplayWeight(value);
+      if (value) {
+        const kg = lbsToKg(Number(value));
+        setUserData(prev => ({ ...prev, weight: kg }));
+      }
+      if (errors.weight) {
+        setErrors((prev) => ({ ...prev, weight: "" }));
+      }
+      return;
+    }
+    
     setUserData((prev) => ({
       ...prev,
       [name]:
@@ -172,8 +278,8 @@ const UserTab = () => {
         const result = await response.json();
         setSaveMessage("Settings saved successfully!");
         setIsEditing(false);
-        // Update recommendations with the fresh data returned from the server
-        setRecommendations(result.recommendations);
+        // Update originalUserData so change detection works correctly
+        setOriginalUserData(userData);
         setTimeout(() => setSaveMessage(""), 3000);
       } else {
         setSaveMessage("Failed to save settings");
@@ -191,6 +297,98 @@ const UserTab = () => {
     setIsEditing(false);
     setErrors({});
     setSaveMessage("");
+  };
+
+  // Check if recommendation-affecting fields have changed
+  const hasRecommendationFieldsChanged = () => {
+    if (!originalUserData || !isEditing) return false;
+    return (
+      userData.age !== originalUserData.age ||
+      userData.gender !== originalUserData.gender ||
+      userData.height !== originalUserData.height ||
+      userData.weight !== originalUserData.weight ||
+      userData.activityLevel !== originalUserData.activityLevel
+    );
+  };
+
+  // Update recommendations using standard formula
+  const updateWithFormula = async () => {
+    setUpdatingRecommendations(true);
+    try {
+      const response = await fetch("http://localhost:3001/api/recommendations/calculate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userData),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log("📊 [Standard Formula] User data used:");
+        console.log({
+          age: userData.age,
+          gender: userData.gender,
+          weight: userData.weight,
+          height: userData.height,
+          activityLevel: userData.activityLevel,
+          calorieGoal: userData.calorieGoal
+        });
+        console.log("📊 [Standard Formula] Calculated recommendations:");
+        console.log(data);
+        setRecommendations(data);
+        setSaveMessage("✓ Recommendations updated using standard formula!");
+        setTimeout(() => setSaveMessage(""), 3000);
+      } else {
+        setSaveMessage("Failed to update recommendations");
+      }
+    } catch (error) {
+      console.error("Error updating recommendations:", error);
+      setSaveMessage("Error updating recommendations");
+    } finally {
+      setUpdatingRecommendations(false);
+      setShowRecommendationModal(false);
+    }
+  };
+
+  // Update recommendations using AI/LLM
+  const updateWithAI = async () => {
+    setUpdatingRecommendations(true);
+    try {
+      const response = await fetch("http://localhost:3001/api/ai/generate-recommendations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userData,
+          ollamaUrl: llmConfig.ollamaUrl,
+          model: llmConfig.model,
+        }),
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log("🤖 [AI Recommendation] Response structure:", result);
+        if (result.success && result.data) {
+          console.log("🤖 [AI Recommendation] Prompt sent to model:");
+          console.log(result.prompt || "(Prompt not included in response)");
+          console.log("🤖 [AI Recommendation] Raw response:");
+          console.log(result.rawResponse);
+          console.log("🤖 [AI Recommendation] Parsed recommendations:");
+          console.log(result.data);
+          setRecommendations(result.data);
+          setSaveMessage("✓ Personalized recommendations generated by AI!");
+          setTimeout(() => setSaveMessage(""), 3000);
+        } else {
+          setSaveMessage("AI analysis failed: " + (result.error || "Unknown error"));
+        }
+      } else {
+        setSaveMessage("Failed to generate AI recommendations");
+      }
+    } catch (error) {
+      console.error("Error generating AI recommendations:", error);
+      setSaveMessage("Error generating AI recommendations");
+    } finally {
+      setUpdatingRecommendations(false);
+      setShowRecommendationModal(false);
+    }
   };
 
   const calculateBMI = () => {
@@ -319,43 +517,124 @@ const UserTab = () => {
 
           {/* Physical Measurements Section */}
           <section className="settings-section">
-            <h3 className="section-title">Physical Measurements</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 className="section-title" style={{ margin: 0 }}>Physical Measurements</h3>
+              <button
+                type="button"
+                onClick={() => setUnitSystem(unitSystem === 'imperial' ? 'metric' : 'imperial')}
+                style={{
+                  padding: '6px 12px',
+                  fontSize: '0.85rem',
+                  backgroundColor: '#646cff',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: '500'
+                }}
+                title="Toggle between Imperial and Metric units"
+              >
+                {unitSystem === 'imperial' ? '📏 Switch to Metric' : '📏 Switch to Imperial'}
+              </button>
+            </div>
             <div className="form-grid">
-              <div className="form-group">
-                <label htmlFor="height">Height (cm)</label>
-                <input
-                  type="number"
-                  id="height"
-                  name="height"
-                  value={userData.height}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  min="50"
-                  max="300"
-                  className={errors.height ? "input-error" : ""}
-                />
-                {errors.height && (
-                  <span className="error-text">{errors.height}</span>
-                )}
-              </div>
+              {unitSystem === 'imperial' ? (
+                <>
+                  <div className="form-group">
+                    <label>Height (ft/in)</label>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <div style={{ flex: 1 }}>
+                        <input
+                          type="number"
+                          name="heightFeet"
+                          value={displayHeight.feet}
+                          onChange={handleInputChange}
+                          disabled={!isEditing}
+                          min="3"
+                          max="10"
+                          placeholder="Feet"
+                          className={errors.height ? "input-error" : ""}
+                        />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <input
+                          type="number"
+                          name="heightInches"
+                          value={displayHeight.inches}
+                          onChange={handleInputChange}
+                          disabled={!isEditing}
+                          min="0"
+                          max="11"
+                          placeholder="Inches"
+                          className={errors.height ? "input-error" : ""}
+                        />
+                      </div>
+                    </div>
+                    {errors.height && (
+                      <span className="error-text">{errors.height}</span>
+                    )}
+                  </div>
 
-              <div className="form-group">
-                <label htmlFor="weight">Weight (kg)</label>
-                <input
-                  type="number"
-                  id="weight"
-                  name="weight"
-                  value={userData.weight}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  min="20"
-                  max="500"
-                  className={errors.weight ? "input-error" : ""}
-                />
-                {errors.weight && (
-                  <span className="error-text">{errors.weight}</span>
-                )}
-              </div>
+                  <div className="form-group">
+                    <label htmlFor="weightLbs">Weight (lbs)</label>
+                    <input
+                      type="number"
+                      id="weightLbs"
+                      name="weightLbs"
+                      value={displayWeight}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      min="44"
+                      max="1100"
+                      step="0.1"
+                      className={errors.weight ? "input-error" : ""}
+                    />
+                    {errors.weight && (
+                      <span className="error-text">{errors.weight}</span>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="form-group">
+                    <label htmlFor="height">Height (cm)</label>
+                    <input
+                      type="number"
+                      id="height"
+                      name="height"
+                      value={userData.height}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      min="50"
+                      max="300"
+                      step="0.1"
+                      className={errors.height ? "input-error" : ""}
+                    />
+                    {errors.height && (
+                      <span className="error-text">{errors.height}</span>
+                    )}
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="weight">Weight (kg)</label>
+                    <input
+                      type="number"
+                      id="weight"
+                      name="weight"
+                      value={userData.weight}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      min="20"
+                      max="500"
+                      step="0.1"
+                      className={errors.weight ? "input-error" : ""}
+                    />
+                    {errors.weight && (
+                      <span className="error-text">{errors.weight}</span>
+                    )}
+                  </div>
+                </>
+              )}
 
               <div className="form-group bmi-display">
                 <label>BMI</label>
@@ -426,10 +705,37 @@ const UserTab = () => {
 
           {/* Daily Recommendations Section */}
           <section className="settings-section">
-            <h3 className="section-title">Daily Recommendations</h3>
-            <p style={{ color: '#ccc', marginBottom: '1.5rem', lineHeight: '1.5' }}>
-              Your personalized daily nutrient targets based on your profile settings.
-            </p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <div>
+                <h3 className="section-title" style={{ marginBottom: '0.5rem' }}>Daily Recommendations</h3>
+                <p style={{ color: '#ccc', lineHeight: '1.5', margin: 0 }}>
+                  Your personalized daily nutrient targets based on your profile settings.
+                </p>
+              </div>
+              {hasRecommendationFieldsChanged() && (
+                <button
+                  className="update-recommendations-button"
+                  onClick={() => setShowRecommendationModal(true)}
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    fontWeight: '600',
+                    boxShadow: '0 4px 6px rgba(102, 126, 234, 0.3)',
+                    transition: 'all 0.2s',
+                    whiteSpace: 'nowrap'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                  onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                >
+                  🔄 Update Recommendations
+                </button>
+              )}
+            </div>
             
             <div className="nutrient-summary">
               <div className="nutrient-item">
@@ -520,8 +826,8 @@ const UserTab = () => {
                 <input
                   type="text"
                   id="ollamaUrl"
-                  value={llmSettings.ollamaUrl}
-                  onChange={(e) => saveLlmSettings({ ...llmSettings, ollamaUrl: e.target.value })}
+                  value={llmConfig.ollamaUrl}
+                  onChange={(e) => setLlmConfig({ ...llmConfig, ollamaUrl: e.target.value })}
                   disabled={!isEditing}
                   placeholder="http://localhost:11434"
                 />
@@ -530,22 +836,33 @@ const UserTab = () => {
 
               <div className="form-group">
                 <label htmlFor="model">Model</label>
-                <input
-                  type="text"
+                <select
                   id="model"
-                  value={llmSettings.model}
-                  onChange={(e) => saveLlmSettings({ ...llmSettings, model: e.target.value })}
-                  disabled={!isEditing}
-                  placeholder="mistral:latest"
-                />
-                <small style={{ color: '#999' }}>E.g., mistral:latest, phi:latest, tinyllama:latest</small>
+                  value={llmConfig.model}
+                  onChange={(e) => setLlmConfig({ ...llmConfig, model: e.target.value })}
+                  disabled={!isEditing || !ollamaStatus?.available}
+                >
+                  {ollamaStatus?.models && ollamaStatus.models.length > 0 ? (
+                    ollamaStatus.models.map((model) => {
+                      const modelName = typeof model === 'string' ? model : model.name;
+                      return <option key={modelName} value={modelName}>{modelName}</option>;
+                    })
+                  ) : (
+                    <option value={llmConfig.model}>{llmConfig.model}</option>
+                  )}
+                </select>
+                <small style={{ color: '#999' }}>
+                  {ollamaStatus?.available 
+                    ? `${ollamaStatus.models?.length || 0} model(s) available` 
+                    : 'Check Ollama status to see available models'}
+                </small>
               </div>
             </div>
 
             <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
               <button 
                 className="check-ollama-button"
-                onClick={checkOllamaStatus}
+                onClick={handleCheckOllama}
                 disabled={checkingOllama}
               >
                 {checkingOllama ? '⏳ Checking...' : '🔍 Check Ollama Status'}
@@ -608,6 +925,126 @@ const UserTab = () => {
           </div>
         </div>
       </div>
+
+      {/* Recommendation Update Modal */}
+      {showRecommendationModal && (
+        <div 
+          className="modal-overlay" 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}
+          onClick={() => setShowRecommendationModal(false)}
+        >
+          <div 
+            className="modal-content"
+            style={{
+              background: '#1a1a1a',
+              border: '1px solid #333',
+              borderRadius: '12px',
+              padding: '2rem',
+              maxWidth: '500px',
+              width: '90%',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ marginTop: 0, marginBottom: '1rem', color: '#fff' }}>
+              Choose Recommendation Method
+            </h3>
+            <p style={{ color: '#ccc', marginBottom: '2rem', lineHeight: '1.6' }}>
+              Select how you'd like to update your daily nutrient recommendations:
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <button
+                onClick={updateWithFormula}
+                disabled={updatingRecommendations}
+                style={{
+                  padding: '1.25rem',
+                  background: '#2a2a2a',
+                  border: '2px solid #4CAF50',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  cursor: updatingRecommendations ? 'not-allowed' : 'pointer',
+                  textAlign: 'left',
+                  transition: 'all 0.2s',
+                  opacity: updatingRecommendations ? 0.6 : 1
+                }}
+                onMouseOver={(e) => !updatingRecommendations && (e.currentTarget.style.background = '#333')}
+                onMouseOut={(e) => !updatingRecommendations && (e.currentTarget.style.background = '#2a2a2a')}
+              >
+                <div style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem' }}>
+                  📊 Standard Formula
+                </div>
+                <div style={{ fontSize: '0.85rem', color: '#aaa' }}>
+                  Uses evidence-based nutritional guidelines (RDA/DRI) tailored to your age, gender, and activity level. Fast and reliable.
+                </div>
+              </button>
+
+              <button
+                onClick={updateWithAI}
+                disabled={updatingRecommendations || !ollamaStatus?.available}
+                style={{
+                  padding: '1.25rem',
+                  background: '#2a2a2a',
+                  border: `2px solid ${ollamaStatus?.available ? '#667eea' : '#666'}`,
+                  borderRadius: '8px',
+                  color: '#fff',
+                  cursor: (updatingRecommendations || !ollamaStatus?.available) ? 'not-allowed' : 'pointer',
+                  textAlign: 'left',
+                  transition: 'all 0.2s',
+                  opacity: (updatingRecommendations || !ollamaStatus?.available) ? 0.6 : 1
+                }}
+                onMouseOver={(e) => !updatingRecommendations && ollamaStatus?.available && (e.currentTarget.style.background = '#333')}
+                onMouseOut={(e) => !updatingRecommendations && ollamaStatus?.available && (e.currentTarget.style.background = '#2a2a2a')}
+              >
+                <div style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem' }}>
+                  🤖 AI Personalized {!ollamaStatus?.available && '(Setup Required)'}
+                </div>
+                <div style={{ fontSize: '0.85rem', color: '#aaa' }}>
+                  {ollamaStatus?.available 
+                    ? 'Uses local AI to generate deeply personalized recommendations based on your unique profile. May take 30-60 seconds.'
+                    : 'Requires Ollama to be installed and running. Configure in LLM Settings below.'}
+                </div>
+              </button>
+            </div>
+
+            {updatingRecommendations && (
+              <div style={{ marginTop: '1.5rem', textAlign: 'center', color: '#667eea' }}>
+                <span style={{ fontSize: '1.5rem' }}>⏳</span>
+                <p style={{ margin: '0.5rem 0 0 0' }}>Updating recommendations...</p>
+              </div>
+            )}
+
+            <button
+              onClick={() => setShowRecommendationModal(false)}
+              disabled={updatingRecommendations}
+              style={{
+                marginTop: '1.5rem',
+                width: '100%',
+                padding: '0.75rem',
+                background: 'transparent',
+                border: '1px solid #444',
+                borderRadius: '6px',
+                color: '#ccc',
+                cursor: updatingRecommendations ? 'not-allowed' : 'pointer',
+                fontSize: '0.9rem'
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

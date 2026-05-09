@@ -346,6 +346,64 @@ router.get("/records", (req, res) => {
 // ============= RECOMMENDATIONS ROUTES =============
 
 /**
+ * GET /api/recommendations
+ * Get nutrient recommendations for the current user
+ */
+router.get("/recommendations", (req, res) => {
+  try {
+    const userData = userDAL.getUser();
+    
+    if (!userData) {
+      return res.status(404).json({ error: "User profile not found" });
+    }
+    
+    const recommendations = createRecommendedMicros(userData);
+    recommendations["Calories_kcal"] = userData.calorieGoal || 2000;
+    
+    console.log(`✅ [Routes] Fetched recommendations for user`);
+    
+    res.status(200).json(recommendations);
+  } catch (error) {
+    console.error("Error fetching recommendations:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/**
+ * POST /api/recommendations/calculate
+ * Calculate nutrient recommendations using standard formula
+ */
+router.post("/recommendations/calculate", (req, res) => {
+  try {
+    const userData = req.body;
+    
+    // Validate required fields
+    if (!userData.age || !userData.gender || !userData.activityLevel) {
+      return res.status(400).json({ error: "Missing required user data" });
+    }
+    
+    console.log(`📊 [Standard Formula] Calculating for user:`, {
+      age: userData.age,
+      gender: userData.gender,
+      weight: userData.weight,
+      height: userData.height,
+      activityLevel: userData.activityLevel,
+      calorieGoal: userData.calorieGoal
+    });
+    
+    const recommendations = createRecommendedMicros(userData);
+    recommendations["Calories_kcal"] = userData.calorieGoal || 2000;
+    
+    console.log(`✅ [Standard Formula] Calculated recommendations:`, recommendations);
+    
+    res.status(200).json(recommendations);
+  } catch (error) {
+    console.error("Error calculating recommendations:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/**
  * GET /api/smart-recommendations
  * Get smart food recommendations based on nutrient deficits
  */

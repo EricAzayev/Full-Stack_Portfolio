@@ -56,17 +56,46 @@ export function createRecommendedMicros(user) {
   }
   const activityMult = activityMultiplier[user.activityLevel] || 1.0;
   const genderMult = genderMultiplier[user.gender] || {};
-  const ageMult = ageAdjustment(user.age || 30); // Default to 30 if age missing
-
-  // Scale based on calorie goal relative to 2000 kcal baseline
-  // Default to 2000 if missing
+  const ageMult = ageAdjustment(user.age || 30);
+  
+  const weight = user.weight || 70; // Default to 70kg if missing
+  const age = user.age || 30;
   const calorieGoal = user.calorieGoal || 2000;
   const calorieFactor = calorieGoal / 2000;
 
   const recommendedMicros = {};
 
   for (const [key, value] of Object.entries(baseMicros)) {
-    let adjusted = value * calorieFactor * activityMult;
+    let adjusted = value;
+    
+    // Weight-based calculations for protein (most important)
+    if (key === "Protein_g") {
+      // Protein: 0.8-2.2g per kg based on activity level
+      // Sedentary: 0.8g/kg, Light: 1.0g/kg, Moderate: 1.2g/kg, Active: 1.6g/kg, Very Active: 2.0g/kg
+      const proteinPerKg = {
+        sedentary: 0.8,
+        light: 1.0,
+        moderate: 1.2,
+        active: 1.6,
+        "very active": 2.0
+      }[user.activityLevel] || 1.0;
+      
+      adjusted = weight * proteinPerKg;
+    }
+    // Weight-based adjustments for minerals that scale with body mass
+    else if (key === "Magnesium_mg" || key === "Zinc_mg" || key === "Iron_mg") {
+      // Scale by weight relative to 70kg baseline
+      const weightFactor = weight / 70;
+      adjusted = value * weightFactor * activityMult;
+    }
+    // Fiber scales with calorie intake and activity
+    else if (key === "Fiber_g") {
+      adjusted = value * calorieFactor * activityMult;
+    }
+    // Standard calorie and activity scaling for others
+    else {
+      adjusted = value * calorieFactor * activityMult;
+    }
 
     // Apply gender-specific multiplier if exists
     if (genderMult[key]) adjusted *= genderMult[key];

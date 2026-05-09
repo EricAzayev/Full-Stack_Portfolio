@@ -147,6 +147,147 @@ router.get("/defaults", (req, res) => {
   });
 });
 
+/**
+ * POST /api/ai/generate-recommendations
+ * Generate personalized nutrient recommendations using LLM
+ * 
+ * Body:
+ * {
+ *   userData: { name, age, gender, height, weight, activityLevel, calorieGoal },
+ *   ollamaUrl?: string,
+ *   model?: string
+ * }
+ */
+router.post("/generate-recommendations", async (req, res) => {
+  try {
+    console.log("📍 [AI] Recommendation generation request received");
+    
+    const { userData, ollamaUrl, model } = req.body;
+
+    // Validate input
+    if (!userData || !userData.age || !userData.gender || !userData.activityLevel) {
+      console.warn("⚠️ [AI] Missing required userData fields");
+      return res.status(400).json({
+        success: false,
+        error: "Missing required user data (age, gender, activityLevel)",
+      });
+    }
+
+    console.log(`📍 [AI] Generating recommendations for ${userData.name || 'user'}`);
+
+    // Build prompt for LLM
+    const prompt = `You are a certified nutritionist. Generate daily nutrient recommendations.
+
+Profile:
+- Age: ${userData.age} years
+- Gender: ${userData.gender}
+- Height: ${userData.height} cm
+- Weight: ${userData.weight} kg
+- Activity Level: ${userData.activityLevel}
+- Calorie Goal: ${userData.calorieGoal} kcal
+
+CRITICAL RULES:
+1. Protein = ${userData.weight} kg × activity multiplier (sedentary:0.8, light:1.0, moderate:1.2, active:1.6, very active:2.0)
+2. Use RDA/DRI for vitamins/minerals
+3. MUST output SINGLE numbers only (example: "90" NOT "75-100" or "90 mg")
+4. NO UNITS in output (no mg, mcg, g, IU)
+5. NO RANGES (75-100 is FORBIDDEN - pick ONE number like 87)
+6. ONE LINE ONLY, no explanations
+
+Output EXACTLY this format:
+Calories_kcal:[number]|Protein_g:[number]|Carbohydrates_g:[number]|Fats_g:[number]|Omega3_DHA_EPA_mg:[number]|Vitamin_B12_mcg:[number]|Choline_mg:[number]|Magnesium_mg:[number]|Iron_mg:[number]|Zinc_mg:[number]|Calcium_mg:[number]|Vitamin_D_mcg:[number]|Vitamin_C_mg:[number]|Fiber_g:[number]|Collagen_g:[number]
+
+Example correct output:
+Calories_kcal:2000|Protein_g:88|Carbohydrates_g:250|Fats_g:67|Omega3_DHA_EPA_mg:250|Vitamin_B12_mcg:2.4|Choline_mg:550|Magnesium_mg:400|Iron_mg:11|Zinc_mg:8|Calcium_mg:1000|Vitamin_D_mcg:15|Vitamin_C_mg:90|Fiber_g:30|Collagen_g:10
+
+NOW OUTPUT FOR THIS PROFILE (single line, numbers only, no ranges, no units):`;
+
+    // Import callOllama dynamically
+    const { callOllama } = await import("../services/llmService.js");
+    
+    // Use model from request, not DEFAULT_MODEL
+    const selectedModel = model || DEFAULT_MODEL;
+    const selectedUrl = ollamaUrl || DEFAULT_OLLAMA_URL;
+    
+    console.log(`📍 [AI] Using model: ${selectedModel} at ${selectedUrl}`);
+    console.log(`📝 [AI] Prompt being sent to model:\n${prompt}`);
+    
+    // Call LLM
+    const llmResult = await callOllama(
+      prompt,
+      selectedModel,
+      selectedUrl
+    );
+
+    if (!llmResult.success) {
+      console.error("❌ [AI] LLM call failed:", llmResult.error);
+      return res.status(500).json({
+        success: false,
+        error: llmResult.error,
+        source: "ollama",
+      });
+    }
+
+    // Parse the response
+    const cleanResponse = llmResult.response.trim().replace(/\n/g, "");
+    const pairs = cleanResponse.split("|");
+    const recommendations = {};
+
+    pairs.forEach((pair) => {
+      const [key, value] = pair.split(":");
+      if (key && value !== undefined) {
+        // Remove any units (mg, mcg, g, IU, etc.) from the value
+        let cleanValue = value.trim().replace(/\s*(mg|mcg|g|IU|grams\/day)\.?$/i, '');
+        
+        // Handle ranges (e.g., "75-100", "275-300") - take the average
+        if (cleanValue.includes('-')) {
+          const parts = cleanValue.split('-').map(v => parseFloat(v.trim()));
+          if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+            cleanValue = ((parts[0] + parts[1]) / 2).toString();
+            console.log(`🔄 [AI] Converted range "${value}" to average: ${cleanValue}`);
+          }
+        }
+        
+        const parsedValue = parseFloat(cleanValue);
+        if (!isNaN(parsedValue)) {
+          recommendations[key.trim()] = parsedValue;
+        }
+      }
+    });
+
+    // Validate we got the required fields
+    const requiredFields = ["Calories_kcal", "Protein_g", "Carbohydrates_g", "Fats_g"];
+    for (const field of requiredFields) {
+      if (!recommendations[field]) {
+        console.error("❌ [AI] Missing required field in LLM response:", field);
+        return res.status(500).json({
+          success: false,
+          error: `LLM response missing required field: ${field}`,
+        });
+      }
+    }
+
+    console.log("✅ [AI] Recommendations generated successfully");
+    console.log(`📦 [AI] Sending response with prompt included`);
+
+    res.json({
+      success: true,
+      data: recommendations,
+      rawResponse: llmResult.response,
+      prompt: prompt,
+      model: selectedModel,
+      source: "ollama",
+    });
+  } catch (error) {
+    console.error("❌ [AI] Unexpected error:", error.message);
+    console.error("❌ [AI] Stack trace:", error.stack);
+    res.status(500).json({
+      success: false,
+      error: `Server error: ${error.message}`,
+    });
+  }
+});
+
 console.log("✅ [AI Routes] AI router loaded");
 
 export default router;
