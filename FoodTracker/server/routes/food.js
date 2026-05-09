@@ -77,6 +77,10 @@ router.post("/foodLibrary", (req, res) => {
       vitamin_c_mg: parseFloat(nutrients.Vitamin_C_mg) || 0,
       fiber_g: parseFloat(nutrients.Fiber_g) || 0,
       collagen_g: parseFloat(nutrients.Collagen_g) || 0,
+      added_sugars_g: parseFloat(nutrients.Added_Sugars_g) || 0,
+      sodium_mg: parseFloat(nutrients.Sodium_mg) || 0,
+      saturated_fat_g: parseFloat(nutrients.Saturated_Fat_g) || 0,
+      monounsaturated_fat_g: parseFloat(nutrients.Monounsaturated_Fat_g) || 0,
     };
 
     // Add food to database
@@ -146,6 +150,10 @@ router.put("/foodLibrary/:foodName", (req, res) => {
       vitamin_c_mg: parseFloat(nutrients.Vitamin_C_mg) || 0,
       fiber_g: parseFloat(nutrients.Fiber_g) || 0,
       collagen_g: parseFloat(nutrients.Collagen_g) || 0,
+      added_sugars_g: parseFloat(nutrients.Added_Sugars_g) || 0,
+      sodium_mg: parseFloat(nutrients.Sodium_mg) || 0,
+      saturated_fat_g: parseFloat(nutrients.Saturated_Fat_g) || 0,
+      monounsaturated_fat_g: parseFloat(nutrients.Monounsaturated_Fat_g) || 0,
     };
 
     // Update food in database

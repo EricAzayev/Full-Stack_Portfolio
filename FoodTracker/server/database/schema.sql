@@ -40,6 +40,10 @@ CREATE TABLE IF NOT EXISTS foods (
     vitamin_d_mcg REAL NOT NULL DEFAULT 0,
     vitamin_c_mg REAL NOT NULL DEFAULT 0,
     collagen_g REAL NOT NULL DEFAULT 0,
+    added_sugars_g REAL NOT NULL DEFAULT 0,
+    sodium_mg REAL NOT NULL DEFAULT 0,
+    saturated_fat_g REAL NOT NULL DEFAULT 0,
+    monounsaturated_fat_g REAL NOT NULL DEFAULT 0,
     
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now'))
@@ -66,6 +70,10 @@ CREATE TABLE IF NOT EXISTS daily_records (
     total_vitamin_d_mcg REAL NOT NULL DEFAULT 0,
     total_vitamin_c_mg REAL NOT NULL DEFAULT 0,
     total_collagen_g REAL NOT NULL DEFAULT 0,
+    total_added_sugars_g REAL NOT NULL DEFAULT 0,
+    total_sodium_mg REAL NOT NULL DEFAULT 0,
+    total_saturated_fat_g REAL NOT NULL DEFAULT 0,
+    total_monounsaturated_fat_g REAL NOT NULL DEFAULT 0,
     
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now'))
@@ -79,7 +87,7 @@ CREATE TABLE IF NOT EXISTS daily_food_items (
     servings REAL NOT NULL,
     
     FOREIGN KEY (daily_record_id) REFERENCES daily_records(id) ON DELETE CASCADE,
-    FOREIGN KEY (food_id) REFERENCES foods(id) ON DELETE RESTRICT,
+    FOREIGN KEY (food_id) REFERENCES foods(id) ON DELETE CASCADE,
     UNIQUE(daily_record_id, food_id)
 );
 

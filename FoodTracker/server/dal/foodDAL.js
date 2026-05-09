@@ -17,7 +17,8 @@ export function getAllFoods() {
       protein_g, carbohydrates_g, fats_g, fiber_g,
       omega3_dha_epa_mg, vitamin_b12_mcg, choline_mg,
       magnesium_mg, iron_mg, zinc_mg, calcium_mg,
-      vitamin_d_mcg, vitamin_c_mg, collagen_g
+      vitamin_d_mcg, vitamin_c_mg, collagen_g,
+      added_sugars_g, sodium_mg, saturated_fat_g, monounsaturated_fat_g
     FROM foods
     ORDER BY name
   `);
@@ -39,7 +40,8 @@ export function getFoodByName(name) {
       protein_g, carbohydrates_g, fats_g, fiber_g,
       omega3_dha_epa_mg, vitamin_b12_mcg, choline_mg,
       magnesium_mg, iron_mg, zinc_mg, calcium_mg,
-      vitamin_d_mcg, vitamin_c_mg, collagen_g
+      vitamin_d_mcg, vitamin_c_mg, collagen_g,
+      added_sugars_g, sodium_mg, saturated_fat_g, monounsaturated_fat_g
     FROM foods
     WHERE name = ?
   `);
@@ -61,7 +63,8 @@ export function getFoodById(id) {
       protein_g, carbohydrates_g, fats_g, fiber_g,
       omega3_dha_epa_mg, vitamin_b12_mcg, choline_mg,
       magnesium_mg, iron_mg, zinc_mg, calcium_mg,
-      vitamin_d_mcg, vitamin_c_mg, collagen_g
+      vitamin_d_mcg, vitamin_c_mg, collagen_g,
+      added_sugars_g, sodium_mg, saturated_fat_g, monounsaturated_fat_g
     FROM foods
     WHERE id = ?
   `);
@@ -83,13 +86,15 @@ export function addFood(foodData) {
       protein_g, carbohydrates_g, fats_g, fiber_g,
       omega3_dha_epa_mg, vitamin_b12_mcg, choline_mg,
       magnesium_mg, iron_mg, zinc_mg, calcium_mg,
-      vitamin_d_mcg, vitamin_c_mg, collagen_g
+      vitamin_d_mcg, vitamin_c_mg, collagen_g,
+      added_sugars_g, sodium_mg, saturated_fat_g, monounsaturated_fat_g
     ) VALUES (
       @name, @category, @servingSize, @calories, @isProbiotic,
       @protein_g, @carbohydrates_g, @fats_g, @fiber_g,
       @omega3_dha_epa_mg, @vitamin_b12_mcg, @choline_mg,
       @magnesium_mg, @iron_mg, @zinc_mg, @calcium_mg,
-      @vitamin_d_mcg, @vitamin_c_mg, @collagen_g
+      @vitamin_d_mcg, @vitamin_c_mg, @collagen_g,
+      @added_sugars_g, @sodium_mg, @saturated_fat_g, @monounsaturated_fat_g
     )
   `);
   
@@ -126,7 +131,11 @@ export function updateFood(oldName, foodData) {
       calcium_mg = @calcium_mg,
       vitamin_d_mcg = @vitamin_d_mcg,
       vitamin_c_mg = @vitamin_c_mg,
-      collagen_g = @collagen_g
+      collagen_g = @collagen_g,
+      added_sugars_g = @added_sugars_g,
+      sodium_mg = @sodium_mg,
+      saturated_fat_g = @saturated_fat_g,
+      monounsaturated_fat_g = @monounsaturated_fat_g
     WHERE name = @oldName
   `);
   
@@ -223,6 +232,10 @@ export function getFoodLibraryLegacyFormat() {
         Vitamin_C_mg: food.vitamin_c_mg,
         Fiber_g: food.fiber_g,
         Collagen_g: food.collagen_g,
+        Added_Sugars_g: food.added_sugars_g,
+        Sodium_mg: food.sodium_mg,
+        Saturated_Fat_g: food.saturated_fat_g,
+        Monounsaturated_Fat_g: food.monounsaturated_fat_g,
       },
       CollagenSupport: {
         DerivedFrom: ["Protein_g"],

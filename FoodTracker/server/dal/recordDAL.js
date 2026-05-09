@@ -19,7 +19,8 @@ export function getRecordByDate(date) {
       total_protein_g, total_carbohydrates_g, total_fats_g, total_fiber_g,
       total_omega3_dha_epa_mg, total_vitamin_b12_mcg, total_choline_mg,
       total_magnesium_mg, total_iron_mg, total_zinc_mg, total_calcium_mg,
-      total_vitamin_d_mcg, total_vitamin_c_mg, total_collagen_g
+      total_vitamin_d_mcg, total_vitamin_c_mg, total_collagen_g,
+      total_added_sugars_g, total_sodium_mg, total_saturated_fat_g, total_monounsaturated_fat_g
     FROM daily_records
     WHERE date = ?
   `);
@@ -58,7 +59,8 @@ export function getFoodItemsForRecord(recordId) {
       f.protein_g, f.carbohydrates_g, f.fats_g, f.fiber_g,
       f.omega3_dha_epa_mg, f.vitamin_b12_mcg, f.choline_mg,
       f.magnesium_mg, f.iron_mg, f.zinc_mg, f.calcium_mg,
-      f.vitamin_d_mcg, f.vitamin_c_mg, f.collagen_g
+      f.vitamin_d_mcg, f.vitamin_c_mg, f.collagen_g,
+      f.added_sugars_g, f.sodium_mg, f.saturated_fat_g, f.monounsaturated_fat_g
     FROM daily_food_items dfi
     JOIN foods f ON dfi.food_id = f.id
     WHERE dfi.daily_record_id = ?
@@ -97,6 +99,10 @@ export function getTodayLegacyFormat() {
       Vitamin_C_mg: today.total_vitamin_c_mg,
       Fiber_g: today.total_fiber_g,
       Collagen_g: today.total_collagen_g,
+      Added_Sugars_g: today.total_added_sugars_g,
+      Sodium_mg: today.total_sodium_mg,
+      Saturated_Fat_g: today.total_saturated_fat_g,
+      Monounsaturated_Fat_g: today.total_monounsaturated_fat_g,
     },
     calories: today.total_calories,
     food: food,
@@ -195,7 +201,11 @@ export function updateTodayFood(foodName, servings) {
         total_calcium_mg = total_calcium_mg + (? * ?),
         total_vitamin_d_mcg = total_vitamin_d_mcg + (? * ?),
         total_vitamin_c_mg = total_vitamin_c_mg + (? * ?),
-        total_collagen_g = total_collagen_g + (? * ?)
+        total_collagen_g = total_collagen_g + (? * ?),
+        total_added_sugars_g = total_added_sugars_g + (? * ?),
+        total_sodium_mg = total_sodium_mg + (? * ?),
+        total_saturated_fat_g = total_saturated_fat_g + (? * ?),
+        total_monounsaturated_fat_g = total_monounsaturated_fat_g + (? * ?)
       WHERE id = ?
     `);
     
@@ -215,6 +225,10 @@ export function updateTodayFood(foodName, servings) {
       nutrientChange, food.vitamin_d_mcg,
       nutrientChange, food.vitamin_c_mg,
       nutrientChange, food.collagen_g,
+      nutrientChange, food.added_sugars_g,
+      nutrientChange, food.sodium_mg,
+      nutrientChange, food.saturated_fat_g,
+      nutrientChange, food.monounsaturated_fat_g,
       today.id
     );
     
@@ -255,7 +269,11 @@ export function resetTodayRecord() {
         total_calcium_mg = 0,
         total_vitamin_d_mcg = 0,
         total_vitamin_c_mg = 0,
-        total_collagen_g = 0
+        total_collagen_g = 0,
+        total_added_sugars_g = 0,
+        total_sodium_mg = 0,
+        total_saturated_fat_g = 0,
+        total_monounsaturated_fat_g = 0
       WHERE id = ?
     `);
     resetTotalsStmt.run(today.id);
@@ -280,6 +298,7 @@ export function getAllRecords(limit = null, offset = 0) {
       total_omega3_dha_epa_mg, total_vitamin_b12_mcg, total_choline_mg,
       total_magnesium_mg, total_iron_mg, total_zinc_mg, total_calcium_mg,
       total_vitamin_d_mcg, total_vitamin_c_mg, total_collagen_g,
+      total_added_sugars_g, total_sodium_mg, total_saturated_fat_g, total_monounsaturated_fat_g,
       created_at as timestamp
     FROM daily_records
     ORDER BY date DESC
@@ -327,6 +346,10 @@ export function getAllRecordsLegacyFormat() {
         Vitamin_C_mg: record.total_vitamin_c_mg,
         Fiber_g: record.total_fiber_g,
         Collagen_g: record.total_collagen_g,
+        Added_Sugars_g: record.total_added_sugars_g,
+        Sodium_mg: record.total_sodium_mg,
+        Saturated_Fat_g: record.total_saturated_fat_g,
+        Monounsaturated_Fat_g: record.total_monounsaturated_fat_g,
       },
       calories: record.total_calories,
       food: food,

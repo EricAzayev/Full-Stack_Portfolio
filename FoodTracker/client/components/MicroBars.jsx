@@ -15,7 +15,11 @@ const MicroBars = ({ nutrients, targets, showAll = false, onToggleShowAll }) => 
     { key: 'Vitamin_D_mcg', name: 'Vitamin D', color: '#ec4899', unit: 'μg', icon: '☀️' },
     { key: 'Vitamin_C_mg', name: 'Vitamin C', color: '#22c55e', unit: 'mg', icon: '🍊' },
     { key: 'Fiber_g', name: 'Fiber', color: '#a855f7', unit: 'g', icon: '🌾' },
-    { key: 'Collagen_g', name: 'Collagen', color: '#64748b', unit: 'g', icon: '💎' }
+    { key: 'Collagen_g', name: 'Collagen', color: '#64748b', unit: 'g', icon: '💎' },
+    { key: 'Added_Sugars_g', name: 'Added Sugars', color: '#dc2626', unit: 'g', icon: '🍬' },
+    { key: 'Sodium_mg', name: 'Sodium', color: '#6366f1', unit: 'mg', icon: '🧂' },
+    { key: 'Saturated_Fat_g', name: 'Saturated Fat', color: '#f43f5e', unit: 'g', icon: '🧈' },
+    { key: 'Monounsaturated_Fat_g', name: 'Monounsaturated Fat', color: '#14b8a6', unit: 'g', icon: '🥑' }
   ];
 
   // Calculate progress for each nutrient and sort by deficiency (lowest % first)

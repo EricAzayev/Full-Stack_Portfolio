@@ -31,6 +31,10 @@ const UserTab = () => {
     Vitamin_C_mg: 0,
     Fiber_g: 0,
     Collagen_g: 0,
+    Added_Sugars_g: 0,
+    Sodium_mg: 0,
+    Saturated_Fat_g: 0,
+    Monounsaturated_Fat_g: 0,
   });
   const [showAllNutrients, setShowAllNutrients] = useState(false);
   const [llmConfig, setLlmConfig] = useState({
@@ -800,6 +804,22 @@ const UserTab = () => {
                   <div className="nutrient-item">
                     <span>Collagen:</span>
                     <span>{recommendations.Collagen_g || 0}g</span>
+                  </div>
+                  <div className="nutrient-item">
+                    <span>Added Sugars:</span>
+                    <span>{recommendations.Added_Sugars_g || 0}g</span>
+                  </div>
+                  <div className="nutrient-item">
+                    <span>Sodium:</span>
+                    <span>{recommendations.Sodium_mg || 0}mg</span>
+                  </div>
+                  <div className="nutrient-item">
+                    <span>Saturated Fat:</span>
+                    <span>{recommendations.Saturated_Fat_g || 0}g</span>
+                  </div>
+                  <div className="nutrient-item">
+                    <span>Monounsaturated Fat:</span>
+                    <span>{recommendations.Monounsaturated_Fat_g || 0}g</span>
                   </div>
                 </>
               )}

@@ -25,7 +25,11 @@ const FoodLibraryTab = () => {
       Vitamin_D_mcg: '',
       Vitamin_C_mg: '',
       Fiber_g: '',
-      Collagen_g: ''
+      Collagen_g: '',
+      Added_Sugars_g: '',
+      Sodium_mg: '',
+      Saturated_Fat_g: '',
+      Monounsaturated_Fat_g: ''
     }
   });
   const [message, setMessage] = useState('');
@@ -196,7 +200,11 @@ const FoodLibraryTab = () => {
             Vitamin_D_mcg: '',
             Vitamin_C_mg: '',
             Fiber_g: '',
-            Collagen_g: ''
+            Collagen_g: '',
+            Added_Sugars_g: '',
+            Sodium_mg: '',
+            Saturated_Fat_g: '',
+            Monounsaturated_Fat_g: ''
           }
         });
         setErrors({});
@@ -237,7 +245,11 @@ const FoodLibraryTab = () => {
         Vitamin_D_mcg: '',
         Vitamin_C_mg: '',
         Fiber_g: '',
-        Collagen_g: ''
+        Collagen_g: '',
+        Added_Sugars_g: '',
+        Sodium_mg: '',
+        Saturated_Fat_g: '',
+        Monounsaturated_Fat_g: ''
       }
     });
     setErrors({});
@@ -267,7 +279,11 @@ const FoodLibraryTab = () => {
         Vitamin_D_mcg: foodData.Nutrients.Vitamin_D_mcg.toString(),
         Vitamin_C_mg: foodData.Nutrients.Vitamin_C_mg.toString(),
         Fiber_g: foodData.Nutrients.Fiber_g.toString(),
-        Collagen_g: foodData.Nutrients.Collagen_g.toString()
+        Collagen_g: foodData.Nutrients.Collagen_g.toString(),
+        Added_Sugars_g: foodData.Nutrients.Added_Sugars_g.toString(),
+        Sodium_mg: foodData.Nutrients.Sodium_mg.toString(),
+        Saturated_Fat_g: foodData.Nutrients.Saturated_Fat_g.toString(),
+        Monounsaturated_Fat_g: foodData.Nutrients.Monounsaturated_Fat_g.toString()
       }
     });
     setIsAddingFood(true);
@@ -306,7 +322,7 @@ These values may be null, at which point you should make a reasonable, evidence-
 
 Write a dissectable line formatted as follows:
 
-foodName:${newFood.name || '[name]'}|category:${newFood.category || '[category]'}|servingSize_g:${newFood.servingSize || '[servingSize]'}|calories:${newFood.calories || '[calories]'}|containsProbiotics:${newFood.isProbiotic}|Protein_g:${newFood.nutrients.Protein_g || '[val]'}|Carbohydrates_g:${newFood.nutrients.Carbohydrates_g || '[val]'}|Fats_g:${newFood.nutrients.Fats_g || '[val]'}|Omega3_DHA_EPA_mg:${newFood.nutrients.Omega3_DHA_EPA_mg || '[val]'}|Vitamin_B12_mcg:${newFood.nutrients.Vitamin_B12_mcg || '[val]'}|Choline_mg:${newFood.nutrients.Choline_mg || '[val]'}|Magnesium_mg:${newFood.nutrients.Magnesium_mg || '[val]'}|Iron_mg:${newFood.nutrients.Iron_mg || '[val]'}|Zinc_mg:${newFood.nutrients.Zinc_mg || '[val]'}|Calcium_mg:${newFood.nutrients.Calcium_mg || '[val]'}|Vitamin_D_mcg:${newFood.nutrients.Vitamin_D_mcg || '[val]'}|Vitamin_C_mg:${newFood.nutrients.Vitamin_C_mg || '[val]'}|Fiber_g:${newFood.nutrients.Fiber_g || '[val]'}|Collagen_g:${newFood.nutrients.Collagen_g || '[val]'}
+foodName:${newFood.name || '[name]'}|category:${newFood.category || '[category]'}|servingSize_g:${newFood.servingSize || '[servingSize]'}|calories:${newFood.calories || '[calories]'}|containsProbiotics:${newFood.isProbiotic}|Protein_g:${newFood.nutrients.Protein_g || '[val]'}|Carbohydrates_g:${newFood.nutrients.Carbohydrates_g || '[val]'}|Fats_g:${newFood.nutrients.Fats_g || '[val]'}|Omega3_DHA_EPA_mg:${newFood.nutrients.Omega3_DHA_EPA_mg || '[val]'}|Vitamin_B12_mcg:${newFood.nutrients.Vitamin_B12_mcg || '[val]'}|Choline_mg:${newFood.nutrients.Choline_mg || '[val]'}|Magnesium_mg:${newFood.nutrients.Magnesium_mg || '[val]'}|Iron_mg:${newFood.nutrients.Iron_mg || '[val]'}|Zinc_mg:${newFood.nutrients.Zinc_mg || '[val]'}|Calcium_mg:${newFood.nutrients.Calcium_mg || '[val]'}|Vitamin_D_mcg:${newFood.nutrients.Vitamin_D_mcg || '[val]'}|Vitamin_C_mg:${newFood.nutrients.Vitamin_C_mg || '[val]'}|Fiber_g:${newFood.nutrients.Fiber_g || '[val]'}|Collagen_g:${newFood.nutrients.Collagen_g || '[val]'}|Added_Sugars_g:${newFood.nutrients.Added_Sugars_g || '[val]'}|Sodium_mg:${newFood.nutrients.Sodium_mg || '[val]'}|Saturated_Fat_g:${newFood.nutrients.Saturated_Fat_g || '[val]'}|Monounsaturated_Fat_g:${newFood.nutrients.Monounsaturated_Fat_g || '[val]'}
 
 A food tracker will dissect the line to fill in the user's nutrition library, so be as thorough and realistic as possible with all nutrient values. Use your best nutritional knowledge to estimate missing information when data is incomplete.`;
 
@@ -384,7 +400,11 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
           Vitamin_D_mcg: parseNumericValue(parsedData.Vitamin_D_mcg) || '',
           Vitamin_C_mg: parseNumericValue(parsedData.Vitamin_C_mg) || '',
           Fiber_g: parseNumericValue(parsedData.Fiber_g) || '',
-          Collagen_g: parseNumericValue(parsedData.Collagen_g) || ''
+          Collagen_g: parseNumericValue(parsedData.Collagen_g) || '',
+          Added_Sugars_g: parseNumericValue(parsedData.Added_Sugars_g) || '',
+          Sodium_mg: parseNumericValue(parsedData.Sodium_mg) || '',
+          Saturated_Fat_g: parseNumericValue(parsedData.Saturated_Fat_g) || '',
+          Monounsaturated_Fat_g: parseNumericValue(parsedData.Monounsaturated_Fat_g) || ''
         }
       });
 
@@ -437,7 +457,11 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
           Vitamin_D_mcg: '',
           Vitamin_C_mg: '',
           Fiber_g: '',
-          Collagen_g: ''
+          Collagen_g: '',
+          Added_Sugars_g: '',
+          Sodium_mg: '',
+          Saturated_Fat_g: '',
+          Monounsaturated_Fat_g: ''
         }
       });
 
@@ -809,7 +833,7 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
                           Write a dissectable line formatted as follows:
                         </p>
                         <p className="prompt-text prompt-format">
-                          foodName:{newFood.name || '[name]'}|category:{newFood.category || '[category]'}|servingSize_g:{newFood.servingSize || '[servingSize]'}|calories:{newFood.calories || '[calories]'}|containsProbiotics:{newFood.isProbiotic}|Protein_g:{newFood.nutrients.Protein_g || '[val]'}|Carbohydrates_g:{newFood.nutrients.Carbohydrates_g || '[val]'}|Fats_g:{newFood.nutrients.Fats_g || '[val]'}|Omega3_DHA_EPA_mg:{newFood.nutrients.Omega3_DHA_EPA_mg || '[val]'}|Vitamin_B12_mcg:{newFood.nutrients.Vitamin_B12_mcg || '[val]'}|Choline_mg:{newFood.nutrients.Choline_mg || '[val]'}|Magnesium_mg:{newFood.nutrients.Magnesium_mg || '[val]'}|Iron_mg:{newFood.nutrients.Iron_mg || '[val]'}|Zinc_mg:{newFood.nutrients.Zinc_mg || '[val]'}|Calcium_mg:{newFood.nutrients.Calcium_mg || '[val]'}|Vitamin_D_mcg:{newFood.nutrients.Vitamin_D_mcg || '[val]'}|Vitamin_C_mg:{newFood.nutrients.Vitamin_C_mg || '[val]'}|Fiber_g:{newFood.nutrients.Fiber_g || '[val]'}|Collagen_g:{newFood.nutrients.Collagen_g || '[val]'}
+                          foodName:{newFood.name || '[name]'}|category:{newFood.category || '[category]'}|servingSize_g:{newFood.servingSize || '[servingSize]'}|calories:{newFood.calories || '[calories]'}|containsProbiotics:{newFood.isProbiotic}|Protein_g:{newFood.nutrients.Protein_g || '[val]'}|Carbohydrates_g:{newFood.nutrients.Carbohydrates_g || '[val]'}|Fats_g:{newFood.nutrients.Fats_g || '[val]'}|Omega3_DHA_EPA_mg:{newFood.nutrients.Omega3_DHA_EPA_mg || '[val]'}|Vitamin_B12_mcg:{newFood.nutrients.Vitamin_B12_mcg || '[val]'}|Choline_mg:{newFood.nutrients.Choline_mg || '[val]'}|Magnesium_mg:{newFood.nutrients.Magnesium_mg || '[val]'}|Iron_mg:{newFood.nutrients.Iron_mg || '[val]'}|Zinc_mg:{newFood.nutrients.Zinc_mg || '[val]'}|Calcium_mg:{newFood.nutrients.Calcium_mg || '[val]'}|Vitamin_D_mcg:{newFood.nutrients.Vitamin_D_mcg || '[val]'}|Vitamin_C_mg:{newFood.nutrients.Vitamin_C_mg || '[val]'}|Fiber_g:{newFood.nutrients.Fiber_g || '[val]'}|Collagen_g:{newFood.nutrients.Collagen_g || '[val]'}|Added_Sugars_g:{newFood.nutrients.Added_Sugars_g || '[val]'}|Sodium_mg:{newFood.nutrients.Sodium_mg || '[val]'}|Saturated_Fat_g:{newFood.nutrients.Saturated_Fat_g || '[val]'}|Monounsaturated_Fat_g:{newFood.nutrients.Monounsaturated_Fat_g || '[val]'}
                         </p>
                         <p className="prompt-text">
                           A food tracker will dissect the line to fill in the user's nutrition library, so be as thorough and realistic as possible with all nutrient values. Use your best nutritional knowledge to estimate missing information when data is incomplete.

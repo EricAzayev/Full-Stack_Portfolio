@@ -15,7 +15,11 @@ const baseMicros = {
   "Vitamin_D_mcg": 15,     // 600 IU
   "Vitamin_C_mg": 90,
   "Fiber_g": 30,
-  "Collagen_g": 10
+  "Collagen_g": 10,
+  "Added_Sugars_g": 50,    // FDA recommendation: < 50g per day (10% of 2000 kcal)
+  "Sodium_mg": 2300,       // FDA recommendation: < 2300mg per day
+  "Saturated_Fat_g": 20,   // AHA recommendation: < 13g for 2000 kcal (6% of calories), using 20g as upper limit
+  "Monounsaturated_Fat_g": 25  // Healthy target for MUFA
 };
 
 // Activity multipliers (rough scaling factors)

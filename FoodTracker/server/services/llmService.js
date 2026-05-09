@@ -194,7 +194,7 @@ IMPORTANT: Provide SINGLE numeric values only (e.g., "150" not "100-200"). If un
 
 Output ONLY the following format with pipe-separated values. No explanations or additional text:
 
-foodName:${name}|category:${category}|servingSize_g:${servingSize}|calories:${calories}|containsProbiotics:false|Protein_g:[estimate]|Carbohydrates_g:[estimate]|Fats_g:[estimate]|Omega3_DHA_EPA_mg:[estimate]|Vitamin_B12_mcg:[estimate]|Choline_mg:[estimate]|Magnesium_mg:[estimate]|Iron_mg:[estimate]|Zinc_mg:[estimate]|Calcium_mg:[estimate]|Vitamin_D_mcg:[estimate]|Vitamin_C_mg:[estimate]|Fiber_g:[estimate]|Collagen_g:[estimate]
+foodName:${name}|category:${category}|servingSize_g:${servingSize}|calories:${calories}|containsProbiotics:false|Protein_g:[estimate]|Carbohydrates_g:[estimate]|Fats_g:[estimate]|Omega3_DHA_EPA_mg:[estimate]|Vitamin_B12_mcg:[estimate]|Choline_mg:[estimate]|Magnesium_mg:[estimate]|Iron_mg:[estimate]|Zinc_mg:[estimate]|Calcium_mg:[estimate]|Vitamin_D_mcg:[estimate]|Vitamin_C_mg:[estimate]|Fiber_g:[estimate]|Collagen_g:[estimate]|Added_Sugars_g:[estimate]|Sodium_mg:[estimate]|Saturated_Fat_g:[estimate]|Monounsaturated_Fat_g:[estimate]
 
 Replace [estimate] with SINGLE numerical values (not ranges) based on nutritional science. Be thorough and realistic.`;
 };
@@ -229,23 +229,38 @@ const parseNumericValue = (value) => {
 const parseLLMResponse = (response) => {
   try {
     // Clean the response - remove any extra whitespace and newlines
-    const cleanResponse = response.trim().replace(/\n/g, "");
+    let cleanResponse = response.trim().replace(/\n/g, "");
+
+    // Handle case where LLM omits "foodName:" prefix
+    // If response doesn't start with "foodName:", prepend it
+    if (!cleanResponse.startsWith("foodName:")) {
+      // Extract the food name (everything before first |)
+      const firstPipeIndex = cleanResponse.indexOf("|");
+      if (firstPipeIndex > 0) {
+        const foodNameValue = cleanResponse.substring(0, firstPipeIndex);
+        cleanResponse = `foodName:${foodNameValue}` + cleanResponse.substring(firstPipeIndex);
+      }
+    }
 
     // Parse the pipe-separated values
     const pairs = cleanResponse.split("|");
     const parsedData = {};
 
     pairs.forEach((pair) => {
-      const [key, value] = pair.split(":");
-      if (key && value !== undefined) {
-        parsedData[key.trim()] = value.trim();
+      const colonIndex = pair.indexOf(":");
+      if (colonIndex > 0) {
+        const key = pair.substring(0, colonIndex).trim();
+        const value = pair.substring(colonIndex + 1).trim();
+        if (key) {
+          parsedData[key] = value;
+        }
       }
     });
 
-    // Validate required fields
+    // Validate required fields (allow empty strings for now, just check existence)
     const requiredFields = ["foodName", "category", "servingSize_g", "calories"];
     for (const field of requiredFields) {
-      if (!parsedData[field]) {
+      if (parsedData[field] === undefined || parsedData[field] === null) {
         throw new Error(`Missing required field: ${field}`);
       }
     }
@@ -271,6 +286,10 @@ const parseLLMResponse = (response) => {
         Vitamin_C_mg: parseNumericValue(parsedData.Vitamin_C_mg),
         Fiber_g: parseNumericValue(parsedData.Fiber_g),
         Collagen_g: parseNumericValue(parsedData.Collagen_g),
+        Added_Sugars_g: parseNumericValue(parsedData.Added_Sugars_g),
+        Sodium_mg: parseNumericValue(parsedData.Sodium_mg),
+        Saturated_Fat_g: parseNumericValue(parsedData.Saturated_Fat_g),
+        Monounsaturated_Fat_g: parseNumericValue(parsedData.Monounsaturated_Fat_g),
       },
     };
   } catch (error) {
