@@ -426,6 +426,89 @@ const UserTab = () => {
 
           {/* Daily Recommendations Section */}
           <section className="settings-section">
+            <h3 className="section-title">Daily Recommendations</h3>
+            <p style={{ color: '#ccc', marginBottom: '1.5rem', lineHeight: '1.5' }}>
+              Your personalized daily nutrient targets based on your profile settings.
+            </p>
+            
+            <div className="nutrient-summary">
+              <div className="nutrient-item">
+                <span>Calories:</span>
+                <span>{recommendations.Calories_kcal || 0}</span>
+              </div>
+              <div className="nutrient-item">
+                <span>Protein:</span>
+                <span>{recommendations.Protein_g || 0}g</span>
+              </div>
+              <div className="nutrient-item">
+                <span>Carbs:</span>
+                <span>{recommendations.Carbohydrates_g || 0}g</span>
+              </div>
+              <div className="nutrient-item">
+                <span>Fats:</span>
+                <span>{recommendations.Fats_g || 0}g</span>
+              </div>
+              <div className="nutrient-item">
+                <span>Omega-3:</span>
+                <span>{recommendations.Omega3_DHA_EPA_mg || 0}mg</span>
+              </div>
+              <div className="nutrient-item">
+                <span>Vitamin B12:</span>
+                <span>{recommendations.Vitamin_B12_mcg || 0}μg</span>
+              </div>
+              <div className="nutrient-item">
+                <span>Calcium:</span>
+                <span>{recommendations.Calcium_mg || 0}mg</span>
+              </div>
+              <div className="nutrient-item">
+                <span>Magnesium:</span>
+                <span>{recommendations.Magnesium_mg || 0}mg</span>
+              </div>
+              
+              {showAllNutrients && (
+                <>
+                  <div className="nutrient-item">
+                    <span>Choline:</span>
+                    <span>{recommendations.Choline_mg || 0}mg</span>
+                  </div>
+                  <div className="nutrient-item">
+                    <span>Iron:</span>
+                    <span>{recommendations.Iron_mg || 0}mg</span>
+                  </div>
+                  <div className="nutrient-item">
+                    <span>Zinc:</span>
+                    <span>{recommendations.Zinc_mg || 0}mg</span>
+                  </div>
+                  <div className="nutrient-item">
+                    <span>Vitamin D:</span>
+                    <span>{recommendations.Vitamin_D_mcg || 0}μg</span>
+                  </div>
+                  <div className="nutrient-item">
+                    <span>Vitamin C:</span>
+                    <span>{recommendations.Vitamin_C_mg || 0}mg</span>
+                  </div>
+                  <div className="nutrient-item">
+                    <span>Fiber:</span>
+                    <span>{recommendations.Fiber_g || 0}g</span>
+                  </div>
+                  <div className="nutrient-item">
+                    <span>Collagen:</span>
+                    <span>{recommendations.Collagen_g || 0}g</span>
+                  </div>
+                </>
+              )}
+            </div>
+            
+            <button 
+              className="toggle-nutrients-button"
+              onClick={() => setShowAllNutrients(!showAllNutrients)}
+            >
+              {showAllNutrients ? 'Show Less' : 'Show All Nutrients'}
+            </button>
+          </section>
+
+          {/* LLM Settings Section (moved to bottom) */}
+          <section className="settings-section">
             <h3 className="section-title">LLM Settings (AI Analysis)</h3>
             <p style={{ color: '#ccc', marginBottom: '1.5rem', lineHeight: '1.5' }}>
               Configure local LLM (Ollama) for AI food analysis. The LLM runs on your device for privacy and offline use.
@@ -509,89 +592,6 @@ const UserTab = () => {
                 </ol>
               </div>
             </div>
-          </section>
-
-          {/* Daily Recommendations Section */}
-          <section className="settings-section">
-            <h3 className="section-title">Daily Recommendations</h3>
-            <p style={{ color: '#ccc', marginBottom: '1.5rem', lineHeight: '1.5' }}>
-              Your personalized daily nutrient targets based on your profile settings.
-            </p>
-            
-            <div className="nutrient-summary">
-              <div className="nutrient-item">
-                <span>Calories:</span>
-                <span>{recommendations.Calories_kcal || 0}</span>
-              </div>
-              <div className="nutrient-item">
-                <span>Protein:</span>
-                <span>{recommendations.Protein_g || 0}g</span>
-              </div>
-              <div className="nutrient-item">
-                <span>Carbs:</span>
-                <span>{recommendations.Carbohydrates_g || 0}g</span>
-              </div>
-              <div className="nutrient-item">
-                <span>Fats:</span>
-                <span>{recommendations.Fats_g || 0}g</span>
-              </div>
-              <div className="nutrient-item">
-                <span>Omega-3:</span>
-                <span>{recommendations.Omega3_DHA_EPA_mg || 0}mg</span>
-              </div>
-              <div className="nutrient-item">
-                <span>Vitamin B12:</span>
-                <span>{recommendations.Vitamin_B12_mcg || 0}μg</span>
-              </div>
-              <div className="nutrient-item">
-                <span>Calcium:</span>
-                <span>{recommendations.Calcium_mg || 0}mg</span>
-              </div>
-              <div className="nutrient-item">
-                <span>Magnesium:</span>
-                <span>{recommendations.Magnesium_mg || 0}mg</span>
-              </div>
-              
-              {showAllNutrients && (
-                <>
-                  <div className="nutrient-item">
-                    <span>Choline:</span>
-                    <span>{recommendations.Choline_mg || 0}mg</span>
-                  </div>
-                  <div className="nutrient-item">
-                    <span>Iron:</span>
-                    <span>{recommendations.Iron_mg || 0}mg</span>
-                  </div>
-                  <div className="nutrient-item">
-                    <span>Zinc:</span>
-                    <span>{recommendations.Zinc_mg || 0}mg</span>
-                  </div>
-                  <div className="nutrient-item">
-                    <span>Vitamin D:</span>
-                    <span>{recommendations.Vitamin_D_mcg || 0}μg</span>
-                  </div>
-                  <div className="nutrient-item">
-                    <span>Vitamin C:</span>
-                    <span>{recommendations.Vitamin_C_mg || 0}mg</span>
-                  </div>
-                  <div className="nutrient-item">
-                    <span>Fiber:</span>
-                    <span>{recommendations.Fiber_g || 0}g</span>
-                  </div>
-                  <div className="nutrient-item">
-                    <span>Collagen:</span>
-                    <span>{recommendations.Collagen_g || 0}g</span>
-                  </div>
-                </>
-              )}
-            </div>
-            
-            <button 
-              className="toggle-nutrients-button"
-              onClick={() => setShowAllNutrients(!showAllNutrients)}
-            >
-              {showAllNutrients ? 'Show Less' : 'Show All Nutrients'}
-            </button>
           </section>
 
           {/* Info Card */}

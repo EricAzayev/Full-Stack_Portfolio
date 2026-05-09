@@ -31,4 +31,8 @@ out/
 release/
 dist/
 
+# Database files
+*.db
+*.db-wal
+*.db-shm
 

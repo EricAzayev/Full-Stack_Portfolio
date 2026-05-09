@@ -190,11 +190,37 @@ Food Details:
 
 These values may be incomplete. Use your knowledge to make reasonable, evidence-based estimates for typical servings.
 
+IMPORTANT: Provide SINGLE numeric values only (e.g., "150" not "100-200"). If uncertain, use the typical/average amount.
+
 Output ONLY the following format with pipe-separated values. No explanations or additional text:
 
 foodName:${name}|category:${category}|servingSize_g:${servingSize}|calories:${calories}|containsProbiotics:false|Protein_g:[estimate]|Carbohydrates_g:[estimate]|Fats_g:[estimate]|Omega3_DHA_EPA_mg:[estimate]|Vitamin_B12_mcg:[estimate]|Choline_mg:[estimate]|Magnesium_mg:[estimate]|Iron_mg:[estimate]|Zinc_mg:[estimate]|Calcium_mg:[estimate]|Vitamin_D_mcg:[estimate]|Vitamin_C_mg:[estimate]|Fiber_g:[estimate]|Collagen_g:[estimate]
 
-Replace [estimate] with numerical values based on nutritional science. Be thorough and realistic.`;
+Replace [estimate] with SINGLE numerical values (not ranges) based on nutritional science. Be thorough and realistic.`;
+};
+
+/**
+ * Parse a value that might be a range (e.g., "100-200") and return the average
+ * @param {string} value The value to parse
+ * @returns {number} The parsed number or average of range
+ */
+const parseNumericValue = (value) => {
+  if (!value || value === '') return 0;
+  
+  const strValue = String(value).trim();
+  
+  // Check if it's a range (e.g., "100-200")
+  if (strValue.includes('-')) {
+    const parts = strValue.split('-').map(p => parseFloat(p.trim()));
+    if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+      // Return the average of the range
+      return (parts[0] + parts[1]) / 2;
+    }
+  }
+  
+  // Otherwise parse as regular number
+  const parsed = parseFloat(strValue);
+  return isNaN(parsed) ? 0 : parsed;
 };
 
 /**
@@ -227,24 +253,24 @@ const parseLLMResponse = (response) => {
     return {
       foodName: parsedData.foodName,
       category: parsedData.category,
-      servingSize: parseFloat(parsedData.servingSize_g) || 0,
-      calories: parseFloat(parsedData.calories) || 0,
+      servingSize: parseNumericValue(parsedData.servingSize_g),
+      calories: parseNumericValue(parsedData.calories),
       isProbiotic: parsedData.containsProbiotics === "true",
       nutrients: {
-        Protein_g: parseFloat(parsedData.Protein_g) || 0,
-        Carbohydrates_g: parseFloat(parsedData.Carbohydrates_g) || 0,
-        Fats_g: parseFloat(parsedData.Fats_g) || 0,
-        Omega3_DHA_EPA_mg: parseFloat(parsedData.Omega3_DHA_EPA_mg) || 0,
-        Vitamin_B12_mcg: parseFloat(parsedData.Vitamin_B12_mcg) || 0,
-        Choline_mg: parseFloat(parsedData.Choline_mg) || 0,
-        Magnesium_mg: parseFloat(parsedData.Magnesium_mg) || 0,
-        Iron_mg: parseFloat(parsedData.Iron_mg) || 0,
-        Zinc_mg: parseFloat(parsedData.Zinc_mg) || 0,
-        Calcium_mg: parseFloat(parsedData.Calcium_mg) || 0,
-        Vitamin_D_mcg: parseFloat(parsedData.Vitamin_D_mcg) || 0,
-        Vitamin_C_mg: parseFloat(parsedData.Vitamin_C_mg) || 0,
-        Fiber_g: parseFloat(parsedData.Fiber_g) || 0,
-        Collagen_g: parseFloat(parsedData.Collagen_g) || 0,
+        Protein_g: parseNumericValue(parsedData.Protein_g),
+        Carbohydrates_g: parseNumericValue(parsedData.Carbohydrates_g),
+        Fats_g: parseNumericValue(parsedData.Fats_g),
+        Omega3_DHA_EPA_mg: parseNumericValue(parsedData.Omega3_DHA_EPA_mg),
+        Vitamin_B12_mcg: parseNumericValue(parsedData.Vitamin_B12_mcg),
+        Choline_mg: parseNumericValue(parsedData.Choline_mg),
+        Magnesium_mg: parseNumericValue(parsedData.Magnesium_mg),
+        Iron_mg: parseNumericValue(parsedData.Iron_mg),
+        Zinc_mg: parseNumericValue(parsedData.Zinc_mg),
+        Calcium_mg: parseNumericValue(parsedData.Calcium_mg),
+        Vitamin_D_mcg: parseNumericValue(parsedData.Vitamin_D_mcg),
+        Vitamin_C_mg: parseNumericValue(parsedData.Vitamin_C_mg),
+        Fiber_g: parseNumericValue(parsedData.Fiber_g),
+        Collagen_g: parseNumericValue(parsedData.Collagen_g),
       },
     };
   } catch (error) {

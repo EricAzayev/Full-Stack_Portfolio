@@ -58,6 +58,16 @@ const FoodLibraryTab = () => {
     const checkOllama = async () => {
       const status = await checkOllamaStatus(llmConfig.ollamaUrl);
       setOllamaStatus(status);
+      
+      // Auto-select first available model if current model isn't available
+      if (status?.available && status.models && status.models.length > 0) {
+        const modelNames = status.models.map(m => typeof m === 'string' ? m : m.name);
+        if (!modelNames.includes(llmConfig.model)) {
+          const firstModel = modelNames[0];
+          console.log(`📍 Model "${llmConfig.model}" not found, using "${firstModel}"`);
+          setLlmConfig(prev => ({ ...prev, model: firstModel }));
+        }
+      }
     };
 
     fetchFoodLibrary();
@@ -314,6 +324,24 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
   // Parse AI result and fill form
   const parseAiResult = () => {
     try {
+      // Helper to parse numeric values including ranges
+      const parseNumericValue = (value) => {
+        if (!value || value === '') return '';
+        const strValue = String(value).trim();
+        
+        // Check if it's a range (e.g., "100-200")
+        if (strValue.includes('-')) {
+          const parts = strValue.split('-').map(p => parseFloat(p.trim()));
+          if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+            // Return the average of the range
+            return ((parts[0] + parts[1]) / 2).toString();
+          }
+        }
+        
+        // Otherwise return as-is
+        return strValue;
+      };
+      
       // Clean the input - remove any extra whitespace and newlines
       const cleanResult = aiResult.trim().replace(/\n/g, '');
       
@@ -335,28 +363,28 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
         return;
       }
 
-      // Update the form with parsed data
+      // Update the form with parsed data (converting ranges to averages)
       setNewFood({
         name: parsedData.foodName,
         category: parsedData.category,
-        servingSize: parsedData.servingSize_g,
-        calories: parsedData.calories,
+        servingSize: parseNumericValue(parsedData.servingSize_g),
+        calories: parseNumericValue(parsedData.calories),
         isProbiotic: parsedData.containsProbiotics === 'true',
         nutrients: {
-          Protein_g: parsedData.Protein_g || '',
-          Carbohydrates_g: parsedData.Carbohydrates_g || '',
-          Fats_g: parsedData.Fats_g || '',
-          Omega3_DHA_EPA_mg: parsedData.Omega3_DHA_EPA_mg || '',
-          Vitamin_B12_mcg: parsedData.Vitamin_B12_mcg || '',
-          Choline_mg: parsedData.Choline_mg || '',
-          Magnesium_mg: parsedData.Magnesium_mg || '',
-          Iron_mg: parsedData.Iron_mg || '',
-          Zinc_mg: parsedData.Zinc_mg || '',
-          Calcium_mg: parsedData.Calcium_mg || '',
-          Vitamin_D_mcg: parsedData.Vitamin_D_mcg || '',
-          Vitamin_C_mg: parsedData.Vitamin_C_mg || '',
-          Fiber_g: parsedData.Fiber_g || '',
-          Collagen_g: parsedData.Collagen_g || ''
+          Protein_g: parseNumericValue(parsedData.Protein_g) || '',
+          Carbohydrates_g: parseNumericValue(parsedData.Carbohydrates_g) || '',
+          Fats_g: parseNumericValue(parsedData.Fats_g) || '',
+          Omega3_DHA_EPA_mg: parseNumericValue(parsedData.Omega3_DHA_EPA_mg) || '',
+          Vitamin_B12_mcg: parseNumericValue(parsedData.Vitamin_B12_mcg) || '',
+          Choline_mg: parseNumericValue(parsedData.Choline_mg) || '',
+          Magnesium_mg: parseNumericValue(parsedData.Magnesium_mg) || '',
+          Iron_mg: parseNumericValue(parsedData.Iron_mg) || '',
+          Zinc_mg: parseNumericValue(parsedData.Zinc_mg) || '',
+          Calcium_mg: parseNumericValue(parsedData.Calcium_mg) || '',
+          Vitamin_D_mcg: parseNumericValue(parsedData.Vitamin_D_mcg) || '',
+          Vitamin_C_mg: parseNumericValue(parsedData.Vitamin_C_mg) || '',
+          Fiber_g: parseNumericValue(parsedData.Fiber_g) || '',
+          Collagen_g: parseNumericValue(parsedData.Collagen_g) || ''
         }
       });
 
@@ -727,6 +755,33 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
                         >
                           📋 Copy Prompt
                         </button>
+                        <div className="ai-model-selector">
+                          <label htmlFor="model-select" style={{ fontSize: '0.85em', marginRight: '6px', color: '#666' }}>
+                            Model:
+                          </label>
+                          <select 
+                            id="model-select"
+                            value={llmConfig.model}
+                            onChange={(e) => setLlmConfig(prev => ({ ...prev, model: e.target.value }))}
+                            disabled={!ollamaStatus?.available || isAnalyzing}
+                            style={{ 
+                              padding: '4px 8px', 
+                              borderRadius: '4px', 
+                              border: '1px solid #ddd',
+                              fontSize: '0.85em',
+                              minWidth: '150px'
+                            }}
+                          >
+                            {ollamaStatus?.models && ollamaStatus.models.length > 0 ? (
+                              ollamaStatus.models.map((model) => {
+                                const modelName = typeof model === 'string' ? model : model.name;
+                                return <option key={modelName} value={modelName}>{modelName}</option>;
+                              })
+                            ) : (
+                              <option value={llmConfig.model}>{llmConfig.model}</option>
+                            )}
+                          </select>
+                        </div>
                         <div className="analyze-button-container">
                           <button 
                             type="button"
@@ -765,6 +820,9 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
                     <div className="result-section">
                       <div className="result-header">
                         <span className="result-label">Step 2: Parse AI Response</span>
+                        <span style={{ fontSize: '0.75em', color: '#666', fontStyle: 'italic', marginLeft: '8px' }}>
+                          (Ranges like "100-200" will be averaged to 150)
+                        </span>
                       </div>
                       <div className="result-input-container">
                         <textarea
