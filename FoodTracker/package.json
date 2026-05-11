@@ -2,13 +2,16 @@
   "name": "foodtracker",
   "private": true,
   "version": "1.0.0",
+  "description": "Local food tracking application",
+  "author": "Your Name",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
     "dev:electron": "electron .",
     "build": "vite build",
-    "build:app": "npm run build && electron-builder",
+    "rebuild:native": "npx electron-rebuild -f -w better-sqlite3 -m ./server",
+    "build:app": "npm run build && npm run rebuild:native && electron-builder",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -34,12 +37,16 @@
     },
     "files": [
       "dist/**/*",
-      "server/**/*",
-      "!server/node_modules",
       "electron/**/*",
       "node_modules/**/*",
       "package.json"
     ],
+    "extraResources": [
+      "server"
+    ],
+    "npmRebuild": false,
+    "nodeGypRebuild": false,
+    "buildDependenciesFromSource": false,
     "win": {
       "target": [
         "nsis"

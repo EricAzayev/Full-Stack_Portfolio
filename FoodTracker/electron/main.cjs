@@ -7,7 +7,27 @@ let serverProcess = null;
 
 function startServer() {
   try {
-    const serverPath = path.join(__dirname, "../server/server.js");
+    // In production, server files are in resources/server (extraFiles)
+    let serverPath;
+    if (app.isPackaged) {
+      // When packaged, server is copied to resources/server via extraFiles
+      serverPath = path.join(process.resourcesPath, "server", "server.js");
+      console.log("📍 [Electron] Production mode - using extraFiles server path");
+      console.log("📍 [Electron] process.resourcesPath:", process.resourcesPath);
+      
+      // Check if server file exists
+      const fs = require("fs");
+      if (!fs.existsSync(serverPath)) {
+        console.error("❌ [Electron] Server file not found at:", serverPath);
+      } else {
+        console.log("✅ [Electron] Server file exists");
+      }
+    } else {
+      // Development mode
+      serverPath = path.join(__dirname, "../server/server.js");
+      console.log("📍 [Electron] Development mode - using relative path");
+    }
+    
     console.log("📍 [Electron] Starting server from:", serverPath);
     console.log("📍 [Electron] __dirname:", __dirname);
 
