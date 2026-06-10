@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import OllamaSetupModal from './OllamaSetupModal';
 import { checkOllamaStatus, clearCache } from '../services/ollamaDetection';
+import { apiUrl } from '../services/api';
 
 const FoodLibraryTab = () => {
   const [foodLibrary, setFoodLibrary] = useState({});
@@ -50,7 +51,7 @@ const FoodLibraryTab = () => {
   useEffect(() => {
     const fetchFoodLibrary = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/foodLibrary');
+        const response = await fetch(apiUrl('/api/foodLibrary'));
         const data = await response.json();
         setFoodLibrary(data);
       } catch (error) {
@@ -161,8 +162,8 @@ const FoodLibraryTab = () => {
       };
 
       const url = editingFood 
-        ? `http://localhost:3001/api/foodLibrary/${encodeURIComponent(editingFood)}`
-        : 'http://localhost:3001/api/foodLibrary';
+        ? apiUrl(`/api/foodLibrary/${encodeURIComponent(editingFood)}`)
+        : apiUrl('/api/foodLibrary');
       
       const method = editingFood ? 'PUT' : 'POST';
       
@@ -292,7 +293,7 @@ const FoodLibraryTab = () => {
   // Handle delete food
   const handleDeleteFood = async (foodName) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/foodLibrary/${encodeURIComponent(foodName)}`, {
+      const response = await fetch(apiUrl(`/api/foodLibrary/${encodeURIComponent(foodName)}`), {
         method: 'DELETE'
       });
 
@@ -535,7 +536,7 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
     }
 
     try {
-      const response = await fetch('http://localhost:3001/api/ai/analyze-food', {
+      const response = await fetch(apiUrl('/api/ai/analyze-food'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

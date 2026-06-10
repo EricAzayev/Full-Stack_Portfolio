@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '../services/api';
 
 const SmartRecommendations = ({ todayData, needToday, onAddFood }) => {
   const [recommendations, setRecommendations] = useState(null);
@@ -15,7 +16,7 @@ const SmartRecommendations = ({ todayData, needToday, onAddFood }) => {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:3001/api/smart-recommendations');
+      const response = await fetch(apiUrl('/api/smart-recommendations'));
       
       if (response.ok) {
         const data = await response.json();

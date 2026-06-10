@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import TodaySummary from './TodaySummary'
 import SmartRecommendations from './SmartRecommendations'
+import { apiUrl } from '../services/api'
 
 const TodayTab = ({ onNavigateToFoodLibrary }) => {
   const [foodLibrary, setFoodLibrary] = useState({})
@@ -17,8 +18,8 @@ const TodayTab = ({ onNavigateToFoodLibrary }) => {
     const fetchData = async () => {
       try {
         const [foodLibraryRes, todayRes] = await Promise.all([
-          fetch('http://localhost:3001/api/foodLibrary'),
-          fetch('http://localhost:3001/api/today')
+          fetch(apiUrl('/api/foodLibrary')),
+          fetch(apiUrl('/api/today'))
         ])
 
         const foodLibraryData = await foodLibraryRes.json()
@@ -74,7 +75,7 @@ const TodayTab = ({ onNavigateToFoodLibrary }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:3001/api/today', {
+      const response = await fetch(apiUrl('/api/today'), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -119,7 +120,7 @@ const TodayTab = ({ onNavigateToFoodLibrary }) => {
     if (newQuantity < 0) return
 
     try {
-      const response = await fetch('http://localhost:3001/api/today', {
+      const response = await fetch(apiUrl('/api/today'), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

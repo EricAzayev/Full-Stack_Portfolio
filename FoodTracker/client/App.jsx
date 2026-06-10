@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import TodayTab from "./components/TodayTab";
 import DevModeTab from "./components/DevModeTab";
 import UserTab from "./components/UserTab";
@@ -6,9 +6,28 @@ import FoodLibraryTab from "./components/FoodLibraryTab";
 import HistoryTab from "./components/HistoryTab";
 import AnalyticsTab from "./components/AnalyticsTab";
 
+const PERSISTENT_TABS = ["foodLibrary", "user"];
+
 function App() {
   const [activeTab, setActiveTab] = useState("today");
   const [selectedDate, setSelectedDate] = useState(null);
+  const [mountedTabs, setMountedTabs] = useState(new Set(["today"]));
+
+  useEffect(() => {
+    if (!PERSISTENT_TABS.includes(activeTab)) {
+      return;
+    }
+
+    setMountedTabs((prevMountedTabs) => {
+      if (prevMountedTabs.has(activeTab)) {
+        return prevMountedTabs;
+      }
+
+      const nextMountedTabs = new Set(prevMountedTabs);
+      nextMountedTabs.add(activeTab);
+      return nextMountedTabs;
+    });
+  }, [activeTab]);
 
   //Analytics to History date click handler
   const handleAnalyticsDateClick = (dateString) => {
@@ -78,8 +97,16 @@ function App() {
         {activeTab === "analytics" && (
           <AnalyticsTab onDateClick={handleAnalyticsDateClick} />
         )}
-        {activeTab === "foodLibrary" && <FoodLibraryTab />}
-        {activeTab === "user" && <UserTab />}
+        {mountedTabs.has("foodLibrary") && (
+          <div hidden={activeTab !== "foodLibrary"}>
+            <FoodLibraryTab />
+          </div>
+        )}
+        {mountedTabs.has("user") && (
+          <div hidden={activeTab !== "user"}>
+            <UserTab />
+          </div>
+        )}
         {activeTab === "dev" && <DevModeTab />}
       </main>
     </div>

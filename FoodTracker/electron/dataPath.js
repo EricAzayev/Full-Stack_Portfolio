@@ -33,7 +33,7 @@ export function getDataPath(filename = "") {
 export function initializeDataFiles() {
   if (!app.isPackaged) return; // Skip in development
 
-  const sourceDir = path.join(app.getAppPath(), "server", "data");
+  const sourceDir = path.join(process.resourcesPath, "server", "data");
   const destDir = getDataPath();
 
 

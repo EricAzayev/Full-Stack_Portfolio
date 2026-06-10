@@ -61,17 +61,21 @@ app.get("/", (req, res) => {
     );
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = Number(process.env.PORT || 3001);
+const HOST = process.env.HOST || "127.0.0.1";
+console.log("📍 [Server] Using HOST:", HOST);
 console.log("📍 [Server] Using PORT:", PORT);
 
 // Start the server
-const server = app.listen(PORT, () => {
-  console.log(`🚀 [Server] Server listening on http://localhost:${PORT}`);
+const server = app.listen(PORT, HOST, () => {
+  const address = server.address();
+  const resolvedPort = typeof address === "object" && address ? address.port : PORT;
+  console.log(`🚀 [Server] Server listening on http://${HOST}:${resolvedPort}`);
   
   // Notify parent process (Electron) that server is ready
   if (process.send) {
     console.log("📍 [Server] Sending server-ready message to parent process");
-    process.send("server-ready");
+    process.send({ type: "server-ready", host: HOST, port: resolvedPort });
   } else {
     console.log("📍 [Server] No parent process (running standalone)");
   }

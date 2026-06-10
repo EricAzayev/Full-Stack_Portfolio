@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { apiUrl } from '../services/api'
 
 const DevModeTab = () => {
   const [isResetting, setIsResetting] = useState(false)
@@ -13,7 +14,7 @@ const DevModeTab = () => {
     setMessage('')
 
     try {
-      const response = await fetch('http://localhost:3001/api/reset-day', {
+      const response = await fetch(apiUrl('/api/reset-day'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

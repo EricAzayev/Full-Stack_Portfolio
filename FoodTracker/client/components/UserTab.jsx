@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { checkOllamaStatus } from '../services/ollamaDetection';
+import { apiUrl } from '../services/api';
 
 const UserTab = () => {
   const [userData, setUserData] = useState({
@@ -108,7 +109,7 @@ const UserTab = () => {
 
   const fetchUserData = async () => {
     try {
-      const response = await fetch("http://localhost:3001/api/user");
+      const response = await fetch(apiUrl('/api/user'));
       const data = await response.json();
       setUserData(data);
       setOriginalUserData(data); // Store original for comparison
@@ -131,7 +132,7 @@ const UserTab = () => {
 
   const fetchRecommendations = async () => {
     try {
-      const response = await fetch("http://localhost:3001/api/recommendations");
+      const response = await fetch(apiUrl('/api/recommendations'));
       if (response.ok) {
         const data = await response.json();
         setRecommendations(data);
@@ -270,7 +271,7 @@ const UserTab = () => {
     setSaveMessage("");
 
     try {
-      const response = await fetch("http://localhost:3001/api/user", {
+      const response = await fetch(apiUrl('/api/user'), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -319,7 +320,7 @@ const UserTab = () => {
   const updateWithFormula = async () => {
     setUpdatingRecommendations(true);
     try {
-      const response = await fetch("http://localhost:3001/api/recommendations/calculate", {
+      const response = await fetch(apiUrl('/api/recommendations/calculate'), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
@@ -357,7 +358,7 @@ const UserTab = () => {
   const updateWithAI = async () => {
     setUpdatingRecommendations(true);
     try {
-      const response = await fetch("http://localhost:3001/api/ai/generate-recommendations", {
+      const response = await fetch(apiUrl('/api/ai/generate-recommendations'), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

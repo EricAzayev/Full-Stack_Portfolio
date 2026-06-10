@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { apiUrl } from '../services/api'
 
 const AnalyticsTab = ({ onDateClick }) => {
   const [records, setRecords] = useState([])
@@ -12,9 +13,9 @@ const AnalyticsTab = ({ onDateClick }) => {
     const fetchData = async () => {
       try {
         const [recordRes, userRes, recRes] = await Promise.all([
-          fetch('http://localhost:3001/api/records'),
-          fetch('http://localhost:3001/api/user'),
-          fetch('http://localhost:3001/api/recommendations')
+          fetch(apiUrl('/api/records')),
+          fetch(apiUrl('/api/user')),
+          fetch(apiUrl('/api/recommendations'))
         ])
         
         const recordData = await recordRes.json()

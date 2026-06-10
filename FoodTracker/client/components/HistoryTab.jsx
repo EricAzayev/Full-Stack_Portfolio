@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { apiUrl } from '../services/api'
 
 const HistoryTab = ({ selectedDate, onDateSelect }) => {
   const [records, setRecords] = useState([])
@@ -10,7 +11,7 @@ const HistoryTab = ({ selectedDate, onDateSelect }) => {
   useEffect(() => {
     const fetchRecords = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/records')
+        const response = await fetch(apiUrl('/api/records'))
         const data = await response.json()
         setRecords(data.records || [])
       } catch (error) {
