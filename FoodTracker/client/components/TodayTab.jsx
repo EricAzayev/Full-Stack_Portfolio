@@ -3,7 +3,7 @@ import TodaySummary from './TodaySummary'
 import SmartRecommendations from './SmartRecommendations'
 import { apiUrl } from '../services/api'
 
-const TodayTab = ({ onNavigateToFoodLibrary }) => {
+const TodayTab = ({ onNavigateToFoodLibrary, onNavigateToUserSettings }) => {
   const [foodLibrary, setFoodLibrary] = useState({})
   const [todayData, setTodayData] = useState({})
   const [needToday, setNeedToday] = useState({})
@@ -12,6 +12,10 @@ const TodayTab = ({ onNavigateToFoodLibrary }) => {
   const [searchResults, setSearchResults] = useState([])
   const [showResults, setShowResults] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
+
+  const hasUserSettings = Object.keys(needToday).length > 0
+  const hasFoodLibrary = Object.keys(foodLibrary).length > 0
+  const showSetupGuide = !hasUserSettings || !hasFoodLibrary
 
   // Fetch data from API
   useEffect(() => {
@@ -180,6 +184,31 @@ const TodayTab = ({ onNavigateToFoodLibrary }) => {
   return (
     <div className="today-tab">
       <div className="left-panel">
+        {showSetupGuide && (
+          <div className="setup-guide-card">
+            <div className="setup-guide-header">
+              <h2>Start Here</h2>
+              <p>Set up these two tabs once and the rest of FoodTracker becomes useful immediately.</p>
+            </div>
+            <div className="setup-guide-steps">
+              <button className="setup-step" onClick={onNavigateToUserSettings}>
+                <span className="setup-step-icon" aria-hidden="true">👤</span>
+                <span className="setup-step-copy">
+                  <strong>1. User Settings</strong>
+                  <span>{hasUserSettings ? 'Profile is ready.' : 'Add your profile so calorie and nutrient targets can be calculated.'}</span>
+                </span>
+              </button>
+              <button className="setup-step" onClick={onNavigateToFoodLibrary}>
+                <span className="setup-step-icon" aria-hidden="true">📚</span>
+                <span className="setup-step-copy">
+                  <strong>2. Food Library</strong>
+                  <span>{hasFoodLibrary ? 'Food library has items.' : 'Add foods here so Today and Recommendations have something to work with.'}</span>
+                </span>
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="food-input-section">
           <h2>Add Food to Today's Intake</h2>
 
@@ -297,6 +326,9 @@ const TodayTab = ({ onNavigateToFoodLibrary }) => {
           todayData={todayData}
           needToday={needToday}
           onAddFood={handleAddFood}
+          foodLibraryCount={Object.keys(foodLibrary).length}
+          onNavigateToFoodLibrary={onNavigateToFoodLibrary}
+          onNavigateToUserSettings={onNavigateToUserSettings}
         />
 
       </div>

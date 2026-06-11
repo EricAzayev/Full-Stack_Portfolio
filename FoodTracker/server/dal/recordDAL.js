@@ -1,6 +1,15 @@
 import { getDatabase, transaction } from "../database/db.js";
 import { getFoodByName } from "./foodDAL.js";
 
+function getLocalDateString() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
 /**
  * Daily Records Data Access Layer
  * Handles both "today" (current day) and historical records
@@ -33,7 +42,7 @@ export function getRecordByDate(date) {
  * @returns {Object} Today's record (creates if doesn't exist)
  */
 export function getTodayRecord() {
-  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  const today = getLocalDateString();
   let record = getRecordByDate(today);
   
   if (!record) {

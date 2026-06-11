@@ -1,15 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { apiUrl } from '../services/api';
 
-const SmartRecommendations = ({ todayData, needToday, onAddFood }) => {
+const SmartRecommendations = ({
+  todayData,
+  needToday,
+  onAddFood,
+  foodLibraryCount,
+  onNavigateToFoodLibrary,
+  onNavigateToUserSettings,
+}) => {
   const [recommendations, setRecommendations] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeCategory, setActiveCategory] = useState('All');
 
+  const hasUserSettings = Object.keys(needToday || {}).length > 0;
+  const hasFoodLibrary = foodLibraryCount > 0;
+  const hasFoodsToday = Boolean(todayData?.food && Object.keys(todayData.food).length > 0);
+
   useEffect(() => {
+    if (!hasUserSettings || !hasFoodLibrary) {
+      setRecommendations(null);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
     fetchRecommendations();
-  }, [todayData, needToday]);
+  }, [todayData, needToday, hasUserSettings, hasFoodLibrary]);
 
   const fetchRecommendations = async () => {
     setLoading(true);
@@ -22,10 +40,13 @@ const SmartRecommendations = ({ todayData, needToday, onAddFood }) => {
         const data = await response.json();
         setRecommendations(data);
       } else {
-        setError('Failed to load recommendations');
+        const payload = await response.json().catch(() => null);
+        setRecommendations(null);
+        setError(payload?.error || 'Failed to load recommendations');
       }
     } catch (err) {
       console.error('Error fetching recommendations:', err);
+      setRecommendations(null);
       setError('Failed to load recommendations');
     } finally {
       setLoading(false);
@@ -36,6 +57,44 @@ const SmartRecommendations = ({ todayData, needToday, onAddFood }) => {
     onAddFood(foodName, 1);
     setTimeout(() => fetchRecommendations(), 500);
   };
+
+  const renderSetupState = ({ icon, title, message, actionLabel, onAction }) => (
+    <div className="smart-recommendations empty-state-card">
+      <h3>🎯 Food Recommendations</h3>
+      <div className="setup-state-body">
+        <div className="setup-state-icon" aria-hidden="true">{icon}</div>
+        <div className="setup-state-copy">
+          <h4>{title}</h4>
+          <p>{message}</p>
+        </div>
+      </div>
+      {onAction && (
+        <button onClick={onAction} className="retry-btn cta-btn">
+          {actionLabel}
+        </button>
+      )}
+    </div>
+  );
+
+  if (!hasUserSettings) {
+    return renderSetupState({
+      icon: '👤',
+      title: 'User Settings not set up',
+      message: 'Add your profile first so FoodTracker can calculate calorie and nutrient targets before recommending foods.',
+      actionLabel: 'Open User Settings',
+      onAction: onNavigateToUserSettings,
+    });
+  }
+
+  if (!hasFoodLibrary) {
+    return renderSetupState({
+      icon: '📚',
+      title: 'Your food library is empty',
+      message: 'Add a few foods to your library and FoodTracker will suggest what best fills today\'s nutrient gaps.',
+      actionLabel: 'Open Food Library',
+      onAction: onNavigateToFoodLibrary,
+    });
+  }
 
   if (loading) {
     return (
@@ -51,7 +110,7 @@ const SmartRecommendations = ({ todayData, needToday, onAddFood }) => {
       <div className="smart-recommendations">
         <h3>🎯 Food Recommendations</h3>
         <div className="error-message">
-          <p>{error || 'No recommendations available'}</p>
+          <p>{error || 'No recommendations available right now.'}</p>
           <button onClick={fetchRecommendations} className="retry-btn">Try Again</button>
         </div>
       </div>
@@ -65,7 +124,13 @@ const SmartRecommendations = ({ todayData, needToday, onAddFood }) => {
       <div className="smart-recommendations">
         <h3>🎯 Food Recommendations</h3>
         <div className="empty-message">
-          <p>✨ {remainingCalories < 100 ? "You're close to your calorie goal!" : "All nutrient targets met!"}</p>
+          <p>
+            ✨ {remainingCalories < 100
+              ? "You're close to your calorie goal for today."
+              : hasFoodsToday
+                ? 'You are in good shape so far. Add more foods if you want more specific suggestions.'
+                : 'Start logging foods today and this section will suggest the best next additions.'}
+          </p>
         </div>
       </div>
     );
