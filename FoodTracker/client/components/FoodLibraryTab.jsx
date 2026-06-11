@@ -530,9 +530,9 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
     
     // Show which model is being used - VISIBLE TO USER
     if (modelWasAutoSelected) {
-      setMessage(`🤖 Using available model: ${modelToUse} (${(freshStatus.models.length)} installed). This may take 30-120 seconds...`);
+      setMessage(`🤖 Using available model: ${modelToUse} with web search (${(freshStatus.models.length)} installed). This may take 30-120 seconds...`);
     } else {
-      setMessage(`🤖 Analyzing with ${modelToUse}... this may take 30-120 seconds`);
+      setMessage(`🤖 Analyzing with ${modelToUse} and web search... this may take 30-120 seconds`);
     }
 
     try {
@@ -551,12 +551,14 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
           ollamaUrl: llmConfig.ollamaUrl,
           model: modelToUse,
           useLocal: true,
+          useWebSearch: true,
         }),
       });
 
       const result = await response.json();
 
       if (result.success && result.data) {
+        console.log('🌐 [FoodLibrary] Web search context:', result.search);
         // Set the raw response in the AI Result textarea (Step 2)
         if (result.rawResponse) {
           setAiResult(result.rawResponse);
@@ -577,7 +579,9 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
         }
 
         setErrors({});
-        setMessage(`✓ AI analysis complete for "${result.data.foodName}" using ${modelToUse}!`);
+        setMessage(result.search?.enabled
+          ? `✓ AI analysis complete for "${result.data.foodName}" using ${modelToUse} with web search!`
+          : `✓ AI analysis complete for "${result.data.foodName}" using ${modelToUse}!`);
         setTimeout(() => setMessage(''), 4000);
       } else {
         const errorMsg = result.error || 'Unknown error';
