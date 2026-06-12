@@ -965,6 +965,10 @@ body {
   border-left: 4px solid #646cff;
 }
 
+.danger-section {
+  border-left-color: #dc3545;
+}
+
 .action-section h3 {
   margin: 0 0 0.5rem 0;
   color: #646cff;
@@ -992,6 +996,14 @@ body {
 .reset-button:hover:not(:disabled) {
   background-color: #c82333;
   transform: translateY(-1px);
+}
+
+.delete-all-button {
+  background-color: #8b1e2d;
+}
+
+.delete-all-button:hover:not(:disabled) {
+  background-color: #751824;
 }
 
 .reset-button:disabled {
@@ -1051,6 +1063,39 @@ body {
   margin: 0.5rem 0 0 0;
   color: #999;
   font-size: 0.95rem;
+}
+
+.data-transfer-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.secondary-action-button {
+  padding: 0.65rem 1rem;
+  background-color: transparent;
+  color: #cfd3ff;
+  border: 1px solid #4c54c9;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.secondary-action-button:hover:not(:disabled) {
+  background-color: rgba(100, 108, 255, 0.12);
+  color: #fff;
+}
+
+.secondary-action-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.hidden-file-input {
+  display: none;
 }
 
 .edit-button {

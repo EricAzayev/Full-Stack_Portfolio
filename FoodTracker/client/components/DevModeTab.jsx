@@ -3,6 +3,7 @@ import { apiUrl } from '../services/api'
 
 const DevModeTab = () => {
   const [isResetting, setIsResetting] = useState(false)
+  const [isDeletingAll, setIsDeletingAll] = useState(false)
   const [message, setMessage] = useState('')
 
   const handleResetDay = async () => {
@@ -14,11 +15,8 @@ const DevModeTab = () => {
     setMessage('')
 
     try {
-      const response = await fetch(apiUrl('/api/reset-day'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
+      const response = await fetch(apiUrl('/api/today'), {
+        method: 'DELETE'
       })
 
       if (response.ok) {
@@ -36,6 +34,34 @@ const DevModeTab = () => {
       setMessage('Error resetting day. Please try again.')
     } finally {
       setIsResetting(false)
+    }
+  }
+
+  const handleDeleteAllUserData = async () => {
+    if (!window.confirm('Delete all local FoodTracker data for this installed app instance? This removes user settings, food library, today data, and history.')) {
+      return
+    }
+
+    setIsDeletingAll(true)
+    setMessage('')
+
+    try {
+      const response = await fetch(apiUrl('/api/user-data'), {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        setMessage('✓ All local user data deleted successfully.')
+        setTimeout(() => setMessage(''), 5000)
+      } else {
+        const error = await response.json()
+        setMessage(`Error: ${error.error}`)
+      }
+    } catch (error) {
+      console.error('Error deleting all user data:', error)
+      setMessage('Error deleting all user data. Please try again.')
+    } finally {
+      setIsDeletingAll(false)
     }
   }
 
@@ -64,6 +90,19 @@ const DevModeTab = () => {
               className="reset-button"
             >
               {isResetting ? 'Resetting...' : 'Reset Day'}
+            </button>
+          </div>
+
+          <div className="action-section danger-section">
+            <h3>Delete All User Data</h3>
+            <p>Remove all local data for this app instance, including user settings, food library, current day, and history.</p>
+
+            <button
+              onClick={handleDeleteAllUserData}
+              disabled={isDeletingAll}
+              className="reset-button delete-all-button"
+            >
+              {isDeletingAll ? 'Deleting...' : 'Delete All User Data'}
             </button>
           </div>
         </div>

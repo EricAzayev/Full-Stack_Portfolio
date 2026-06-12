@@ -1,42 +1,49 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { checkOllamaStatus } from '../services/ollamaDetection';
 import { apiUrl } from '../services/api';
 
+const EMPTY_USER_DATA = {
+  name: "",
+  age: "",
+  gender: "",
+  height: "",
+  weight: "",
+  activityLevel: "",
+  calorieGoal: "",
+};
+
+const EMPTY_RECOMMENDATIONS = {
+  Calories_kcal: 0,
+  Protein_g: 0,
+  Carbohydrates_g: 0,
+  Fats_g: 0,
+  Omega3_DHA_EPA_mg: 0,
+  Vitamin_B12_mcg: 0,
+  Choline_mg: 0,
+  Magnesium_mg: 0,
+  Iron_mg: 0,
+  Zinc_mg: 0,
+  Calcium_mg: 0,
+  Vitamin_D_mcg: 0,
+  Vitamin_C_mg: 0,
+  Fiber_g: 0,
+  Collagen_g: 0,
+  Added_Sugars_g: 0,
+  Sodium_mg: 0,
+  Saturated_Fat_g: 0,
+  Monounsaturated_Fat_g: 0,
+};
+
 const UserTab = () => {
-  const [userData, setUserData] = useState({
-    name: "",
-    age: "",
-    gender: "",
-    height: "",
-    weight: "",
-    activityLevel: "",
-    calorieGoal: "",
-  });
+  const fileInputRef = useRef(null);
+  const [userData, setUserData] = useState(EMPTY_USER_DATA);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
   const [errors, setErrors] = useState({});
-  const [recommendations, setRecommendations] = useState({
-    Calories_kcal: 0,
-    Protein_g: 0,
-    Carbohydrates_g: 0,
-    Fats_g: 0,
-    Omega3_DHA_EPA_mg: 0,
-    Vitamin_B12_mcg: 0,
-    Choline_mg: 0,
-    Magnesium_mg: 0,
-    Iron_mg: 0,
-    Zinc_mg: 0,
-    Calcium_mg: 0,
-    Vitamin_D_mcg: 0,
-    Vitamin_C_mg: 0,
-    Fiber_g: 0,
-    Collagen_g: 0,
-    Added_Sugars_g: 0,
-    Sodium_mg: 0,
-    Saturated_Fat_g: 0,
-    Monounsaturated_Fat_g: 0,
-  });
+  const [recommendations, setRecommendations] = useState(EMPTY_RECOMMENDATIONS);
   const [showAllNutrients, setShowAllNutrients] = useState(false);
   const [llmConfig, setLlmConfig] = useState({
     ollamaUrl: 'http://localhost:11434',
@@ -110,6 +117,18 @@ const UserTab = () => {
   const fetchUserData = async () => {
     try {
       const response = await fetch(apiUrl('/api/user'));
+      if (response.status === 404) {
+        setUserData(EMPTY_USER_DATA);
+        setOriginalUserData(EMPTY_USER_DATA);
+        setDisplayHeight({ feet: '', inches: '' });
+        setDisplayWeight('');
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error('Failed to load user data');
+      }
+
       const data = await response.json();
       setUserData(data);
       setOriginalUserData(data); // Store original for comparison
@@ -136,6 +155,8 @@ const UserTab = () => {
       if (response.ok) {
         const data = await response.json();
         setRecommendations(data);
+      } else if (response.status === 404) {
+        setRecommendations(EMPTY_RECOMMENDATIONS);
       } else {
         console.error("Error fetching recommendations");
       }
@@ -304,6 +325,82 @@ const UserTab = () => {
     setSaveMessage("");
   };
 
+  const handleExportUserData = async () => {
+    setIsExporting(true);
+    setSaveMessage('');
+
+    try {
+      const response = await fetch(apiUrl('/api/user-data/export'));
+      if (!response.ok) {
+        throw new Error('Failed to export user data');
+      }
+
+      const snapshot = await response.json();
+      const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
+      const downloadUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      const dateStamp = new Date().toISOString().slice(0, 10);
+      anchor.href = downloadUrl;
+      anchor.download = `foodtracker-user-data-${dateStamp}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(downloadUrl);
+
+      setSaveMessage('User data exported successfully!');
+      setTimeout(() => setSaveMessage(''), 3000);
+    } catch (error) {
+      console.error('Error exporting user data:', error);
+      setSaveMessage('Failed to export user data');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleImportButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImportUserData = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    setIsImporting(true);
+    setSaveMessage('');
+
+    try {
+      const fileText = await file.text();
+      const snapshot = JSON.parse(fileText);
+
+      const response = await fetch(apiUrl('/api/user-data/import'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(snapshot),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to import user data');
+      }
+
+      setIsEditing(false);
+      setErrors({});
+      await Promise.all([fetchUserData(), fetchRecommendations()]);
+      setSaveMessage('User data imported successfully!');
+      setTimeout(() => setSaveMessage(''), 4000);
+    } catch (error) {
+      console.error('Error importing user data:', error);
+      setSaveMessage(error.message || 'Failed to import user data');
+    } finally {
+      event.target.value = '';
+      setIsImporting(false);
+    }
+  };
+
   // Check if recommendation-affecting fields have changed
   const hasRecommendationFieldsChanged = () => {
     if (!originalUserData || !isEditing) return false;
@@ -431,6 +528,31 @@ const UserTab = () => {
             <p className="settings-subtitle">
               Manage your personal information and preferences
             </p>
+            <div className="data-transfer-actions">
+              <button
+                type="button"
+                className="secondary-action-button"
+                onClick={handleExportUserData}
+                disabled={isExporting || isImporting}
+              >
+                {isExporting ? 'Exporting...' : 'Export User Data'}
+              </button>
+              <button
+                type="button"
+                className="secondary-action-button"
+                onClick={handleImportButtonClick}
+                disabled={isExporting || isImporting}
+              >
+                {isImporting ? 'Importing...' : 'Import User Data'}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json,application/json"
+                onChange={handleImportUserData}
+                className="hidden-file-input"
+              />
+            </div>
           </div>
           {!isEditing ? (
             <button className="edit-button" onClick={() => setIsEditing(true)}>

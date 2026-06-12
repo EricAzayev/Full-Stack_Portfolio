@@ -14,3 +14,5 @@ TO BE ADDED
 Food Comment section (AI can see comments about how abstract foods such as "Protein Shake" are created to give detail nutrient breakdowns)
 Inport/Export Account Feature - user can download and upload their Food Library, User Tab, and Food History Tabs
 AI Next Food Recommender 
+
+Add a FINISH DAY Button because day switching can have unexpected bugs. 

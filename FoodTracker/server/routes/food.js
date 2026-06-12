@@ -1,5 +1,5 @@
 import express from "express";
-import { initDatabase } from "../database/db.js";
+import { getDatabase, initDatabase, transaction } from "../database/db.js";
 import * as foodDAL from "../dal/foodDAL.js";
 import * as recordDAL from "../dal/recordDAL.js";
 import * as userDAL from "../dal/userDAL.js";
@@ -12,6 +12,196 @@ initDatabase();
 console.log("✅ [Routes] Database initialized");
 
 const router = express.Router();
+
+function getUserDataSnapshot() {
+  const db = getDatabase();
+  const systemMetadata = db.prepare(`
+    SELECT key, value
+    FROM system_metadata
+    ORDER BY key
+  `).all();
+
+  return {
+    app: "FoodTracker",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    user: userDAL.getUser(),
+    foodLibrary: foodDAL.getFoodLibraryLegacyFormat(),
+    records: recordDAL.getAllRecordsLegacyFormat().records,
+    deletedFoods: foodDAL.getDeletedFoods(),
+    systemMetadata,
+  };
+}
+
+function clearAllUserData() {
+  transaction(() => {
+    const db = getDatabase();
+
+    db.prepare("DELETE FROM daily_food_items").run();
+    db.prepare("DELETE FROM daily_records").run();
+    db.prepare("DELETE FROM deleted_foods").run();
+    db.prepare("DELETE FROM foods").run();
+    db.prepare("DELETE FROM user_profile").run();
+    db.prepare("DELETE FROM system_metadata").run();
+  });
+}
+
+function importUserDataSnapshot(snapshot) {
+  if (!snapshot || typeof snapshot !== "object") {
+    throw new Error("Import file is empty or invalid.");
+  }
+
+  if (snapshot.app !== "FoodTracker") {
+    throw new Error("Import file is not a FoodTracker export.");
+  }
+
+  if (snapshot.version !== 1) {
+    throw new Error(`Unsupported export version: ${snapshot.version}`);
+  }
+
+  const foodLibrary = snapshot.foodLibrary || {};
+  const records = Array.isArray(snapshot.records) ? snapshot.records : [];
+  const deletedFoods = snapshot.deletedFoods || {};
+  const systemMetadata = Array.isArray(snapshot.systemMetadata) ? snapshot.systemMetadata : [];
+
+  transaction(() => {
+    const db = getDatabase();
+
+    db.prepare("DELETE FROM daily_food_items").run();
+    db.prepare("DELETE FROM daily_records").run();
+    db.prepare("DELETE FROM deleted_foods").run();
+    db.prepare("DELETE FROM foods").run();
+    db.prepare("DELETE FROM user_profile").run();
+    db.prepare("DELETE FROM system_metadata").run();
+
+    if (snapshot.user) {
+      userDAL.saveUser(snapshot.user);
+    }
+
+    for (const [foodName, foodData] of Object.entries(foodLibrary)) {
+      foodDAL.addFood({
+        name: foodName,
+        category: foodData.Metadata?.Category || "Uncategorized",
+        servingSize: parseFloat(foodData.Metadata?.ServingSize_g) || 0,
+        calories: parseFloat(foodData.Metadata?.Calories_kcal) || 0,
+        isProbiotic: foodData.Metadata?.IsProbiotic ? 1 : 0,
+        protein_g: parseFloat(foodData.Nutrients?.Protein_g) || 0,
+        carbohydrates_g: parseFloat(foodData.Nutrients?.Carbohydrates_g) || 0,
+        fats_g: parseFloat(foodData.Nutrients?.Fats_g) || 0,
+        fiber_g: parseFloat(foodData.Nutrients?.Fiber_g) || 0,
+        omega3_dha_epa_mg: parseFloat(foodData.Nutrients?.Omega3_DHA_EPA_mg) || 0,
+        vitamin_b12_mcg: parseFloat(foodData.Nutrients?.Vitamin_B12_mcg) || 0,
+        choline_mg: parseFloat(foodData.Nutrients?.Choline_mg) || 0,
+        magnesium_mg: parseFloat(foodData.Nutrients?.Magnesium_mg) || 0,
+        iron_mg: parseFloat(foodData.Nutrients?.Iron_mg) || 0,
+        zinc_mg: parseFloat(foodData.Nutrients?.Zinc_mg) || 0,
+        calcium_mg: parseFloat(foodData.Nutrients?.Calcium_mg) || 0,
+        vitamin_d_mcg: parseFloat(foodData.Nutrients?.Vitamin_D_mcg) || 0,
+        vitamin_c_mg: parseFloat(foodData.Nutrients?.Vitamin_C_mg) || 0,
+        collagen_g: parseFloat(foodData.Nutrients?.Collagen_g) || 0,
+        added_sugars_g: parseFloat(foodData.Nutrients?.Added_Sugars_g) || 0,
+        sodium_mg: parseFloat(foodData.Nutrients?.Sodium_mg) || 0,
+        saturated_fat_g: parseFloat(foodData.Nutrients?.Saturated_Fat_g) || 0,
+        monounsaturated_fat_g: parseFloat(foodData.Nutrients?.Monounsaturated_Fat_g) || 0,
+      });
+    }
+
+    const insertRecordStmt = db.prepare(`
+      INSERT INTO daily_records (
+        date, total_calories,
+        total_protein_g, total_carbohydrates_g, total_fats_g, total_fiber_g,
+        total_omega3_dha_epa_mg, total_vitamin_b12_mcg, total_choline_mg,
+        total_magnesium_mg, total_iron_mg, total_zinc_mg, total_calcium_mg,
+        total_vitamin_d_mcg, total_vitamin_c_mg, total_collagen_g,
+        total_added_sugars_g, total_sodium_mg, total_saturated_fat_g, total_monounsaturated_fat_g,
+        created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    const findFoodIdStmt = db.prepare("SELECT id FROM foods WHERE name = ?");
+    const insertFoodItemStmt = db.prepare(`
+      INSERT INTO daily_food_items (daily_record_id, food_id, servings)
+      VALUES (?, ?, ?)
+    `);
+
+    for (const record of records) {
+      const result = insertRecordStmt.run(
+        record.date,
+        record.calories || 0,
+        record.nutrients?.Protein_g || 0,
+        record.nutrients?.Carbohydrates_g || 0,
+        record.nutrients?.Fats_g || 0,
+        record.nutrients?.Fiber_g || 0,
+        record.nutrients?.Omega3_DHA_EPA_mg || 0,
+        record.nutrients?.Vitamin_B12_mcg || 0,
+        record.nutrients?.Choline_mg || 0,
+        record.nutrients?.Magnesium_mg || 0,
+        record.nutrients?.Iron_mg || 0,
+        record.nutrients?.Zinc_mg || 0,
+        record.nutrients?.Calcium_mg || 0,
+        record.nutrients?.Vitamin_D_mcg || 0,
+        record.nutrients?.Vitamin_C_mg || 0,
+        record.nutrients?.Collagen_g || 0,
+        record.nutrients?.Added_Sugars_g || 0,
+        record.nutrients?.Sodium_mg || 0,
+        record.nutrients?.Saturated_Fat_g || 0,
+        record.nutrients?.Monounsaturated_Fat_g || 0,
+        record.timestamp || new Date().toISOString(),
+      );
+
+      const recordId = result.lastInsertRowid;
+      for (const [foodName, servings] of Object.entries(record.food || {})) {
+        const food = findFoodIdStmt.get(foodName);
+        if (!food) {
+          throw new Error(`Imported record references missing food: ${foodName}`);
+        }
+
+        insertFoodItemStmt.run(recordId, food.id, servings);
+      }
+    }
+
+    const insertDeletedFoodStmt = db.prepare(`
+      INSERT INTO deleted_foods (food_name, food_data)
+      VALUES (?, ?)
+    `);
+    for (const [foodName, foodData] of Object.entries(deletedFoods)) {
+      insertDeletedFoodStmt.run(foodName, JSON.stringify(foodData));
+    }
+
+    const insertMetadataStmt = db.prepare(`
+      INSERT INTO system_metadata (key, value)
+      VALUES (?, ?)
+    `);
+    for (const entry of systemMetadata) {
+      if (entry?.key && entry.value !== undefined) {
+        insertMetadataStmt.run(entry.key, String(entry.value));
+      }
+    }
+  });
+}
+
+function buildTodayResponse() {
+  const today = recordDAL.getTodayLegacyFormat();
+  const user = userDAL.getUser();
+  const needToday = user ? createRecommendedMicros(user) : {};
+  if (user) {
+    needToday["Calories_kcal"] = user.calorieGoal;
+  }
+
+  return { today, needToday };
+}
+
+function resetTodayData() {
+  recordDAL.resetTodayRecord();
+  foodDAL.clearDeletedFoods();
+  recordDAL.updateLastResetDate(new Date().toDateString());
+
+  console.log("✅ [Routes] Manual reset completed");
+
+  return {
+    message: "Today's data reset successfully",
+    ...buildTodayResponse(),
+  };
+}
 
 // Middleware to parse JSON
 router.use(express.json());
@@ -284,15 +474,7 @@ router.put("/today", (req, res) => {
     // Update today's record with the delta
     recordDAL.updateTodayFood(foodName, servingsDelta);
     
-    // Get updated data
-    const today = recordDAL.getTodayLegacyFormat();
-    const user = userDAL.getUser();
-    const needToday = user ? createRecommendedMicros(user) : {};
-    if (user) {
-      needToday["Calories_kcal"] = user.calorieGoal;
-    }
-
-    res.status(200).json({ today, needToday });
+    res.status(200).json(buildTodayResponse());
   } catch (error) {
     console.error("Error updating today's data:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -305,30 +487,16 @@ router.put("/today", (req, res) => {
  */
 router.delete("/today", (req, res) => {
   try {
-    // Reset today's record
-    recordDAL.resetTodayRecord();
-    
-    // Clear deleted foods
-    foodDAL.clearDeletedFoods();
-    
-    // Update last reset date
-    recordDAL.updateLastResetDate(new Date().toDateString());
+    res.status(200).json(resetTodayData());
+  } catch (error) {
+    console.error("Error resetting today's data:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
-    // Get fresh data
-    const today = recordDAL.getTodayLegacyFormat();
-    const user = userDAL.getUser();
-    const needToday = user ? createRecommendedMicros(user) : {};
-    if (user) {
-      needToday["Calories_kcal"] = user.calorieGoal;
-    }
-
-    console.log("✅ [Routes] Manual reset completed");
-
-    res.status(200).json({ 
-      message: "Today's data reset successfully",
-      today,
-      needToday
-    });
+router.post("/reset-day", (req, res) => {
+  try {
+    res.status(200).json(resetTodayData());
   } catch (error) {
     console.error("Error resetting today's data:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -373,6 +541,50 @@ router.get("/recommendations", (req, res) => {
     res.status(200).json(recommendations);
   } catch (error) {
     console.error("Error fetching recommendations:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ============= USER DATA BACKUP ROUTES =============
+
+/**
+ * GET /api/user-data/export
+ * Export all user data to a versioned JSON snapshot
+ */
+router.get("/user-data/export", (req, res) => {
+  try {
+    const snapshot = getUserDataSnapshot();
+    res.status(200).json(snapshot);
+  } catch (error) {
+    console.error("Error exporting user data:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/**
+ * POST /api/user-data/import
+ * Replace current user data with an imported snapshot
+ */
+router.post("/user-data/import", (req, res) => {
+  try {
+    importUserDataSnapshot(req.body);
+    res.status(200).json({ message: "User data imported successfully" });
+  } catch (error) {
+    console.error("Error importing user data:", error);
+    res.status(400).json({ error: error.message || "Could not import user data" });
+  }
+});
+
+/**
+ * DELETE /api/user-data
+ * Delete all stored user data for the current local app instance
+ */
+router.delete("/user-data", (req, res) => {
+  try {
+    clearAllUserData();
+    res.status(200).json({ message: "All user data deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting all user data:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
