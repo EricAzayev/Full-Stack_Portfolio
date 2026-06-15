@@ -9,10 +9,13 @@
   "scripts": {
     "dev": "vite",
     "dev:electron": "electron .",
-    "build": "vite build",
+    "build:renderer": "vite build",
     "rebuild:native:node": "npm rebuild better-sqlite3 --prefix server",
     "rebuild:native": "npx electron-rebuild -f -w better-sqlite3 -m ./server",
-    "build:app": "npm run build && npm run rebuild:native && electron-builder",
+    "package:app": "electron-builder --config electron-builder.prod.json",
+    "package:test-app": "electron-builder --config electron-builder.test.json",
+    "build": "npm run build:renderer && npm run rebuild:native && npm run package:app && npm run package:test-app",
+    "build:app": "npm run build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -30,36 +33,5 @@
     "electron-builder": "^26.0.12",
     "vite": "^5.0.8"
   },
-  "build": {
-    "appId": "com.foodtracker.app",
-    "productName": "FoodTracker",
-    "icon": "DataFork Logo.png",
-    "directories": {
-      "output": "release"
-    },
-    "files": [
-      "dist/**/*",
-      "electron/**/*",
-      "node_modules/**/*",
-      "package.json"
-    ],
-    "extraResources": [
-      "server"
-    ],
-    "npmRebuild": false,
-    "nodeGypRebuild": false,
-    "buildDependenciesFromSource": false,
-    "win": {
-      "icon": "DataFork Logo.png",
-      "target": [
-        "nsis"
-      ]
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
-    }
-  }
+  "build": {}
 }
