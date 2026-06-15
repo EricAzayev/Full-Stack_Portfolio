@@ -10,6 +10,7 @@
     "dev": "vite",
     "dev:electron": "electron .",
     "build": "vite build",
+    "rebuild:native:node": "npm rebuild better-sqlite3 --prefix server",
     "rebuild:native": "npx electron-rebuild -f -w better-sqlite3 -m ./server",
     "build:app": "npm run build && npm run rebuild:native && electron-builder",
     "preview": "vite preview"
@@ -32,6 +33,7 @@
   "build": {
     "appId": "com.foodtracker.app",
     "productName": "FoodTracker",
+    "icon": "DataFork Logo.png",
     "directories": {
       "output": "release"
     },
@@ -48,6 +50,7 @@
     "nodeGypRebuild": false,
     "buildDependenciesFromSource": false,
     "win": {
+      "icon": "DataFork Logo.png",
       "target": [
         "nsis"
       ]

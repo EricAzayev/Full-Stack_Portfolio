@@ -10,6 +10,10 @@ function getLocalDateString() {
   return `${year}-${month}-${day}`;
 }
 
+function getSkippedMetadataKey(date) {
+  return `skippedAnalytics:${date}`;
+}
+
 /**
  * Daily Records Data Access Layer
  * Handles both "today" (current day) and historical records
@@ -33,8 +37,16 @@ export function getRecordByDate(date) {
     FROM daily_records
     WHERE date = ?
   `);
-  
-  return stmt.get(date);
+
+  const record = stmt.get(date);
+  if (!record) {
+    return null;
+  }
+
+  return {
+    ...record,
+    skippedInAnalytics: isRecordSkipped(date),
+  };
 }
 
 /**
@@ -318,7 +330,10 @@ export function getAllRecords(limit = null, offset = 0) {
   }
   
   const stmt = db.prepare(query);
-  return stmt.all();
+  return stmt.all().map((record) => ({
+    ...record,
+    skippedInAnalytics: isRecordSkipped(record.date),
+  }));
 }
 
 /**
@@ -340,6 +355,7 @@ export function getAllRecordsLegacyFormat() {
     
     legacyRecords.push({
       date: record.date,
+      skippedInAnalytics: Boolean(record.skippedInAnalytics),
       nutrients: {
         Protein_g: record.total_protein_g,
         Carbohydrates_g: record.total_carbohydrates_g,
@@ -367,6 +383,46 @@ export function getAllRecordsLegacyFormat() {
   }
   
   return { records: legacyRecords };
+}
+
+export function isRecordSkipped(date) {
+  const db = getDatabase();
+  const stmt = db.prepare(`
+    SELECT value
+    FROM system_metadata
+    WHERE key = ?
+  `);
+
+  const result = stmt.get(getSkippedMetadataKey(date));
+  return result ? result.value === "true" : false;
+}
+
+export function setRecordSkipped(date, skipped) {
+  const db = getDatabase();
+  const record = getRecordByDate(date);
+
+  if (!record) {
+    throw new Error(`Record for ${date} not found`);
+  }
+
+  if (skipped) {
+    const stmt = db.prepare(`
+      INSERT INTO system_metadata (key, value)
+      VALUES (?, 'true')
+      ON CONFLICT(key) DO UPDATE SET
+        value = 'true',
+        updated_at = datetime('now')
+    `);
+    stmt.run(getSkippedMetadataKey(date));
+  } else {
+    const stmt = db.prepare(`
+      DELETE FROM system_metadata
+      WHERE key = ?
+    `);
+    stmt.run(getSkippedMetadataKey(date));
+  }
+
+  return getRecordByDate(date);
 }
 
 /**
@@ -412,6 +468,8 @@ export default {
   resetTodayRecord,
   getAllRecords,
   getAllRecordsLegacyFormat,
+  isRecordSkipped,
   getLastResetDate,
+  setRecordSkipped,
   updateLastResetDate,
 };

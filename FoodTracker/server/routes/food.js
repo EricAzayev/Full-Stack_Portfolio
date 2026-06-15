@@ -157,6 +157,10 @@ function importUserDataSnapshot(snapshot) {
 
         insertFoodItemStmt.run(recordId, food.id, servings);
       }
+
+      if (record.skippedInAnalytics) {
+        recordDAL.setRecordSkipped(record.date, true);
+      }
     }
 
     const insertDeletedFoodStmt = db.prepare(`
@@ -516,6 +520,30 @@ router.get("/records", (req, res) => {
   } catch (error) {
     console.error("Error getting records:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.patch("/records/:date/skip", (req, res) => {
+  try {
+    const { date } = req.params;
+    const { skipped } = req.body;
+
+    if (typeof skipped !== "boolean") {
+      return res.status(400).json({ error: "Skipped flag must be a boolean" });
+    }
+
+    const updatedRecord = recordDAL.setRecordSkipped(date, skipped);
+    const legacyRecord = recordDAL.getAllRecordsLegacyFormat().records.find((record) => record.date === date);
+
+    res.status(200).json({
+      message: skipped
+        ? "Day skipped from analytics successfully"
+        : "Day restored to analytics successfully",
+      record: legacyRecord || updatedRecord,
+    });
+  } catch (error) {
+    console.error("Error updating skipped analytics flag:", error);
+    res.status(500).json({ error: error.message || "Internal server error" });
   }
 });
 

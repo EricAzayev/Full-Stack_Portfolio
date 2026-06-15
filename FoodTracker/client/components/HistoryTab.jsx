@@ -6,19 +6,20 @@ const HistoryTab = ({ selectedDate, onDateSelect }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedDay, setSelectedDay] = useState(selectedDate || null)
   const [viewMode, setViewMode] = useState('calendar') // 'calendar' or 'list'
+  const [updatingSkipDate, setUpdatingSkipDate] = useState(null)
+
+  const fetchRecords = async () => {
+    try {
+      const response = await fetch(apiUrl('/api/records'))
+      const data = await response.json()
+      setRecords(data.records || [])
+    } catch (error) {
+      console.error('Error fetching records:', error)
+    }
+  }
 
   // Fetch historical records
   useEffect(() => {
-    const fetchRecords = async () => {
-      try {
-        const response = await fetch(apiUrl('/api/records'))
-        const data = await response.json()
-        setRecords(data.records || [])
-      } catch (error) {
-        console.error('Error fetching records:', error)
-      }
-    }
-
     fetchRecords()
   }, [])
 
@@ -65,6 +66,33 @@ const HistoryTab = ({ selectedDate, onDateSelect }) => {
     }
   }
 
+  const handleToggleSkipDay = async (date, skipped) => {
+    setUpdatingSkipDate(date)
+
+    try {
+      const response = await fetch(apiUrl(`/api/records/${date}/skip`), {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ skipped }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update skipped day status')
+      }
+
+      const data = await response.json()
+      setRecords((prevRecords) => prevRecords.map((record) => (
+        record.date === date ? { ...record, ...data.record } : record
+      )))
+    } catch (error) {
+      console.error('Error updating skipped day status:', error)
+    } finally {
+      setUpdatingSkipDate(null)
+    }
+  }
+
   // Render calendar grid
   const renderCalendar = () => {
     const daysInMonth = getDaysInMonth(currentMonth)
@@ -89,13 +117,14 @@ const HistoryTab = ({ selectedDate, onDateSelect }) => {
       days.push(
         <div
           key={day}
-          className={`calendar-day ${record ? 'has-data' : ''} ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}`}
+          className={`calendar-day ${record ? 'has-data' : ''} ${record?.skippedInAnalytics ? 'skipped-day' : ''} ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}`}
           onClick={() => handleDayClick(dateString)}
         >
           <div className="day-number">{day}</div>
           {record && (
             <div className="day-indicator">
               <span className="calorie-badge">{record.calories}</span>
+              {record.skippedInAnalytics && <span className="skip-badge">Skipped</span>}
             </div>
           )}
         </div>
@@ -142,8 +171,23 @@ const HistoryTab = ({ selectedDate, onDateSelect }) => {
     return (
       <div className="daily-detail">
         <div className="daily-detail-header">
-          <h3>🔴 TEST - {formattedDate}</h3>
-          <button className="edit-day-button">Edit Day</button>
+          <div>
+            <h3>{formattedDate}</h3>
+            {record.skippedInAnalytics && (
+              <div className="skip-status-text">This day is currently excluded from Analytics.</div>
+            )}
+          </div>
+          <button
+            className={`edit-day-button skip-day-button ${record.skippedInAnalytics ? 'active' : ''}`}
+            onClick={() => handleToggleSkipDay(record.date, !record.skippedInAnalytics)}
+            disabled={updatingSkipDate === record.date}
+          >
+            {updatingSkipDate === record.date
+              ? 'Saving...'
+              : record.skippedInAnalytics
+                ? 'Count in Analytics'
+                : 'Skip Day'}
+          </button>
         </div>
 
         <div className="daily-meals">
@@ -204,7 +248,7 @@ const HistoryTab = ({ selectedDate, onDateSelect }) => {
           return (
             <div
               key={record.date}
-              className={`list-item ${selectedDay === record.date ? 'selected' : ''}`}
+              className={`list-item ${record.skippedInAnalytics ? 'skipped-day' : ''} ${selectedDay === record.date ? 'selected' : ''}`}
               onClick={() => handleDayClick(record.date)}
             >
               <div className="list-item-date">
@@ -214,6 +258,7 @@ const HistoryTab = ({ selectedDate, onDateSelect }) => {
                   month: 'short', 
                   day: 'numeric' 
                 })}
+                {record.skippedInAnalytics && <span className="list-skip-label">Skipped</span>}
               </div>
             <div className="list-item-calories">{record.calories} cal</div>
             <div className="list-item-macros">

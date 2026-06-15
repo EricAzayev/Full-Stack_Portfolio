@@ -54,6 +54,10 @@ const AnalyticsTab = ({ onDateClick }) => {
   const getRecordsInRange = () => {
     const { startDate, endDate } = getDateRange()
     return records.filter(record => {
+      if (record.skippedInAnalytics) {
+        return false
+      }
+
       const recordDate = new Date(record.date)
       return recordDate >= startDate && recordDate <= endDate
     }).sort((a, b) => new Date(a.date) - new Date(b.date))
