@@ -728,7 +728,7 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
                     className={errors.servingSize ? 'input-error' : ''}
                     placeholder="100"
                     min="0"
-                    step="0.1"
+                    step="any"
                   />
                   {errors.servingSize && <span className="error-text">{errors.servingSize}</span>}
                 </div>
@@ -744,7 +744,7 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
                     className={errors.calories ? 'input-error' : ''}
                     placeholder="150"
                     min="0"
-                    step="0.1"
+                    step="any"
                   />
                   {errors.calories && <span className="error-text">{errors.calories}</span>}
                 </div>
@@ -903,7 +903,7 @@ A food tracker will dissect the line to fill in the user's nutrition library, so
                         className={errors[`nutrients.${nutrient}`] ? 'input-error' : ''}
                         placeholder="0"
                         min="0"
-                        step="0.1"
+                        step="any"
                       />
                       {errors[`nutrients.${nutrient}`] && (
                         <span className="error-text">{errors[`nutrients.${nutrient}`]}</span>

@@ -13,6 +13,80 @@ console.log("✅ [Routes] Database initialized");
 
 const router = express.Router();
 
+const RECOMMENDATION_OVERRIDES_KEY = "recommendation_overrides";
+
+function getRecommendationOverrides() {
+  const db = getDatabase();
+  const row = db.prepare(`
+    SELECT value
+    FROM system_metadata
+    WHERE key = ?
+  `).get(RECOMMENDATION_OVERRIDES_KEY);
+
+  if (!row?.value) {
+    return {};
+  }
+
+  try {
+    const parsed = JSON.parse(row.value);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch (error) {
+    console.warn("Could not parse recommendation overrides metadata:", error);
+    return {};
+  }
+}
+
+function saveRecommendationOverrides(overrides) {
+  const db = getDatabase();
+  db.prepare(`
+    INSERT INTO system_metadata (key, value)
+    VALUES (?, ?)
+    ON CONFLICT(key) DO UPDATE SET
+      value = excluded.value,
+      updated_at = datetime('now')
+  `).run(RECOMMENDATION_OVERRIDES_KEY, JSON.stringify(overrides));
+}
+
+function clearRecommendationOverrides() {
+  const db = getDatabase();
+  db.prepare(`
+    DELETE FROM system_metadata
+    WHERE key = ?
+  `).run(RECOMMENDATION_OVERRIDES_KEY);
+}
+
+function normalizeRecommendationOverrides(input) {
+  if (!input || typeof input !== "object") {
+    return {};
+  }
+
+  const normalized = {};
+
+  for (const [key, value] of Object.entries(input)) {
+    const parsedValue = Number.parseFloat(value);
+    if (Number.isFinite(parsedValue) && parsedValue >= 0) {
+      normalized[key] = Number(parsedValue.toFixed(2));
+    }
+  }
+
+  return normalized;
+}
+
+function buildRecommendationsForUser(userData) {
+  if (!userData) {
+    return null;
+  }
+
+  const calculatedRecommendations = createRecommendedMicros(userData);
+  calculatedRecommendations["Calories_kcal"] = userData.calorieGoal || 2000;
+
+  const overrides = getRecommendationOverrides();
+  return {
+    ...calculatedRecommendations,
+    ...overrides,
+  };
+}
+
 function getUserDataSnapshot() {
   const db = getDatabase();
   const systemMetadata = db.prepare(`
@@ -186,10 +260,7 @@ function importUserDataSnapshot(snapshot) {
 function buildTodayResponse() {
   const today = recordDAL.getTodayLegacyFormat();
   const user = userDAL.getUser();
-  const needToday = user ? createRecommendedMicros(user) : {};
-  if (user) {
-    needToday["Calories_kcal"] = user.calorieGoal;
-  }
+  const needToday = user ? buildRecommendationsForUser(user) : {};
 
   return { today, needToday };
 }
@@ -425,10 +496,7 @@ router.get("/today", (req, res) => {
     
     // Get user for nutrient recommendations
     const user = userDAL.getUser();
-    const needToday = user ? createRecommendedMicros(user) : {};
-    if (user) {
-      needToday["Calories_kcal"] = user.calorieGoal;
-    }
+    const needToday = user ? buildRecommendationsForUser(user) : {};
 
     res.status(200).json({ today, needToday });
   } catch (error) {
@@ -570,14 +638,48 @@ router.get("/recommendations", (req, res) => {
       return res.status(404).json({ error: "User profile not found" });
     }
     
-    const recommendations = createRecommendedMicros(userData);
-    recommendations["Calories_kcal"] = userData.calorieGoal || 2000;
+    const recommendations = buildRecommendationsForUser(userData);
     
     console.log(`✅ [Routes] Fetched recommendations for user`);
     
     res.status(200).json(recommendations);
   } catch (error) {
     console.error("Error fetching recommendations:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/recommendations", (req, res) => {
+  try {
+    const userData = userDAL.getUser();
+
+    if (!userData) {
+      return res.status(404).json({ error: "User profile not found" });
+    }
+
+    const normalizedOverrides = normalizeRecommendationOverrides(req.body);
+    saveRecommendationOverrides(normalizedOverrides);
+
+    res.status(200).json(buildRecommendationsForUser(userData));
+  } catch (error) {
+    console.error("Error saving recommendations:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.delete("/recommendations", (req, res) => {
+  try {
+    const userData = userDAL.getUser();
+
+    if (!userData) {
+      return res.status(404).json({ error: "User profile not found" });
+    }
+
+    clearRecommendationOverrides();
+
+    res.status(200).json(buildRecommendationsForUser(userData));
+  } catch (error) {
+    console.error("Error resetting recommendations:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -675,13 +777,12 @@ router.get("/smart-recommendations", (req, res) => {
       return res.status(400).json({ error: "User profile not found" });
     }
 
-    const needToday = createRecommendedMicros(user);
-    needToday["Calories_kcal"] = user.calorieGoal;
+    const needToday = buildRecommendationsForUser(user);
 
     // Calculate nutrient deficits (what's missing)
     const nutrientDeficits = [];
     const totalCaloriesConsumed = today.calories || 0;
-    const remainingCalories = Math.max(0, user.calorieGoal - totalCaloriesConsumed);
+    const remainingCalories = Math.max(0, (needToday["Calories_kcal"] || 0) - totalCaloriesConsumed);
     const consumedNutrients = today.nutrients || {};
 
     for (const [nutrient, target] of Object.entries(needToday)) {
