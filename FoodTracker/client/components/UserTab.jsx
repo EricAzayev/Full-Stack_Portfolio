@@ -390,6 +390,7 @@ const UserTab = () => {
       setIsEditing(false);
       setErrors({});
       await Promise.all([fetchUserData(), fetchRecommendations()]);
+      window.dispatchEvent(new CustomEvent('foodtracker:user-data-imported'));
       setSaveMessage('User data imported successfully!');
       setTimeout(() => setSaveMessage(''), 4000);
     } catch (error) {

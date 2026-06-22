@@ -2,7 +2,7 @@
   "appId": "com.foodtracker.app.test",
   "productName": "TestFoodTracker",
   "artifactName": "TestFoodTracker Setup ${version}.${ext}",
-  "icon": "DataFork Logo.png",
+  "icon": "DataFork TestingLogo.png",
   "directories": {
     "output": "release/test"
   },
@@ -19,7 +19,7 @@
   "nodeGypRebuild": false,
   "buildDependenciesFromSource": false,
   "win": {
-    "icon": "DataFork Logo.png",
+    "icon": "DataFork TestingLogo.png",
     "executableName": "TestFoodTracker",
     "target": [
       "nsis"
@@ -28,6 +28,8 @@
   "nsis": {
     "oneClick": false,
     "allowToChangeInstallationDirectory": true,
+    "installerSidebar": "installerSidebar.bmp",
+    "uninstallerSidebar": "uninstallerSidebar.bmp",
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true
   }

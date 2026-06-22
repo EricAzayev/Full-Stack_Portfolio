@@ -3,12 +3,29 @@ import TodaySummary from './TodaySummary'
 import SmartRecommendations from './SmartRecommendations'
 import { apiUrl } from '../services/api'
 
+const DEFAULT_SERVINGS = '1'
+const QUANTITY_STEP = 1
+
+const parseServingsValue = (value) => {
+  const parsedValue = Number.parseFloat(value)
+  return Number.isFinite(parsedValue) ? parsedValue : NaN
+}
+
+const roundServings = (value) => {
+  return Math.round((value + Number.EPSILON) * 100) / 100
+}
+
+const formatServings = (value) => {
+  const roundedValue = roundServings(value)
+  return String(roundedValue)
+}
+
 const TodayTab = ({ onNavigateToFoodLibrary, onNavigateToUserSettings }) => {
   const [foodLibrary, setFoodLibrary] = useState({})
   const [todayData, setTodayData] = useState({})
   const [needToday, setNeedToday] = useState({})
   const [searchTerm, setSearchTerm] = useState('')
-  const [servings, setServings] = useState(1)
+  const [servings, setServings] = useState(DEFAULT_SERVINGS)
   const [searchResults, setSearchResults] = useState([])
   const [showResults, setShowResults] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
@@ -67,14 +84,25 @@ const TodayTab = ({ onNavigateToFoodLibrary, onNavigateToUserSettings }) => {
     setShowResults(false)
   }
 
+  const adjustQuantity = (foodName, currentServings, change) => {
+    const nextQuantity = roundServings(Math.max(0, currentServings + change))
+    handleUpdateQuantity(foodName, nextQuantity)
+  }
+
   // Handle adding food to today's intake
   const handleAddFood = async (foodName = null, servingsAmount = null) => {
     // Check if foodName is actually a string (not an event object)
     const food = (typeof foodName === 'string' && foodName) ? foodName : searchTerm;
-    const amount = (typeof servingsAmount === 'number' && servingsAmount) ? servingsAmount : servings;
+    const inputAmount = typeof servingsAmount === 'number' ? servingsAmount : servings
+    const amount = roundServings(parseServingsValue(inputAmount))
 
     if (!food || !foodLibrary[food]) {
       alert('Please select a valid food from the search results')
+      return
+    }
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      alert('Please enter a servings amount greater than 0')
       return
     }
 
@@ -99,7 +127,7 @@ const TodayTab = ({ onNavigateToFoodLibrary, onNavigateToUserSettings }) => {
         setNeedToday(result.needToday)
 
         // Show success message
-        setSuccessMessage(`✓ Added ${amount} serving(s) of ${food} to today's intake!`)
+        setSuccessMessage(`✓ Added ${formatServings(amount)} serving(s) of ${food} to today's intake!`)
 
         // Clear success message after 3 seconds
         setTimeout(() => setSuccessMessage(''), 3000)
@@ -107,7 +135,7 @@ const TodayTab = ({ onNavigateToFoodLibrary, onNavigateToUserSettings }) => {
         // Reset form only if using the search interface
         if (!foodName) {
           setSearchTerm('')
-          setServings(1)
+          setServings(DEFAULT_SERVINGS)
         }
       } else {
         const error = await response.json()
@@ -147,7 +175,7 @@ const TodayTab = ({ onNavigateToFoodLibrary, onNavigateToUserSettings }) => {
         if (newQuantity === 0) {
           setSuccessMessage(`✓ Removed ${foodName} from today's intake!`)
         } else {
-          setSuccessMessage(`✓ Updated ${foodName} to ${newQuantity} serving${newQuantity !== 1 ? 's' : ''}!`)
+          setSuccessMessage(`✓ Updated ${foodName} to ${formatServings(newQuantity)} serving${newQuantity !== 1 ? 's' : ''}!`)
         }
 
         // Clear success message after 3 seconds
@@ -261,9 +289,10 @@ const TodayTab = ({ onNavigateToFoodLibrary, onNavigateToUserSettings }) => {
 
             <input
               type="number"
-              min="1"
+              min="0.01"
+              step="0.25"
               value={servings}
-              onChange={(e) => setServings(parseInt(e.target.value) || 1)}
+              onChange={(e) => setServings(e.target.value)}
               className="servings-input"
               placeholder="Servings"
             />
@@ -291,16 +320,16 @@ const TodayTab = ({ onNavigateToFoodLibrary, onNavigateToUserSettings }) => {
                   <div className="quantity-controls">
                     <button
                       className="quantity-btn decrease-btn"
-                      onClick={() => handleUpdateQuantity(foodName, servings - 1)}
-                      title="Decrease quantity"
+                      onClick={() => adjustQuantity(foodName, servings, -QUANTITY_STEP)}
+                      title={`Decrease quantity by ${QUANTITY_STEP}`}
                     >
                       −
                     </button>
-                    <span className="quantity-display">{servings}</span>
+                    <span className="quantity-display">{formatServings(servings)}</span>
                     <button
                       className="quantity-btn increase-btn"
-                      onClick={() => handleUpdateQuantity(foodName, servings + 1)}
-                      title="Increase quantity"
+                      onClick={() => adjustQuantity(foodName, servings, QUANTITY_STEP)}
+                      title={`Increase quantity by ${QUANTITY_STEP}`}
                     >
                       +
                     </button>

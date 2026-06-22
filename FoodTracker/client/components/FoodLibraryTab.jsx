@@ -47,19 +47,19 @@ const FoodLibraryTab = () => {
   const [ollamaStatus, setOllamaStatus] = useState(null);
   const [showSetupModal, setShowSetupModal] = useState(false);
 
+  const fetchFoodLibrary = async () => {
+    try {
+      const response = await fetch(apiUrl('/api/foodLibrary'));
+      const data = await response.json();
+      setFoodLibrary(data);
+    } catch (error) {
+      console.error('Error fetching food library:', error);
+      setMessage('Failed to load food library');
+    }
+  };
+
   // Fetch food library data
   useEffect(() => {
-    const fetchFoodLibrary = async () => {
-      try {
-        const response = await fetch(apiUrl('/api/foodLibrary'));
-        const data = await response.json();
-        setFoodLibrary(data);
-      } catch (error) {
-        console.error('Error fetching food library:', error);
-        setMessage('Failed to load food library');
-      }
-    };
-
     const checkOllama = async () => {
       const status = await checkOllamaStatus(llmConfig.ollamaUrl);
       setOllamaStatus(status);
@@ -77,6 +77,18 @@ const FoodLibraryTab = () => {
 
     fetchFoodLibrary();
     checkOllama();
+  }, []);
+
+  useEffect(() => {
+    const handleUserDataImported = () => {
+      fetchFoodLibrary();
+    };
+
+    window.addEventListener('foodtracker:user-data-imported', handleUserDataImported);
+
+    return () => {
+      window.removeEventListener('foodtracker:user-data-imported', handleUserDataImported);
+    };
   }, []);
 
   // Handle input changes

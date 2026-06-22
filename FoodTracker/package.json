@@ -14,7 +14,7 @@
     "rebuild:native": "npx electron-rebuild -f -w better-sqlite3 -m ./server",
     "package:app": "electron-builder --config electron-builder.prod.json",
     "package:test-app": "electron-builder --config electron-builder.test.json",
-    "build": "npm run build:renderer && npm run rebuild:native && npm run package:app && npm run package:test-app",
+    "build": "npm run build:renderer && npm run rebuild:native && npm run package:app && npm run package:test-app && npm run rebuild:native:node",
     "build:app": "npm run build",
     "preview": "vite preview"
   },

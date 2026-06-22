@@ -447,10 +447,19 @@ router.get("/today", (req, res) => {
 router.put("/today", (req, res) => {
   try {
     const { foodName, servings, mode } = req.body;
+    const parsedServings = Number.parseFloat(servings);
 
     // Validate required fields
     if (!foodName || servings === undefined) {
       return res.status(400).json({ error: "Food name and servings are required" });
+    }
+
+    if (!Number.isFinite(parsedServings)) {
+      return res.status(400).json({ error: "Servings must be a valid number" });
+    }
+
+    if ((mode === 'set' && parsedServings < 0) || (mode !== 'set' && parsedServings <= 0)) {
+      return res.status(400).json({ error: mode === 'set' ? "Servings cannot be negative" : "Servings must be greater than 0" });
     }
 
     // Check if food exists in library or deleted library
@@ -467,12 +476,12 @@ router.put("/today", (req, res) => {
       // Calculate delta from current servings
       const currentToday = recordDAL.getTodayLegacyFormat();
       const currentServings = currentToday.food[foodName] || 0;
-      servingsDelta = servings - currentServings;
-      console.log(`✅ [Routes] Setting ${foodName}: ${currentServings} -> ${servings} (delta: ${servingsDelta})`);
+      servingsDelta = parsedServings - currentServings;
+      console.log(`✅ [Routes] Setting ${foodName}: ${currentServings} -> ${parsedServings} (delta: ${servingsDelta})`);
     } else {
       // Default: treat servings as delta (add/subtract)
-      servingsDelta = servings;
-      console.log(`✅ [Routes] Adding to ${foodName}: ${servings > 0 ? '+' : ''}${servings}`);
+      servingsDelta = parsedServings;
+      console.log(`✅ [Routes] Adding to ${foodName}: ${parsedServings > 0 ? '+' : ''}${parsedServings}`);
     }
 
     // Update today's record with the delta
