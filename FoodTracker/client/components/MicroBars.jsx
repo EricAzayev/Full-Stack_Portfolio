@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 const MicroBars = ({ nutrients, targets, showAll = false, onToggleShowAll }) => {
   const [hoveredNutrient, setHoveredNutrient] = useState(null);
+  const [orderBy, setOrderBy] = useState('leastMet');
 
   // Define micronutrients with their colors, units, and icons
   const micronutrients = [
@@ -22,7 +23,7 @@ const MicroBars = ({ nutrients, targets, showAll = false, onToggleShowAll }) => 
     { key: 'Monounsaturated_Fat_g', name: 'Monounsaturated Fat', color: '#14b8a6', unit: 'g', icon: '🥑' }
   ];
 
-  // Calculate progress for each nutrient and sort by deficiency (lowest % first)
+  // Calculate progress for each nutrient and sort by the selected progress order.
   const nutrientsWithProgress = micronutrients
     .map(nutrient => {
       const current = nutrients[nutrient.key] || 0;
@@ -31,9 +32,15 @@ const MicroBars = ({ nutrients, targets, showAll = false, onToggleShowAll }) => 
       return { ...nutrient, current, target, percentage };
     })
     .filter(nutrient => nutrient.target > 0) // Only show nutrients with targets
-    .sort((a, b) => a.percentage - b.percentage); // Sort by deficiency (lowest first)
+    .sort((a, b) => {
+      if (orderBy === 'mostMet') {
+        return b.percentage - a.percentage;
+      }
 
-  // Show top 5 most deficient by default, or all if showAll is true
+      return a.percentage - b.percentage;
+    });
+
+  // Show top 5 nutrients for the selected order by default, or all if showAll is true.
   const displayNutrients = showAll ? nutrientsWithProgress : nutrientsWithProgress.slice(0, 5);
 
   const getProgressColor = (percent) => {
@@ -58,14 +65,28 @@ const MicroBars = ({ nutrients, targets, showAll = false, onToggleShowAll }) => 
     <div className="micro-bars">
       <div className="micro-bars-header">
         <h3 className="micro-bars-title">Key Nutrients</h3>
-        {nutrientsWithProgress.length > 5 && (
-          <button 
-            className="toggle-micros-button"
-            onClick={onToggleShowAll}
-          >
-            {showAll ? 'Show Less' : `Show All (${nutrientsWithProgress.length})`}
-          </button>
-        )}
+        <div className="micro-bars-controls">
+          <label className="micro-order-label" htmlFor="micro-order-select">
+            <span>Order By:</span>
+            <select
+              id="micro-order-select"
+              className="micro-order-select"
+              value={orderBy}
+              onChange={(event) => setOrderBy(event.target.value)}
+            >
+              <option value="leastMet">Least Met</option>
+              <option value="mostMet">Most Met</option>
+            </select>
+          </label>
+          {nutrientsWithProgress.length > 5 && (
+            <button 
+              className="toggle-micros-button"
+              onClick={onToggleShowAll}
+            >
+              {showAll ? 'Show Less' : `Show All (${nutrientsWithProgress.length})`}
+            </button>
+          )}
+        </div>
       </div>
       
       <div className="micro-bars-container">

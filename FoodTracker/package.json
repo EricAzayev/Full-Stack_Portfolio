@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "description": "Local food tracking application",
   "author": "Your Name",
+  "license": "UNLICENSED",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {

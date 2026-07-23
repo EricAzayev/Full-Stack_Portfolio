@@ -1545,6 +1545,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
   margin-bottom: 1rem;
 }
 
@@ -1553,6 +1554,36 @@ body {
   color: #fff;
   font-size: 1.1rem;
   font-weight: 600;
+}
+
+.micro-bars-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.micro-order-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+}
+
+.micro-order-select {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.8rem;
+}
+
+.micro-order-select:focus {
+  outline: none;
+  border-color: rgba(100, 108, 255, 0.7);
 }
 
 .toggle-micros-button {
@@ -3085,6 +3116,16 @@ body {
 
   .micro-bars-title {
     color: #1a1a1a;
+  }
+
+  .micro-order-label {
+    color: #4b5563;
+  }
+
+  .micro-order-select {
+    background: rgba(255, 255, 255, 0.95);
+    color: #1a1a1a;
+    border-color: rgba(0, 0, 0, 0.12);
   }
 
   .toggle-micros-button {
