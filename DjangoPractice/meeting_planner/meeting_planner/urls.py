@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from website.views import welcome, about
+from website.views import welcome, about, view_calendar
 
 
 #website/views.py create view function, then import it here and add a URL pattern for it.
@@ -25,7 +25,8 @@ from website.views import welcome, about
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', welcome),
-    path('about', about)
+    path('about', about),
+    path('calendar', view_calendar)
 ]
 
 

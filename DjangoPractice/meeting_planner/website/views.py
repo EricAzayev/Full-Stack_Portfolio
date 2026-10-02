@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from django.shortcuts import render
 
 #view function
 def welcome(request): 
@@ -6,3 +7,6 @@ def welcome(request):
 
 def about(request):
     return HttpResponse("This is a practice website")
+
+def view_calendar(request): #template with render
+    return render(request, 'test.html')
