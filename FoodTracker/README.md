@@ -25,7 +25,21 @@ npm run dev
 - **[ELECTRON_IMPLEMENTATION.md](ELECTRON_IMPLEMENTATION.md)** - Technical implementation details
 
 ## Demo
-<img width="1871" height="901" alt="FoodTracker" src="https://github.com/user-attachments/assets/e54235f2-9c72-45d1-8d37-419908178f03" />
+
+**Today** — log meals and track real-time progress toward your calorie and macro goals
+![Today tab](docs/screenshots/today.png)
+
+**History** — browse past days on a calendar and drill into a day's food log
+![History tab](docs/screenshots/history.png)
+
+**Analytics** — trends across the last 7/30 days plus nutrient goal consistency
+![Analytics tab](docs/screenshots/analytics.png)
+
+**Food Library** — manage a reusable database of foods with full nutrition info
+![Food Library tab](docs/screenshots/food-library.png)
+
+**User Settings** — personalized goals, BMI, and optional local-AI (Ollama) configuration
+![User Settings tab](docs/screenshots/user-settings.png)
 
 ## Overview
 
@@ -35,11 +49,8 @@ Food Tracker is a comprehensive nutrition management system that allows users to
 - Manage a custom food library with nutritional information
 - **Run as a native Windows desktop application**
 - **Store all data locally (no internet required)**
-  <img width="1087" height="911" alt="image" src="https://github.com/user-attachments/assets/2193ca6a-f6ce-4a93-add7-e49e04edba84" />
-
 - View historical data and analytics across multiple days
 - Configure personalized caloric and macro goals
-<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/8bac3f50-8013-41fe-b25e-f0d6218b682f" />
 
 ## Key Learnings
 
