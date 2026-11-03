@@ -5,16 +5,21 @@ import Gifts from "./pages/Gifts";
 import GiftDetails from "./pages/GiftDetails";
 import PageNotFound from "./pages/PageNotFound";
 import { Link } from "react-router-dom";
+import fallbackGifts from "./fallback";
 
 const App = () => {
   const [gifts, setGifts] = useState([]);
 
   const fetchGifts = async () => {
-    const response = await fetch("/gifts");
-    const data = await response.json();
-    console.log(data);
-    console.log(data);
-    setGifts(data);
+    // Static deploy: fall back to the bundled seed when the backend fails.
+    try {
+      const response = await fetch("/gifts");
+      const data = await response.json();
+      setGifts(Array.isArray(data) && data.length > 0 ? data : fallbackGifts);
+    } catch (err) {
+      console.error("Error fetching gifts, using fallback:", err);
+      setGifts(fallbackGifts);
+    }
   };
 
   useEffect(() => {
