@@ -16,7 +16,7 @@ const Chessboard = () => {
   const fetchArmoryData = async () => {
     try {
       setError(null)
-      const response = await fetch('http://localhost:3002/armories')
+      const response = await fetch('/armories')
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)

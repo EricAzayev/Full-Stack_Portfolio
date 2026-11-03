@@ -25,6 +25,17 @@ app.get("/", (req, res) => {
     ); //sending html tags, perhaps react elements later?
 });
 
+
+// Serve the built frontend at the dashboard's project path (if it has been built)
+import fs from "fs";
+import path from "path";
+import url from "url";
+const dist = path.resolve(url.fileURLToPath(new URL(".", import.meta.url)), "..", "dist");
+if (fs.existsSync(dist)) {
+  app.use("/projects/rpg-chess", express.static(dist, { index: false }));
+  app.get("/projects/rpg-chess/*", (req, res) => res.sendFile(path.join(dist, "index.html")));
+}
+
 const PORT = process.env.PORT || 3002;
 
 // Initialize database tables
@@ -33,6 +44,8 @@ createUserTables().then(() => {
     console.log(`🚀 Server listening on http://localhost:${PORT}`);
   });
 }).catch((err) => {
-  console.error("Failed to initialize database:", err);
-  process.exit(1);
+  console.error("Database unavailable - starting with fallback data:", err.message);
+  app.listen(PORT, () => {
+    console.log(`🚀 Server listening on http://localhost:${PORT}`);
+  });
 });

@@ -1,4 +1,5 @@
 import { pool } from "../config/database.js";
+import { armorys } from "../data/armories.js";
 
 // Simple user creation (no login needed)
 const createUser = async (req, res) => {
@@ -36,8 +37,9 @@ const getPlayerData = async (req, res) => {
       res.status(200).json(result.rows[0]);
     }
   } catch (error) {
-    console.error("Error getting player data:", error);
-    res.status(500).json({ error: error.message });
+    console.error("Error getting player data:", error.message);
+    // DB unavailable - fall back to seeded armory defaults
+    res.status(200).json({ gold: armorys.gold, pieces: armorys.pieces });
   }
 };
 
@@ -168,8 +170,9 @@ const getUserArmories = async (req, res) => {
     const result = await pool.query(query, [userId]);
     res.status(200).json(result.rows);
   } catch (error) {
-    console.error("Error getting user armories:", error);
-    res.status(500).json({ error: error.message });
+    console.error("Error getting user armories:", error.message);
+    // DB unavailable - no saved armories to serve
+    res.status(200).json([]);
   }
 };
 

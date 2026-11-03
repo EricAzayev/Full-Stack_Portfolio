@@ -1,11 +1,22 @@
 import { pool } from "../config/database.js";
+import { descriptions, costs } from "../data/armories.js";
+
+// DB row shape: { name, description, cost, type }
+const fallbackArmories = Object.entries(descriptions).map(([name, description]) => ({
+  name,
+  description,
+  cost: costs[name],
+  type: "piece",
+}));
 
 const getArmories = async (req, res) => {
   try {
     const results = await pool.query("SELECT * FROM armories ORDER BY id ASC");
     res.status(200).json(results.rows);
-  } catch (error) {
-    res.status(409).json({ error: error.message });
+  } catch (err) {
+    console.error("DB query failed in getArmories:", err.message);
+    // DB unavailable - fall back to seeded armory data so frontend still renders
+    res.status(200).json(fallbackArmories);
   }
 };
 
@@ -20,8 +31,9 @@ const getArmoryById = async (req, res) => {
 
     const result = await pool.query(selectQuery, [armoryId]);
     res.status(200).json(result.rows[0]);
-  } catch (error) {
-    res.status(409).json({ error: error.message });
+  } catch (err) {
+    console.error("DB query failed in getArmoryById:", err.message);
+    res.status(200).json(fallbackArmories[req.params.armoryId]);
   }
 };
 
@@ -36,8 +48,9 @@ const updateArmory = async (req, res) => {
     const values = [req.body.name, req.body.description, req.body.cost, req.body.type, req.params.armoryId];
     await pool.query(updateQuery, values);
     res.status(200).json({ message: "Armory updated successfully" });
-  } catch (error) {
-    res.status(409).json({ error: error.message });
+  } catch (err) {
+    // DB unavailable - writes cannot be served without Postgres
+    res.status(503).json({ success: false, error: "Database unavailable - cannot update armory" });
   }
 };
 
@@ -50,8 +63,9 @@ const deleteArmory = async (req, res) => {
     const values = [req.params.armoryId];
     await pool.query(deleteQuery, values);
     res.status(200).json({ message: "Armory deleted successfully" });
-  } catch (error) {
-    res.status(409).json({ error: error.message });
+  } catch (err) {
+    // DB unavailable - writes cannot be served without Postgres
+    res.status(503).json({ success: false, error: "Database unavailable - cannot delete armory" });
   }
 };
 

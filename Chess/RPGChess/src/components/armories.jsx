@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import userService from "../services/userService.js"
+import fallbackArmories from "../fallbackArmories.js"
 
 const Armories = () => {
   const navigate = useNavigate()
@@ -12,23 +13,25 @@ const Armories = () => {
   const [costs, setCosts] = useState({})
 
   const fetchArmoryData = async () => {
-    try {
-      const response = await fetch('http://localhost:3002/armories')
-      const data = await response.json()
-      
-      // Convert server data to the format we need
-      const descriptionsObj = {}
-      const costsObj = {}
-      
-      data.forEach(item => {
+    const descriptionsObj = {}
+    const costsObj = {}
+    const applyRows = (rows) => {
+      rows.forEach(item => {
         descriptionsObj[item.name] = item.description
         costsObj[item.name] = item.cost
       })
-      
       setDescriptions(descriptionsObj)
       setCosts(costsObj)
+    }
+    try {
+      const response = await fetch('/armories')
+      const data = await response.json()
+      // Convert server data to the format we need
+      applyRows(Array.isArray(data) && data.length > 0 ? data : fallbackArmories)
     } catch (error) {
-      console.error('Error fetching armory data:', error)
+      console.error('Error fetching armory data, using fallback:', error)
+      // Static deploy: fall back to the bundled seed.
+      applyRows(fallbackArmories)
     }
   }
 

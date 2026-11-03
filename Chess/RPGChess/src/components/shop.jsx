@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import userService from "../services/userService.js"
+import fallbackArmories from "../fallbackArmories.js"
 
 const Shop = () => {
   const navigate = useNavigate()
@@ -11,37 +12,46 @@ const Shop = () => {
   const [isLoading, setIsLoading] = useState(true)
 
   const fetchArmoryData = async () => {
+    let data = null
     try {
       console.log('Fetching armory data from server...')
-      const response = await fetch('http://localhost:3002/armories')
+      const response = await fetch('/armories')
       console.log('Response status:', response.status)
       console.log('Response headers:', response.headers)
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
-      
-      const data = await response.json()
+
+      data = await response.json()
       console.log('Received data:', data)
-      
+
       // Convert server data to the format we need
       const descriptionsObj = {}
       const costsObj = {}
-      
+
       data.forEach(item => {
         descriptionsObj[item.name] = item.description
         costsObj[item.name] = item.cost
       })
-      
+
       console.log('Processed descriptions:', descriptionsObj)
       console.log('Processed costs:', costsObj)
-      
+
       setDescriptions(descriptionsObj)
       setCosts(costsObj)
       setIsLoading(false)
     } catch (error) {
-      console.error('Error fetching armory data:', error)
-      console.error('Error details:', error.message)
+      console.error('Error fetching armory data, using fallback:', error)
+      // Static deploy: fall back to the bundled seed.
+      const descriptionsObj = {}
+      const costsObj = {}
+      fallbackArmories.forEach(item => {
+        descriptionsObj[item.name] = item.description
+        costsObj[item.name] = item.cost
+      })
+      setDescriptions(descriptionsObj)
+      setCosts(costsObj)
       setIsLoading(false)
     }
   }
