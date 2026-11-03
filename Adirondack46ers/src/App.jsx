@@ -5,9 +5,10 @@ import TheSix from './components/TheSix'
 import AllUpcomingHikes from './components/AllUpcomingHikes'
 import MountainSelector from './components/MountainSelector'
 import MountainDetail from './components/MountainDetail'
+import fallbackEvents from './fallbackEvents'
 
 function App() {
-  const [currentMonth, setCurrentMonth] = useState(new Date(2025, 9, 1)) // October 2025
+  const [currentMonth, setCurrentMonth] = useState(new Date()) // open on the current month
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -17,12 +18,14 @@ function App() {
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch('http://localhost:3001/events')
+      const response = await fetch('/events')
       const data = await response.json()
-      setEvents(data)
-      setLoading(false)
+      // Static deploy: fall back to the bundled seed when the backend fails.
+      setEvents(Array.isArray(data) && data.length > 0 ? data : fallbackEvents())
     } catch (error) {
-      console.error('Error fetching events:', error)
+      console.error('Error fetching events, using fallback:', error)
+      setEvents(fallbackEvents())
+    } finally {
       setLoading(false)
     }
   }
@@ -48,7 +51,7 @@ function App() {
   }
 
   return (
-    <Router>
+    <Router basename={import.meta.env.BASE_URL}>
       <div className="app">
         <Header 
           currentMonth={getMonthName(currentMonth)}

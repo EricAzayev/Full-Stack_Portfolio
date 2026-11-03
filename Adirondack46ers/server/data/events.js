@@ -3,7 +3,7 @@
 const eventData = [
   // Past events (to show crossed out styling)
   {
-    date: "2025-10-01",
+    date: "2026-10-01",
     mountain: "Mount Marcy",
     organizer: "AdirondackExplorers",
     register: 25,
@@ -12,7 +12,7 @@ const eventData = [
     duration: "8-10 hours",
   },
   {
-    date: "2025-10-05",
+    date: "2026-10-05",
     mountain: "Algonquin Peak",
     organizer: "HighPeakHikers",
     register: 18,
@@ -22,7 +22,7 @@ const eventData = [
   },
   // Very soon events (imminent - red countdown with warning)
   {
-    date: "2025-10-09",
+    date: "2026-10-09",
     mountain: "Whiteface Mountain",
     organizer: "UrgentHikers",
     register: 15,
@@ -31,7 +31,7 @@ const eventData = [
     duration: "5-7 hours",
   },
   {
-    date: "2025-10-10",
+    date: "2026-10-10",
     mountain: "Dix Mountain",
     organizer: "QuickPeakBaggers",
     register: 12,
@@ -41,7 +41,7 @@ const eventData = [
   },
   // Coming soon (within a week - orange countdown)
   {
-    date: "2025-10-12",
+    date: "2026-10-12",
     mountain: "Mount Haystack",
     organizer: "TrailBlazersNY",
     register: 20,
@@ -50,7 +50,7 @@ const eventData = [
     duration: "10-12 hours",
   },
   {
-    date: "2025-10-14",
+    date: "2026-10-14",
     mountain: "Mount Skylight",
     organizer: "PeakBaggers",
     register: 15,
@@ -60,7 +60,7 @@ const eventData = [
   },
   // Future events (normal green countdown)
   {
-    date: "2025-10-15",
+    date: "2026-10-15",
     mountain: "Mount Marcy",
     organizer: "AdirondackExplorers",
     register: 25,
@@ -69,7 +69,7 @@ const eventData = [
     duration: "8-10 hours",
   },
   {
-    date: "2025-10-22",
+    date: "2026-10-22",
     mountain: "Algonquin Peak",
     organizer: "HighPeakHikers",
     register: 18,
@@ -78,7 +78,7 @@ const eventData = [
     duration: "6-8 hours",
   },
   {
-    date: "2025-11-05",
+    date: "2026-11-05",
     mountain: "Mount Haystack",
     organizer: "TrailBlazersNY",
     register: 12,
@@ -87,7 +87,7 @@ const eventData = [
     duration: "10-12 hours",
   },
   {
-    date: "2025-11-12",
+    date: "2026-11-12",
     mountain: "Mount Skylight",
     organizer: "PeakBaggers",
     register: 15,
@@ -96,7 +96,7 @@ const eventData = [
     duration: "10-12 hours",
   },
   {
-    date: "2025-11-19",
+    date: "2026-11-19",
     mountain: "Whiteface Mountain",
     organizer: "NorthCountryHikers",
     register: 22,
@@ -105,7 +105,7 @@ const eventData = [
     duration: "5-7 hours",
   },
   {
-    date: "2025-11-26",
+    date: "2026-11-26",
     mountain: "Mount Colden",
     organizer: "AdirondackAdventures",
     register: 16,
@@ -114,7 +114,7 @@ const eventData = [
     duration: "7-9 hours",
   },
   {
-    date: "2025-12-03",
+    date: "2026-12-03",
     mountain: "Gray Peak",
     organizer: "WildernessWanderers",
     register: 10,
@@ -123,7 +123,7 @@ const eventData = [
     duration: "9-11 hours",
   },
   {
-    date: "2025-12-10",
+    date: "2026-12-10",
     mountain: "Mount Redfield",
     organizer: "SummitSeekers",
     register: 8,
@@ -132,7 +132,7 @@ const eventData = [
     duration: "11-13 hours",
   },
   {
-    date: "2025-12-17",
+    date: "2026-12-17",
     mountain: "Cascade Mountain",
     organizer: "MountainMavericks",
     register: 30,
@@ -141,7 +141,7 @@ const eventData = [
     duration: "3-4 hours",
   },
   {
-    date: "2025-12-24",
+    date: "2026-12-24",
     mountain: "Porter Mountain",
     organizer: "HolidayHikers",
     register: 20,
@@ -150,7 +150,7 @@ const eventData = [
     duration: "3-5 hours",
   },
   {
-    date: "2026-01-07",
+    date: "2027-01-07",
     mountain: "Mount Esther",
     organizer: "WinterWarriors",
     register: 14,
@@ -159,7 +159,7 @@ const eventData = [
     duration: "5-6 hours",
   },
   {
-    date: "2026-01-14",
+    date: "2027-01-14",
     mountain: "Big Slide Mountain",
     organizer: "SnowshoeSociety",
     register: 17,

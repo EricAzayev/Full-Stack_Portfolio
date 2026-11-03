@@ -27,7 +27,7 @@ function TheSix({ events, currentMonth, loading }) {
 
   const filterEventsByMonth = () => {
     return events.filter(event => {
-      const eventDate = new Date(event.date)
+      const eventDate = new Date(event.date + 'T12:00:00')
       const isTopSix = topSixMountains.some(mountain => 
         event.mountain.toLowerCase().includes(mountain.toLowerCase()) ||
         mountain.toLowerCase().includes(event.mountain.toLowerCase())
@@ -42,7 +42,7 @@ function TheSix({ events, currentMonth, loading }) {
   const filteredEvents = filterEventsByMonth()
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString)
+    const date = new Date(dateString + 'T12:00:00')
     return date.toLocaleDateString('en-US', { 
       weekday: 'long', 
       year: 'numeric', 
@@ -52,7 +52,7 @@ function TheSix({ events, currentMonth, loading }) {
   }
 
   const isEventPast = (dateString) => {
-    const eventDate = new Date(dateString)
+    const eventDate = new Date(dateString + 'T12:00:00')
     const now = new Date()
     return eventDate < now
   }

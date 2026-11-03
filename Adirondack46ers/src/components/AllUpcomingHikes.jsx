@@ -14,16 +14,16 @@ function AllUpcomingHikes({ events, currentMonth, loading }) {
 
   const filterEventsByMonth = () => {
     return events.filter(event => {
-      const eventDate = new Date(event.date)
+      const eventDate = new Date(event.date + 'T12:00:00')
       return eventDate.getMonth() === currentMonth.getMonth() &&
         eventDate.getFullYear() === currentMonth.getFullYear()
-    }).sort((a, b) => new Date(a.date) - new Date(b.date))
+    }).sort((a, b) => new Date(a.date + 'T12:00:00') - new Date(b.date + 'T12:00:00'))
   }
 
   const filteredEvents = filterEventsByMonth()
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString)
+    const date = new Date(dateString + 'T12:00:00')
     return date.toLocaleDateString('en-US', { 
       weekday: 'long', 
       year: 'numeric', 
@@ -33,7 +33,7 @@ function AllUpcomingHikes({ events, currentMonth, loading }) {
   }
 
   const isEventPast = (dateString) => {
-    const eventDate = new Date(dateString)
+    const eventDate = new Date(dateString + 'T12:00:00')
     const now = new Date()
     return eventDate < now
   }
