@@ -82,6 +82,11 @@ npm run build-projects
 - Rebuild the project: `cd server && npm run build-projects`
 - Check browser console for errors
 
+## 📸 Screenshots & demo data
+
+- Card thumbnails are real screenshots of the apps, captured with `dashboard/tools/cdpshot.js` (uses puppeteer-core + the installed Chrome). Job list: `dashboard/tools/shotjobs.json`. Rerun it after rebuilding any project to refresh its thumbnail.
+- Projects whose backing services are gone (Supabase, hosted Postgres, keyed APIs) fall back to bundled/seeded demo data, so every demo renders. Live APIs and databases stay the primary path — run a project's own `server/server.js` for the live version (each server also serves the built frontend at `/projects/<id>/`).
+
 ---
 
 **Built for Codepath coursework showcase**

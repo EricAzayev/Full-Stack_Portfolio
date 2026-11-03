@@ -42,7 +42,7 @@
   display: grid;
   grid-template-columns: 1.2fr 1fr;
   gap: 64px;
-  align-items: center;
+  align-items: stretch;
 }
 
 .video-container {
@@ -53,13 +53,115 @@
     0 20px 60px -10px rgba(0, 0, 0, 0.5),
     0 0 0 1px rgba(255, 255, 255, 0.05);
   background: rgba(0, 0, 0, 0.4);
+  height: 100%;
+  min-height: 600px;
+  display: flex;
+  align-items: center;
+}
+
+.demo-shot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .demo-video {
   width: 100%;
-  height: auto;
+  height: 100%;
+  min-height: 600px;
   display: block;
   border-radius: 16px;
+  object-fit: cover;
+}
+
+/* YouTube iframe wrapper - hides controls immediately */
+.youtube-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 600px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #000;
+}
+
+/* Overlay mask to hide YouTube UI elements */
+.youtube-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent);
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.youtube-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: transparent;
+  z-index: 1;
+}
+
+.youtube-wrapper iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%) scale(1.01);
+  border: none;
+  pointer-events: none;
+}
+
+/* Loading overlay to completely hide YouTube UI */
+.youtube-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(15, 17, 33, 0.98), rgba(3, 0, 20, 0.98));
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(129, 140, 248, 0.2);
+  border-top-color: #818cf8;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .video-placeholder {
@@ -113,6 +215,10 @@
 /* Narrative Panel */
 .narrative-panel {
   color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 600px;
 }
 
 .project-title-cinematic {
@@ -391,6 +497,13 @@
   .slider-container {
     padding: 0 24px;
   }
+  
+  .video-container,
+  .demo-video,
+  .youtube-wrapper,
+  .narrative-panel {
+    min-height: 400px;
+  }
 }
 
 @media (max-width: 640px) {
@@ -414,5 +527,12 @@
   .nav-arrow {
     width: 48px;
     height: 48px;
+  }
+  
+  .video-container,
+  .demo-video,
+  .youtube-wrapper,
+  .narrative-panel {
+    min-height: 300px;
   }
 }

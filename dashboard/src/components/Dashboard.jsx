@@ -51,12 +51,20 @@ const Dashboard = () => {
 
     return (
         <>
-            {/* Hero Section */}
+            {/* Compact hero: name the page, then let the projects lead */}
             <header className="portfolio-hero">
                 <div className="hero-content">
-                    <h1 className="hero-title">Systems & Solutions Engineer</h1>
+                    <h1 className="hero-title">Full-Stack Portfolio</h1>
                     <p className="hero-subtitle">
-                        Full-Stack Portfolio — CodePath 102 & 103 Coursework
+                        CodePath Web102 &amp; Web103 coursework — every project below runs from code in{' '}
+                        <a
+                            className="hero-link"
+                            href="https://github.com/EricAzayev/Full-Stack_Portfolio"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            this repository
+                        </a>
                     </p>
                 </div>
             </header>

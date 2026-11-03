@@ -1,14 +1,24 @@
-// Star projects for the cinematic slider
+// Star projects for the cinematic slider.
+// lines are counted from this repository's actual source; codeUrl points into the repo on GitHub.
+const GH = 'https://github.com/EricAzayev/Full-Stack_Portfolio/tree/main';
+
 export const starProjects = [
   {
     id: 'food-tracker',
     name: 'Food Tracker',
     category: 'Full-Stack Desktop App',
     description: 'Nutrition tracking application that runs as a Windows desktop app or web application',
-    keyChallenge: 'Built a complete Electron wrapper to package the web app as a native Windows executable with offline SQLite storage and cross-process communication.',
-    demoVideo: '/assets/videos/food-tracker-demo.mp4',
+    keyChallenge: 'Packaged the web app as a native Windows executable with Electron: a companion app hosts the Express + SQLite storage so the UI and its data live in separate processes, plus per-instance data directories and import/export of tracking history.',
+    screenshots: [
+      '/assets/screenshots/food-tracker/today.png',
+      '/assets/screenshots/food-tracker/food-library.png',
+      '/assets/screenshots/food-tracker/analytics.png',
+      '/assets/screenshots/food-tracker/history.png',
+      '/assets/screenshots/food-tracker/user-settings.png',
+    ],
     demoUrl: '/projects/food-tracker/',
-    thumbnail: '/assets/thumbnails/food-tracker.webp',
+    codeUrl: `${GH}/FoodTracker`,
+    thumbnail: '/assets/thumbnails/food-tracker.png',
     techStack: [
       { name: 'React', icon: 'https://cdn.simpleicons.org/react/61DAFB' },
       { name: 'Node.js', icon: 'https://cdn.simpleicons.org/nodedotjs/339933' },
@@ -16,9 +26,7 @@ export const starProjects = [
       { name: 'Electron', icon: 'https://cdn.simpleicons.org/electron/47848F' },
       { name: 'Chart.js', icon: 'https://cdn.simpleicons.org/chartdotjs/FF6384' }
     ],
-    linesOfCode: 12450,
-    commits: '140+',
-    dependencies: 18,
+    lines: 14708,
     features: [
       'Daily caloric tracking with visual charts',
       'Macronutrient breakdown and goals',
@@ -31,25 +39,24 @@ export const starProjects = [
     id: 'rpg-chess',
     name: 'RPG Chess',
     category: 'Full-Stack Game',
-    description: 'Chess game with RPG elements and real-time multiplayer functionality',
-    keyChallenge: 'Implemented custom game logic engine handling both traditional chess rules and RPG stat modifiers with WebSocket-based real-time synchronization.',
-    demoVideo: '/assets/videos/rpg-chess-demo.mp4',
-    demoUrl: '/projects/rpg-chess/',
-    thumbnail: '/assets/thumbnails/rpg-chess.webp',
+    description: 'Chess variant where pieces have stats and cost gold - board editor, armory and shop',
+    keyChallenge: 'Built a 3x8 chess variant with an HP/attack economy on top of the standard rules: piece placement rules, a shop that purchases pieces with earned gold, and board persistence through localStorage so a session survives reloads even when the API is out.',
+    demoVideo: null,
+    demoUrl: '/projects/rpg-chess/chessboard',
+    codeUrl: `${GH}/Chess/RPGChess`,
+    thumbnail: '/assets/thumbnails/rpg-chess.png',
     techStack: [
       { name: 'React', icon: 'https://cdn.simpleicons.org/react/61DAFB' },
       { name: 'Node.js', icon: 'https://cdn.simpleicons.org/nodedotjs/339933' },
-      { name: 'Socket.io', icon: 'https://cdn.simpleicons.org/socketdotio/010101' },
-      { name: 'Express', icon: 'https://cdn.simpleicons.org/express/FFFFFF' }
+      { name: 'Express', icon: 'https://cdn.simpleicons.org/express/FFFFFF' },
+      { name: 'PostgreSQL', icon: 'https://cdn.simpleicons.org/postgresql/4169E1' }
     ],
-    linesOfCode: 8920,
-    commits: '95+',
-    dependencies: 14,
+    lines: 2290,
     features: [
-      'Traditional chess gameplay',
-      'RPG stat system for pieces',
-      'Real-time multiplayer',
-      'WebSocket communication'
+      '3x8 chess variant board',
+      'Piece stats and gold economy',
+      'Armory and shop system',
+      'Board persistence across reloads'
     ]
   },
   {
@@ -57,10 +64,11 @@ export const starProjects = [
     name: 'Adirondack 46ers',
     category: 'Full-Stack Event Platform',
     description: 'Event management platform for hiking the 46 High Peaks of the Adirondack Mountains',
-    keyChallenge: 'Designed a dynamic calendar system with custom date filtering algorithms and nested routing for 46 mountain detail pages with associated events.',
-    demoVideo: '/assets/videos/adirondack-demo.mp4',
+    keyChallenge: 'Designed a month-navigation calendar with per-month event filtering, live countdown state on each hike card, and nested routes for the six tallest peaks and all 46 mountains with their associated events.',
+    demoVideo: null,
     demoUrl: '/projects/adirondack46ers/',
-    thumbnail: '/assets/thumbnails/adirondack46ers.webp',
+    codeUrl: `${GH}/Adirondack46ers`,
+    thumbnail: '/assets/thumbnails/adirondack46ers.png',
     techStack: [
       { name: 'React', icon: 'https://cdn.simpleicons.org/react/61DAFB' },
       { name: 'Node.js', icon: 'https://cdn.simpleicons.org/nodedotjs/339933' },
@@ -68,13 +76,11 @@ export const starProjects = [
       { name: 'PostgreSQL', icon: 'https://cdn.simpleicons.org/postgresql/4169E1' },
       { name: 'React Router', icon: 'https://cdn.simpleicons.org/reactrouter/CA4245' }
     ],
-    linesOfCode: 7350,
-    commits: '78+',
-    dependencies: 12,
+    lines: 1949,
     features: [
       'Browse upcoming hiking events',
-      'View mountain details and history',
       'Monthly calendar navigation',
+      'Live countdown on each hike',
       'RESTful API with PostgreSQL'
     ]
   },
@@ -83,24 +89,22 @@ export const starProjects = [
     name: 'Rising Economies',
     category: 'Full-Stack Data Visualization',
     description: 'Interactive data visualization platform for global economic development trends',
-    keyChallenge: 'Built a modular vanilla JavaScript architecture with dynamic DOM manipulation and interactive data visualizations without framework dependencies.',
-    demoVideo: '/assets/videos/rising-economies-demo.mp4',
+    keyChallenge: 'Built a scoring engine in plain JavaScript that normalizes five economic indicators per country and ranks them into a 0-100 rising score, rendered as vanilla-DOM cards over an Express API - no framework, no chart library.',
+    demoVideo: null,
     demoUrl: '/projects/rising-economies/',
-    thumbnail: '/assets/thumbnails/rising-economies.webp',
+    codeUrl: `${GH}/RisingEconomies`,
+    thumbnail: '/assets/thumbnails/rising-economies.png',
     techStack: [
       { name: 'JavaScript', icon: 'https://cdn.simpleicons.org/javascript/F7DF1E' },
       { name: 'Node.js', icon: 'https://cdn.simpleicons.org/nodedotjs/339933' },
-      { name: 'Express', icon: 'https://cdn.simpleicons.org/express/FFFFFF' },
-      { name: 'Vite', icon: 'https://cdn.simpleicons.org/vite/646CFF' }
+      { name: 'Express', icon: 'https://cdn.simpleicons.org/express/FFFFFF' }
     ],
-    linesOfCode: 5680,
-    commits: '62+',
-    dependencies: 8,
+    lines: 773,
     features: [
-      'Interactive economic visualizations',
-      'Country-specific detail pages',
-      'Dynamic data rendering',
-      'RESTful API backend'
+      'Country ranking by composite score',
+      'Country detail pages',
+      'Zero framework dependencies',
+      'Express API with bundled dataset fallback'
     ]
   }
 ];
