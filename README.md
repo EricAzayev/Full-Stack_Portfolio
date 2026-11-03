@@ -5,7 +5,7 @@
 
 Built a complete nutrition management system featuring React frontend with interactive donut charts and Express backend with RESTful API. Mastered complex state management across multiple tabs, implemented daily data reset logic, and created custom nutrient calculation algorithms. Learned to synchronize multiple data sources (food library, user settings, historical records) while maintaining clean component architecture.
 
-**Key Tech:** React, Express.js, Node.js, File System API, Custom State Management
+**Key Tech:** React, Express.js, Node.js, Electron, SQLite, Chart.js
 
 ---
 
@@ -55,11 +55,11 @@ Each project explores a different technical or creative challenge — from build
 
 ## 🛠️ Tech Highlights
 
-**Frontend:** React, Bootstrap, Context API, Hooks, NPM, Express
+**Frontend:** React, React Router, Context API, Hooks, Vanilla JavaScript, Pico CSS
 
-**Backend:** Node.js, Express.js, MongoDB / PostgreSQL
+**Backend:** Node.js, Express.js, PostgreSQL, SQLite
 
-**Other:** REST APIs, JWT Authentication, WebSockets, Axios, Deployment (Render / Vercel / Netlify)
+**Other:** REST APIs, Electron, Chart.js / Recharts, Supabase, Axios, Deployment (Render / Vercel / Netlify)
 
 ---
 
