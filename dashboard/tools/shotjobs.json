@@ -1,0 +1,19 @@
+[
+  ["Web102/Flashcards", "flashcards"],
+  ["Web102/CommunityBoard", "community-board"],
+  ["Web102/Weatherstack", "weatherstack"],
+  ["Web102/TheDailyDogGazette", "daily-dog-gazette"],
+  ["Web102/HTML_Scraper", "html-scraper"],
+  ["Web102/Crypto-Hustle", "crypto-hustle"],
+  ["Web102/CryptoWatchList", "crypto-watchlist"],
+  ["Web102/lab3-DrinkMaker", "drink-maker"],
+  ["Web102/Creatorverse", "creatorverse"],
+  ["Web102/UserProfiles", "user-profiles"],
+  ["Chess/RPGChess", "rpg-chess", "chessboard", 2500, 1600, "3002", "node server/server.js"],
+  ["RisingEconomies", "rising-economies", "", 2500, 1600, "3001", "node server/server.js"],
+  ["Adirondack46ers", "adirondack46ers", "", 2500, 1600, "3001", "node server/server.js"],
+  ["UnEarthed_Series/UnEarthed_1", "unearthed-1", "", 2500, 1600, "3001", "node server/server.js"],
+  ["UnEarthed_Series/UnEarthed_2", "unearthed-2", "", 2500, 1600, "3001", "node server/server.js"],
+  ["UnEarthed_Series/UnEarthed_3", "unearthed-3", "", 2500, 1600, "3001", "node server/server.js"],
+  ["UnEarthed_Series/4_UnEarthed_4", "unearthed-4", "", 2500, 1600, "3001", "node server/server.js"]
+]
