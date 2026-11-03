@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom"; // for the link to detail view
+import { fallbackPrice } from "../fallbackData";
 import "./CoinInfo.css";
 
 const API_KEY = import.meta.env.VITE_APP_API_KEY;
@@ -9,13 +10,21 @@ function CoinInfo({ image, name, symbol }) {
 
   useEffect(() => {
     const getCoinPrice = async () => {
-      let response = await fetch(
-        `https://min-api.cryptocompare.com/data/price?fsym=${symbol}&tsyms=USD&api_key=${API_KEY}`
-      );
-      let responseJson = await response.json();
-      setPrice(responseJson);
+      let quote = null;
+      try {
+        let response = await fetch(
+          `https://min-api.cryptocompare.com/data/price?fsym=${symbol}&tsyms=USD&api_key=${API_KEY}`
+        );
+        // On success the API returns {USD: price}; on failure {Data:{}, Err} (no USD field).
+        const responseJson = await response.json();
+        quote = responseJson.USD ? responseJson : fallbackPrice(symbol);
+      } catch (error) {
+        console.error(error);
+        quote = fallbackPrice(symbol);
+      }
+      setPrice(quote);
     };
-    getCoinPrice().catch(console.error);
+    getCoinPrice();
   }, []);
 
   return (
@@ -24,7 +33,7 @@ function CoinInfo({ image, name, symbol }) {
         <div className="main-list" key={symbol}>
           <img
             className="icons"
-            src={`https://www.cryptocompare.com${image}`}
+            src={image.startsWith("http") ? image : `https://www.cryptocompare.com${image}`}
             alt={`Small icon for ${name} crypto coin`}
           />
           {`${name} (${symbol})`}

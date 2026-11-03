@@ -1,5 +1,6 @@
 import React, { Component, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { fallbackCoinDetails } from "../fallbackData";
 const API_KEY = import.meta.env.VITE_APP_API_KEY;
 
 function CoinDetails() {
@@ -19,9 +20,18 @@ function CoinDetails() {
       const detailsJson = await details.json();
       const descripJson = await description.json();
 
+      // Empty API responses ({DISPLAY:{}, Data:{}}, e.g. 401 without a key) fall
+      // back to the synthetic seed data for known coins.
+      const fb = fallbackCoinDetails(params.symbol);
       setFullDetails({
-        numbers: detailsJson.DISPLAY,
-        textData: descripJson.Data,
+        numbers:
+          detailsJson.DISPLAY && Object.keys(detailsJson.DISPLAY).length
+            ? detailsJson.DISPLAY
+            : fb?.numbers,
+        textData:
+          descripJson.Data && Object.keys(descripJson.Data).length
+            ? descripJson.Data
+            : fb?.textData,
       });
     };
 
@@ -35,9 +45,13 @@ function CoinDetails() {
           <h1>{fullDetails.textData[params.symbol].FullName}</h1>
           <img
             className="images"
-            src={`https://www.cryptocompare.com${
-              fullDetails.numbers[params.symbol].USD.IMAGEURL
-            }`}
+            src={
+              fullDetails.numbers[params.symbol].USD.IMAGEURL.startsWith("http")
+                ? fullDetails.numbers[params.symbol].USD.IMAGEURL
+                : `https://www.cryptocompare.com${
+                    fullDetails.numbers[params.symbol].USD.IMAGEURL
+                  }`
+            }
             alt={`Small icon for ${params.symbol} crypto coin`}
           />
           <div>{fullDetails.textData[params.symbol].Description}</div>

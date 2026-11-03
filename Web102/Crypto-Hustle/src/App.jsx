@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import CoinInfo from "./components/CoinInfo";
+import { fallbackCoinList } from "./fallbackData";
 import "./App.css";
 
 const API_KEY = import.meta.env.VITE_APP_API_KEY;
@@ -13,13 +14,22 @@ function App() {
     const fetchAllCoinData = async () => {
       // Below we are focusing our query to only 10 coins which have the top trading volume.
       // This will reduce our query burden, thus preventing us from hitting API rate limits.
-      let coinData = await fetch(
-        "https://min-api.cryptocompare.com/data/top/totaltoptiervol?limit=5&assetClass=ALL&tsym=usd&api_key=" +
-          API_KEY
-      );
-      let coinDataJson = await coinData.json();
-
-      setCoinList(coinDataJson.Data);
+      let coins = [];
+      try {
+        const coinData = await fetch(
+          "https://min-api.cryptocompare.com/data/top/totaltoptiervol?limit=5&assetClass=ALL&tsym=usd&api_key=" +
+            API_KEY
+        );
+        // The API returns {Data: [coins]} on success, {Data:{}, Err} on failure.
+        coins = (await coinData.json()).Data;
+      } catch (error) {
+        console.error(error);
+      }
+      if (Array.isArray(coins) && coins.length > 0) {
+        setCoinList(coins);
+      } else {
+        setCoinList(fallbackCoinList);
+      }
       // coinList is now set to an array of objects. Example object:
       // { CoinInfo: {
       //    Id:"1182"
@@ -34,7 +44,7 @@ function App() {
       //    Weiss:{}
       // }, ...}
     };
-    fetchAllCoinData().catch(console.error);
+    fetchAllCoinData();
   }, []);
 
   const searchItems = (searchValue) => {
