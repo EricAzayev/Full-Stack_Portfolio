@@ -22,6 +22,18 @@ app.get("/", (req, res) => {
     ); //sending html tags, perhaps react elements later?
 });
 
+
+// Serve the built frontend at the dashboard's project path (if it has been built)
+import fs from "fs";
+import path from "path";
+import url from "url";
+const dist = path.resolve(url.fileURLToPath(new URL(".", import.meta.url)), "..", "dist");
+if (fs.existsSync(dist)) {
+  app.use("/projects/unearthed-2", express.static(dist, { index: false }));
+  app.use("/public", express.static(dist)); // unminified scripts/logo copied into dist by vite
+  app.get("/projects/unearthed-2/*", (req, res) => res.sendFile(path.join(dist, "index.html")));
+}
+
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
