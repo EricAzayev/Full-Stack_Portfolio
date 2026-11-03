@@ -9,7 +9,9 @@ const addHeader = () => {
   headerLeft.className = "header-left";
 
   const headerLogo = document.createElement("img");
-  headerLogo.src = "../public/logo.png";
+  headerLogo.src = window.location.pathname.startsWith("/projects/")
+    ? "/projects/unearthed-1/logo.png"
+    : "../public/logo.png";
 
   const headerTitle = document.createElement("h1");
   headerTitle.textContent = "UnEarthed";

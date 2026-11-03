@@ -4,7 +4,7 @@ const giftData = [
     name: "Wireless Headphones",
     pricePoint: 120,
     audience: "Tech Enthusiasts",
-    image: "https://example.com/images/headphones.jpg",
+    image: "https://picsum.photos/seed/headphones/600/450",
     description: "High-quality wireless headphones with noise cancellation.",
     submittedBy: "Alex Gomez",
     submittedOn: "2025-09-20"
@@ -14,7 +14,7 @@ const giftData = [
     name: "Custom Coffee Mug",
     pricePoint: 18,
     audience: "Office Workers",
-    image: "https://example.com/images/coffeemug.jpg",
+    image: "https://picsum.photos/seed/coffeemug/600/450",
     description: "Personalized coffee mug with custom text and logo.",
     submittedBy: "Jamie Lin",
     submittedOn: "2025-09-18"
@@ -24,7 +24,7 @@ const giftData = [
     name: "Mini Succulent Garden",
     pricePoint: 35,
     audience: "Plant Lovers",
-    image: "https://example.com/images/succulents.jpg",
+    image: "https://picsum.photos/seed/succulents/600/450",
     description: "A decorative mini garden with assorted succulent plants.",
     submittedBy: "Priya Singh",
     submittedOn: "2025-09-17"
@@ -34,7 +34,7 @@ const giftData = [
     name: "Portable Bluetooth Speaker",
     pricePoint: 50,
     audience: "Music Fans",
-    image: "https://example.com/images/bluetoothspeaker.jpg",
+    image: "https://picsum.photos/seed/bluetoothspeaker/600/450",
     description: "Compact Bluetooth speaker with premium sound.",
     submittedBy: "Chris Okafor",
     submittedOn: "2025-09-16"
@@ -44,7 +44,7 @@ const giftData = [
     name: "Handmade Scented Candle",
     pricePoint: 22,
     audience: "Home Decor",
-    image: "https://example.com/images/candle.jpg",
+    image: "https://picsum.photos/seed/candle/600/450",
     description: "Hand-poured soy candle with lavender and vanilla aroma.",
     submittedBy: "Sara Kim",
     submittedOn: "2025-09-15"

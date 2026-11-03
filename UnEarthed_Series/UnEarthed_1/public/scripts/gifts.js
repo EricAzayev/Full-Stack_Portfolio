@@ -1,6 +1,16 @@
 const renderGifts = async () => {
-  const response = await fetch("/gifts");
-  const data = await response.json();
+  // Static deploy: if the backend call fails or is unusable, fall back to the
+  // bundled seed copy so the page still renders.
+  let data = null;
+  try {
+    const response = await fetch("/gifts");
+    data = await response.json();
+  } catch (err) {}
+  if (!Array.isArray(data) || data.length === 0) {
+    try {
+      data = await (await fetch("data/gifts.json")).json();
+    } catch (err) {}
+  }
   const mainContent = document.getElementById("main-content");
   if (data) {
     data.map((gift) => {
@@ -66,7 +76,10 @@ const renderGifts = async () => {
   }
 };
 
-const giftsLastSegment = window.location.pathname.split('/').filter(Boolean).pop() || '';
+// Ignore the /projects/<id> prefix when served inside the portfolio dashboard
+const appPath = window.location.pathname.replace(/^\/projects\/unearthed-1\/?/, '') || '';
+
+const giftsLastSegment = appPath === 'index.html' ? '' : (appPath.split('/').filter(Boolean).pop() || '');
 
 if (giftsLastSegment && giftsLastSegment !== "404.html") {
   window.location.href = "/404.html";
