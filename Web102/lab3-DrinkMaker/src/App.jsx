@@ -22,8 +22,9 @@ function App() {
     setCheckedBlended("");
 
     setCount((prevCount) => prevCount + 1);
-    setCurrentDrink(drinkJson[count]);
-    setTrueRecipe(drinkJson[count].recipe);
+    const drink = drinkJson[count % drinkJson.length];
+    setCurrentDrink(drink.name); // the name must be rendered, not the object itself
+    setTrueRecipe(drink.recipe);
   };
   const onCheckAnswer = () => {
     const userRecipe = {
