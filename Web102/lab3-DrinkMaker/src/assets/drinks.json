@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Caramel Macchiato",
+    "recipe": { "temp": "hot", "syrup": "caramel", "milk": "cow", "blended": "no" }
+  },
+  {
+    "name": "Iced Vanilla Latte",
+    "recipe": { "temp": "cold", "syrup": "vanilla", "milk": "oat", "blended": "no" }
+  },
+  {
+    "name": "Mocha Frappuccino",
+    "recipe": { "temp": "cold", "syrup": "mocha", "milk": "cow", "blended": "yes" }
+  },
+  {
+    "name": "Maple Almond Latte",
+    "recipe": { "temp": "lukewarm", "syrup": "maple", "milk": "almond", "blended": "no" }
+  },
+  {
+    "name": "Toffee Nut Blast",
+    "recipe": { "temp": "hot", "syrup": "toffee", "milk": "goat", "blended": "yes" }
+  },
+  {
+    "name": "Black Espresso",
+    "recipe": { "temp": "hot", "syrup": "none", "milk": "none", "blended": "no" }
+  },
+  {
+    "name": "Caramel Turbo Smoothie",
+    "recipe": { "temp": "cold", "syrup": "caramel", "milk": "oat", "blended": "turbo" }
+  },
+  {
+    "name": "Vanilla Goat Milk Steamer",
+    "recipe": { "temp": "lukewarm", "syrup": "vanilla", "milk": "goat", "blended": "no" }
+  },
+  {
+    "name": "Sugar-Free Iced Americano",
+    "recipe": { "temp": "cold", "syrup": "none", "milk": "none", "blended": "no" }
+  },
+  {
+    "name": "Other-Flavored Turbo Frappe",
+    "recipe": { "temp": "lukewarm", "syrup": "other", "milk": "cow", "blended": "turbo" }
+  }
+]
