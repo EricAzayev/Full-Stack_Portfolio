@@ -30,22 +30,23 @@ const renderCountry = async () => {
     if (countryContent) countryContent.appendChild(message);
   }
 
-  let response;
+  // Static deploy: if the backend call fails, fall back to the bundled seed
+  // copy so the page still renders (base keeps the path relative to the page).
+  const base = window.location.pathname.replace(/(countries|404\.html|index\.html).*/, "");
+  let data = null;
   try {
-    response = await fetch("/countries");
-  } catch (err) {
-    console.error("Fetch failed:", err);
+    const response = await fetch("/countries");
+    if (response.ok) data = await response.json();
+  } catch (err) {}
+  if (!Array.isArray(data) || data.length === 0) {
+    try {
+      data = await (await fetch(base + "data/countries.json")).json();
+    } catch (err) {}
+  }
+  if (!data) {
     appendMessage("Failed to load countries.");
     return;
   }
-
-  if (!response.ok) {
-    console.error("Bad response:", response.status);
-    appendMessage("Failed to load countries.");
-    return;
-  }
-
-  const data = await response.json();
 
   const country = data.find(
     (c) => c.name.toLowerCase().replace(/\s+/g, "-") === idStr.toLowerCase()

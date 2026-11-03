@@ -7,6 +7,16 @@ app.use("/public", express.static("./public")); //server any images from public 
 app.use("/scripts", express.static("./public/scripts")); //server any scripts from public/scripts directory
 app.use("/countries", countriesRouter); // Mount gifts router after middleware configuration
 
+// Serve the built frontend at the dashboard's project path (if it has been built)
+import fs from "fs";
+import path from "path";
+import url from "url";
+const dist = path.resolve(url.fileURLToPath(new URL(".", import.meta.url)), "..", "dist");
+if (fs.existsSync(dist)) {
+  app.use("/projects/rising-economies", express.static(dist, { index: false }));
+  app.get("/projects/rising-economies/*", (req, res) => res.sendFile(path.join(dist, "index.html")));
+}
+
 app.get("/", (req, res) => {
   res
     .status(200)

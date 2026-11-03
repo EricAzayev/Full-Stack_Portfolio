@@ -9,7 +9,8 @@ const addHeader = () => {
   headerLeft.className = "header-left";
 
   const headerLogo = document.createElement("img");
-  headerLogo.src = "../world.png";
+  const inDashboard = window.location.pathname.startsWith("/projects/");
+  headerLogo.src = inDashboard ? "/projects/rising-economies/world.png" : "../world.png";
 
   const headerTitle = document.createElement("h1");
   headerTitle.textContent = "Global Rising Economies";

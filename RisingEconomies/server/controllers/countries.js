@@ -7,16 +7,8 @@ const getCountries = async (req, res) => {
     return res.status(200).json(results.rows);
   } catch (err) {
     console.error("DB query failed in getCountries:", err);
-    // Return a 500 and also provide a fallback dataset so frontend can still render
-    try {
-      return res.status(500).json({
-        error: "Database unavailable - returning fallback data",
-        data: fallbackCountries,
-      });
-    } catch (innerErr) {
-      console.error("Failed to send fallback response:", innerErr);
-      return res.status(500).json({ error: "Internal server error" });
-    }
+    // Database unavailable: fall back to the bundled dataset (same shape as the DB rows)
+    return res.status(200).json(fallbackCountries);
   }
 };
 

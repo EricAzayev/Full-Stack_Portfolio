@@ -23,8 +23,19 @@ const normalize = (val, min, max) => {
 };
 
 const renderCountries = async () => {
-  const response = await fetch("/countries");
-  const data = await response.json();
+  // Static deploy: if the backend call fails or is unusable, fall back to the
+  // bundled seed copy so the page still renders.
+  const base = window.location.pathname.replace(/(countries|404\.html|index\.html).*/, "");
+  let data = null;
+  try {
+    const response = await fetch("/countries");
+    data = await response.json();
+  } catch (err) {}
+  if (!Array.isArray(data) || data.length === 0) {
+    try {
+      data = await (await fetch(base + "data/countries.json")).json();
+    } catch (err) {}
+  }
   const mainContent = document.getElementById("main-content");
 
   if (data && Array.isArray(data) && data.length > 0) {
@@ -112,11 +123,12 @@ const renderCountries = async () => {
   }
 };
 
-const countriesLastSegment =
-  window.location.pathname.split("/").filter(Boolean).pop() || "";
+// Ignore the /projects/<id> prefix when served inside the portfolio dashboard
+const appPath = window.location.pathname.replace(/^\/projects\/rising-economies\/?/, "") || "index.html";
+const countriesLastSegment = appPath.split("/").filter(Boolean).pop() || "";
 
-if (countriesLastSegment && countriesLastSegment !== "404.html") {
+if (countriesLastSegment && countriesLastSegment !== "404.html" && countriesLastSegment !== "index.html") {
   window.location.href = "/404.html";
-} else if (countriesLastSegment !== "404.html") {
+} else {
   renderCountries();
 }
