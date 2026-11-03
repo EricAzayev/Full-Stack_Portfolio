@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 import CoinInfo from "./assets/CoinInfo.jsx";
+import { fallbackCoinMap } from "./assets/fallbackData.js";
 
 const API_KEY = import.meta.env.VITE_APP_API_KEY;
 const url =
@@ -12,11 +13,19 @@ function App() {
   useEffect(() => {
     const fetchAllCoinData = async () => {
       console.log("ran fetchAll!");
-      const response = await fetch(url);
-      const json = await response.json();
-      setList(json);
+      // The API returns {Data: {SYMBOL: coin}} on success, {Data:{}, Err} on failure.
+      let data;
+      try {
+        const response = await fetch(url);
+        data = (await response.json()).Data;
+      } catch (error) {
+        console.error(error);
+      }
+      setList(
+        data && Object.keys(data).length ? { Data: data } : { Data: fallbackCoinMap }
+      );
     };
-    fetchAllCoinData().catch(console.error);
+    fetchAllCoinData();
   }, []);
 
   return (
